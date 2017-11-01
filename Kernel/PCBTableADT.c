@@ -9,7 +9,7 @@ typedef struct pcbCDT
 	int* children;
 	uint64_t* programCounter;
 	uint64_t* stack;
-	struct PCB* next;
+	struct pcbCDT * next;
 };
 
 void addPCB(int privilege)

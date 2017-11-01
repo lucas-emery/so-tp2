@@ -4,6 +4,9 @@
  #define RUNNING 0;
  #define BLOCKED 1;
  #define READY 2;
+ #define TRUE 1;
+ #define FALSE 0;
+ 
 
  static int idCount = 0;
  static pcbADT pcbTable;//= direccion donde quieran ponerlo
