@@ -2,6 +2,7 @@
 #include <moduleLoader.h>
 #include <lib.h>
 #include <terminal.h>
+#include <naiveConsole.h>
 
 static const uint64_t PageSize = 0x200000;
 extern uint8_t text;
@@ -77,38 +78,37 @@ void setKernelPresent(int present){
 }
 
 void changePDEPresent(int entry, int present){
-	uint64_t* PD = 0x10000;
+	uint64_t PD = 0x10000;
 
 	while(entry){ 
-    PD += 0x8; 
+    PD += 8; 
     --entry; 
   } 
- 	uint64_t PDE = *PD;
+ 	uint64_t PDE = *((uint64_t*)PD);
  
  	if(present)
-  		*PD =  PDE | 0x8F; 
+  		*((uint64_t*)PD) =  PDE | 0x8F; 
   	else
-  		*PD = PDE & 0xFE;  
+  		*((uint64_t*)PD) = PDE & ~0x1;  
 }
 
-void changePDE(int entry, uint64_t* physAddr, int present){ 
-  if(*physAddr & 0x000FFFFF != 0) 
+void changePDE(int entry, uint64_t physAddr, int present){ 
+  if(physAddr & 0x001FFFFF != 0) 
     return; 
  
   
-  uint64_t *PD = 0x10000; 
- 
+  uint64_t PD = 0x10000; 
+  
   while(entry){ 
-    PD += 0x8; 
+    PD += 8;
     --entry; 
-  } 
+  }
+  
 
-  uint64_t oldEntry = *PD;
- 
   if(present) 
-    *PD = oldEntry & 0xFFFFF | (uint64_t)physAddr & ~0xFFFFF | 0x8F; 
+    *((uint64_t*)PD) = (uint64_t)physAddr | 0x8F;
   else 
-    *PD = oldEntry & 0xFFFFF | (uint64_t)physAddr & ~0xFFFFF & ~0x1; 
+    *((uint64_t*)PD) = ((uint64_t)physAddr & ~(uint64_t)0x1FFFFF) & ~(uint64_t)0x1;
 } 
 
 void pageFaultHandler(){
@@ -131,6 +131,8 @@ void * getStackBase()
 
 void * initializeKernelBinary()
 {
+
+  ncPrint("ASD");
 
   loadModules(&endOfKernelBinary, moduleAddresses);
   clearBSS(&bss, &endOfKernel - &bss);
