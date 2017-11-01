@@ -22,7 +22,10 @@ void addPCB(int privilege)
 	new->next = NULL;
 	//new->programCounter=dir;
 	//new->stack=dir;
-	last->next = new;
+	if(last == NULL)
+		last = new;
+	else
+		last->next = new;
 }
 
 void removePCB(int id){

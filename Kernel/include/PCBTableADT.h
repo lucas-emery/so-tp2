@@ -7,10 +7,10 @@
 
  static int idCount = 0;
  static pcbADT pcbTable;//= direccion donde quieran ponerlo
+ static pcbADT last = NULL;
 
  typedef struct pcbCDT;
  typedef struct pcbCDT * pcbADT;
- typedef pcbADT last;
  void addPCB(int privilege);
  void removePCB(int id);
  void changeState(int id, int state);
