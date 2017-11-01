@@ -11,10 +11,10 @@
 
  typedef struct pcbCDT * pcbADT;
 
+ static int MAX_CHILDREN = 10;
+ static int MAX_SIZE = 100;
  static int idCount = 0;
- static pcbADT pcbTable[];//= direccion donde quieran ponerlo
- static pcbADT last = NULL;
- static MAX_CHILDREN = 10;
+ static pcbADT pcbTable[MAX_SIZE];//= direccion donde quieran ponerlo
  static int tableSize = 0;
 
  int addPCB(int privilege);
@@ -22,6 +22,5 @@
  void changeState(int id, int state);
  void addChild(int fatherId);
  void createChild(pcbADT father);
- pcbADT remove(pcbADT current, int id);
  
  #endif PCBTABLEADT_H

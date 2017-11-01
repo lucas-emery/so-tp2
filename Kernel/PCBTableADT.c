@@ -12,29 +12,20 @@ typedef struct {
 } pcbCDT;
 
 int addPCB(int privilege){
-	pcbADT new;//reservar memoria
-	pcbTable[size] = new;
-	new->pid = idCount;
+	pcbADT newPCB;//reservar memoria
+	pcbTable[tableSize] = newPCB;
+	newPCB->pid = idCount;
 	idCount++;
 	tableSize++;
-	new->state = READY;
-	new->privilege = privilege;
-	new->next = NULL;
-	new->childrenCount = 0;
+	newPCB->state = READY;
+	newPCB->privilege = privilege;
+	newPCB->childrenCount = 0;
 	//new->programCounter=dir;
 	//new->stack=dir;
-	if(last == NULL)
-		last = new;
-	else
-		last->next = new;
-	return new->pid;
+	return newPCB->pid;
 }
 
 void removePCB(int id){
-	pcbTable = remove(pcbTable, id);
-}
-
-pcbADT remove(pcbADT pcbTable[i], int id){
 	int found = FALSE;
 	for (int i = 0; i < tableSize || found; ++i){
 		if(pcbTable[i]->pid == id){
@@ -56,10 +47,10 @@ void changeState(int id, int state){
 }
 
 void addChild(int fatherId){
-	pcbADT pcbTable[i] = pcbTable;
+	//pcbADT pcbTable = pcbTable;
 	int found = FALSE;
 	for (int i = 0; i < tableSize || found; ++i){
-		if(pcbTable[i]->pid == id){
+		if(pcbTable[i]->pid == fatherId){
 			createChild(pcbTable[i]);
 			found = TRUE;
 		}
@@ -68,8 +59,8 @@ void addChild(int fatherId){
 
 void createChild(pcbADT father){
 	int childId = addPCB(father->privilege);//no se que poner
-	father->children[childrenCount] = childId;
-	father->childrenCount++;
+	father->children[father->childrenCount] = childId;
+	(father->childrenCount)++;
 }
 
 
