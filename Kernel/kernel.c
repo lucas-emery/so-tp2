@@ -7,11 +7,8 @@
 #include <terminal.h>
 #include <MMU.h>
 
-int main()
-{
+int main(){
 	clearScreen();
 	setupIDT();
-
 	copyAndExectueDefaultModule();
-
 }

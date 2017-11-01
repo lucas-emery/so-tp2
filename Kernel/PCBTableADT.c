@@ -1,63 +1,75 @@
 #include <PCBTableADT.h>
 #include <lib.h>
 
-typedef struct pcbCDT
-{
+typedef struct {
 	int pid;
 	int privilege;
 	int state;
-	int* children;
-	uint64_t* programCounter;
-	uint64_t* stack;
-	struct pcbCDT * next;
-};
+	int childrenCount;
+	int children[MAX_CHILDREN];
+	//uint64_t programCounter;
+	uint64_t stack;
+} pcbCDT;
 
-void addPCB(int privilege)
-{
+int addPCB(int privilege){
 	pcbADT new;//reservar memoria
+	pcbTable[size] = new;
 	new->pid = idCount;
 	idCount++;
+	tableSize++;
 	new->state = READY;
 	new->privilege = privilege;
 	new->next = NULL;
+	new->childrenCount = 0;
 	//new->programCounter=dir;
 	//new->stack=dir;
 	if(last == NULL)
 		last = new;
 	else
 		last->next = new;
+	return new->pid;
 }
 
 void removePCB(int id){
 	pcbTable = remove(pcbTable, id);
 }
 
-pcbADT remove(pcbADT current, int id){
-	pcbADT aux;
-	if(current == NULL)
-		return current;
-	if(current->pid == id)
-	{
-		aux = current->next;
-		//free current
-		return aux;
-	}
-	current->next = remove(current->next, id);
-	return current;
-}
-
-void changeState(int id, int state)
-{
-	pcbADT current = pcbTable;
+pcbADT remove(pcbADT pcbTable[i], int id){
 	int found = FALSE;
-	while(current != NULL || found){
-		if(current->pid == id)
-		{
-			current->state = state;
+	for (int i = 0; i < tableSize || found; ++i){
+		if(pcbTable[i]->pid == id){
+			//free de pcbTable[i]
+			pcbTable[i] = NULL;
 			found = TRUE;
 		}
-		current = current->next;
 	}
+}
+
+void changeState(int id, int state){
+	int found = FALSE;
+	for (int i = 0; i < tableSize || found; ++i){
+		if(pcbTable[i]->pid == id){
+			pcbTable[i]->state = state;
+			found = TRUE;
+		}
+	}
+}
+
+void addChild(int fatherId){
+	pcbADT pcbTable[i] = pcbTable;
+	int found = FALSE;
+	for (int i = 0; i < tableSize || found; ++i){
+		if(pcbTable[i]->pid == id){
+			createChild(pcbTable[i]);
+			found = TRUE;
+		}
+	}
+}
+
+void createChild(pcbADT father){
+	int childId = addPCB(father->privilege);//no se que poner
+	father->children[childrenCount] = childId;
+	father->childrenCount++;
 }
 
 
