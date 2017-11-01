@@ -26,7 +26,7 @@ void addPCB(int privilege)
 }
 
 void removePCB(int id){
-	remove(pcbTable, id);
+	pcbTable = remove(pcbTable, id);
 }
 
 pcbADT remove(pcbADT current, int id){
@@ -46,7 +46,7 @@ pcbADT remove(pcbADT current, int id){
 void changeState(int id, int state)
 {
 	pcbADT current = pcbTable;
-	found = FALSE;
+	int found = FALSE;
 	while(current != NULL || found){
 		if(current->pid == id)
 		{

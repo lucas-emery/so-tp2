@@ -14,5 +14,6 @@
  void addPCB(int privilege);
  void removePCB(int id);
  void changeState(int id, int state);
+ pcbADT remove(pcbADT current, int id);
  
  #endif PCBTABLEADT_H
