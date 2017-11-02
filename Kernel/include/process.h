@@ -1,6 +1,8 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#include <stdint.h>
+
 int sysForkProcess(uint64_t pidReturn, uint64_t rdx, uint64_t rcx);
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
 int sysListProcesses(uint64_t rsi, uint64_t rdx, uint64_t rcx);
