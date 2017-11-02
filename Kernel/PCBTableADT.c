@@ -1,7 +1,7 @@
 #include <PCBTableADT.h>
 #include <lib.h>
 
-typedef struct {
+typedef struct pcbCDT{
 	int pid;
 	int privilege;
 	int state;
@@ -9,7 +9,7 @@ typedef struct {
 	int children[MAX_CHILDREN];
 	//uint64_t programCounter;
 	uint64_t stack;
-} pcbCDT;
+};
 
 int addPCB(int privilege){
 	pcbADT newPCB;//reservar memoria

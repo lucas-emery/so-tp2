@@ -10,10 +10,11 @@
 #define MAX_CHILDREN 10
 #define MAX_SIZE 100
 
-typedef struct pcbCDT * pcbADT;
+typedef struct pcbCDT;
+typedef struct pcbCDT* pcbADT;
 
 static int idCount = 0;
-static pcbADT pcbTable[MAX_SIZE];//= direccion donde quieran ponerlo
+static pcbADT pcbTable[MAX_SIZE];
 static int tableSize = 0;
 
 int addPCB(int privilege);
