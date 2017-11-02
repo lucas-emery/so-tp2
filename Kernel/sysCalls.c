@@ -3,10 +3,11 @@
 #include <rtc.h>
 #include <lib.h>
 #include <MMU.h>
+#include <process.h>
 
 extern char* moduleNames[];
 
-#define SYSCALLS 10
+#define SYSCALLS 30
 
 typedef int (*sys)(uint64_t rsi, uint64_t rdx, uint64_t rcx);
 
@@ -83,6 +84,10 @@ int sysMalloc(uint64_t address, uint64_t size, uint64_t rcx) {
 	return 0;
 }
 
+int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
+	//TO DO
+}
+
 int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
 	if(rdi < 0 || rdi >= SYSCALLS)
 		return -1; //Tirar error??
@@ -99,4 +104,11 @@ void sysCallsSetup(){
 	sysCalls[6] = &sysEcho;
 	sysCalls[7] = &sysExec;
 	sysCalls[8] = &sysMalloc;
+	sysCalls[9] = &sysFree;
+	sysCalls[10] = &sysForkProcess;
+	sysCalls[11] = &sysKillProcess;
+	sysCalls[12] = &sysListProcesses;
+	sysCalls[13] = &sysBlockProcess;
+	sysCalls[14] = &sysUnblockProcess;
+	sysCalls[15] = &sysYieldProcess;
 }

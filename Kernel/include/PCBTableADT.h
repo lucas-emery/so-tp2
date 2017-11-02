@@ -20,7 +20,9 @@ static int tableSize = 0;
 int addPCB(int privilege);
 void removePCB(int id);
 void changeState(int id, int state);
-void addChild(int fatherId);
-void createChild(pcbADT father);
+int addChild(int fatherId);
+int createChild(pcbADT father);
+void processesInfo(char** buffer);
+char* makeString(pcbADT process);
  
 #endif

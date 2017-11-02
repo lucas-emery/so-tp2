@@ -7,7 +7,6 @@ typedef struct pcbCDT{
 	int state;
 	int childrenCount;
 	int children[MAX_CHILDREN];
-	//uint64_t programCounter;
 	uint64_t stack;
 };
 
@@ -20,8 +19,7 @@ int addPCB(int privilege){
 	newPCB->state = READY;
 	newPCB->privilege = privilege;
 	newPCB->childrenCount = 0;
-	//new->programCounter=dir;
-	//new->stack=dir;
+	//newPCB->stack=dir;
 	return newPCB->pid;
 }
 
@@ -29,7 +27,7 @@ void removePCB(int id){
 	int found = FALSE;
 	for (int i = 0; i < tableSize || found; ++i){
 		if(pcbTable[i]->pid == id){
-			//free de pcbTable[i]
+			//free de pcbTable[i] y stack
 			pcbTable[i] = NULL;
 			found = TRUE;
 		}
@@ -37,6 +35,7 @@ void removePCB(int id){
 }
 
 void changeState(int id, int state){
+	//hay que hacer las colas (dispatcher)
 	int found = FALSE;
 	for (int i = 0; i < tableSize || found; ++i){
 		if(pcbTable[i]->pid == id){
@@ -46,22 +45,46 @@ void changeState(int id, int state){
 	}
 }
 
-void addChild(int fatherId){
+int addChild(int fatherId){
 	//pcbADT pcbTable = pcbTable;
+	int childId;
 	int found = FALSE;
 	for (int i = 0; i < tableSize || found; ++i){
 		if(pcbTable[i]->pid == fatherId){
-			createChild(pcbTable[i]);
+			childId = createChild(pcbTable[i]);
 			found = TRUE;
 		}
 	}
+	return childId;
 }
 
-void createChild(pcbADT father){
+int createChild(pcbADT father){
 	int childId = addPCB(father->privilege);//no se que poner
 	father->children[father->childrenCount] = childId;
 	(father->childrenCount)++;
+	return childId;
 }
 
+void processesInfo(char* buffer){
+	strcat(buffer, "PID PRIVILEGE STATE\n");
+	for (int i = 0; i < tableSize; ++i)
+		strcat(buffer, makeString(pcbTable[i]));
+} 
 
-
+char* makeString(pcbADT process){
+	char aux[100];
+	char str[15];
+	itoa(process->pid,str,10);
+	strcat(aux, str);
+	itoa(process->privilege,str,10);
+	strcat(aux, str);
+	if(info[2] == RUNNING)
+		strcpy(str, "running");
+	else if(info[2] == BLOCKED)
+		strcpy(str, "blocked");
+	else if(info[2] == READY)
+		strcpy(str, "ready");
+	strcat(aux, str);
+	strcat(aux, "\n");
+	return aux;
+}
