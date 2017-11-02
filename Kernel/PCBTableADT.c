@@ -66,9 +66,9 @@ int createChild(pcbADT father){
 }
 
 void processesInfo(char* buffer){
-	strcat(buffer, "PID PRIVILEGE STATE\n");
+	/*strcat(buffer, "PID PRIVILEGE STATE\n");
 	for (int i = 0; i < tableSize; ++i)
-		//strcat(buffer, makeString(pcbTable[i]));
+		strcat(buffer, makeString(pcbTable[i]));*/
 } 
 
 char* makeString(pcbADT process){
