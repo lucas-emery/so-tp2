@@ -3,7 +3,7 @@
 #include <stdarg.h>
 
 extern int int80(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx);
-int execv(char *filename, int argc, char *argv[]);
+int execv(uint64_t filename, uint64_t argc, uint64_t argv[]);
 
 char * array[] = {"Alooo"};
 
