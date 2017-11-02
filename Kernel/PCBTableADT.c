@@ -68,13 +68,13 @@ int createChild(pcbADT father){
 void processesInfo(char* buffer){
 	strcat(buffer, "PID PRIVILEGE STATE\n");
 	for (int i = 0; i < tableSize; ++i)
-		strcat(buffer, makeString(pcbTable[i]));
+		//strcat(buffer, makeString(pcbTable[i]));
 } 
 
 char* makeString(pcbADT process){
 	char aux[100];
 	char str[15];
-	itoa(process->pid,str,10);
+	/*itoa(process->pid,str,10);
 	strcat(aux, str);
 	itoa(process->privilege,str,10);
 	strcat(aux, str);
@@ -85,6 +85,6 @@ char* makeString(pcbADT process){
 	else if(process->state == READY)
 		strcpy(str, "ready");
 	strcat(aux, str);
-	strcat(aux, "\n");
+	strcat(aux, "\n");*/
 	return aux;
 }
