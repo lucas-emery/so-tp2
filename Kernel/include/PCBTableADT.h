@@ -22,7 +22,7 @@ void removePCB(int id);
 void changeState(int id, int state);
 int addChild(int fatherId);
 int createChild(pcbADT father);
-void processesInfo(char** buffer);
+void processesInfo(char* buffer);
 char* makeString(pcbADT process);
  
 #endif

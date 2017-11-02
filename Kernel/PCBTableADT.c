@@ -78,11 +78,11 @@ char* makeString(pcbADT process){
 	strcat(aux, str);
 	itoa(process->privilege,str,10);
 	strcat(aux, str);
-	if(info[2] == RUNNING)
+	if(process->state == RUNNING)
 		strcpy(str, "running");
-	else if(info[2] == BLOCKED)
+	else if(process->state == BLOCKED)
 		strcpy(str, "blocked");
-	else if(info[2] == READY)
+	else if(process->state == READY)
 		strcpy(str, "ready");
 	strcat(aux, str);
 	strcat(aux, "\n");
