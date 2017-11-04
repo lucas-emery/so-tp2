@@ -30,7 +30,7 @@ int sysWrite(uint64_t fileDescriptor, uint64_t buffer, uint64_t size) {
 			next = *(char *)(buffer++);
 			if(fileDescriptor == 1)
 				printc(next);
-			else 
+			else
 				printcWithStyle(next, 0x04);
 		}
 	}
@@ -70,7 +70,7 @@ int sysExec(uint64_t filename, uint64_t argc, uint64_t argv) {
 	int i = 0;
 	while(moduleNames[i] != 0){
 		if(strcmp(filename, moduleNames[i]) == 0) {
-			argv = backupArguments(argc, argv);
+			//argv = backupArguments(argc, argv);
 			copyAndExecuteModule(i, argc, argv);
 			return 0;
 		}

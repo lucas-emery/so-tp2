@@ -44,6 +44,11 @@ int printf(const char* format, ...) {
 					length = itoa(num, number, 10);
 					write(1, number,length);
 					break;
+				case 'x':
+					num = va_arg(args, int);
+					length = itoa(num, number, 16);
+					write(1, number,length);
+					break;
 				case 'c':
 					putchar((char)va_arg(args, int));
 					break;

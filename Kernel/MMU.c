@@ -69,51 +69,51 @@ char** backupArguments(int argc, char * argv[]) {
 }
 
 void setKernelPresent(int present){
-  uint64_t *PD = 0x10000; 
-  uint64_t entry= *PD; 
-  if(present) 
-    *PD = entry | 0x8F; 
-  else 
-    *PD = entry & ~0x1; 
+  uint64_t *PD = 0x10000;
+  uint64_t entry= *PD;
+  if(present)
+    *PD = entry | 0x8F;
+  else
+    *PD = entry & ~0x1;
 }
 
 void changePDEPresent(int entry, int present){
 	uint64_t PD = 0x10000;
 
-	while(entry){ 
-    PD += 8; 
-    --entry; 
-  } 
+	while(entry){
+    PD += 8;
+    --entry;
+  }
  	uint64_t PDE = *((uint64_t*)PD);
- 
+
  	if(present)
-  		*((uint64_t*)PD) =  PDE | 0x8F; 
+  		*((uint64_t*)PD) =  PDE | 0x8F;
   	else
-  		*((uint64_t*)PD) = PDE & ~0x1;  
+  		*((uint64_t*)PD) = PDE & ~0x1;
 }
 
-void changePDE(int entry, uint64_t physAddr, int present){ 
-  if(physAddr & 0x001FFFFF != 0) 
-    return; 
- 
-  
-  uint64_t PD = 0x10000; 
-  
-  while(entry){ 
-    PD += 8;
-    --entry; 
-  }
-  
+void changePDE(int entry, uint64_t physAddr, int present){
+  if(physAddr & 0x001FFFFF != 0)
+    return;
 
-  if(present) 
+
+  uint64_t PD = 0x10000;
+
+  while(entry){
+    PD += 8;
+    --entry;
+  }
+
+
+  if(present)
     *((uint64_t*)PD) = (uint64_t)physAddr | 0x8F;
-  else 
+  else
     *((uint64_t*)PD) = ((uint64_t)physAddr & ~(uint64_t)0x1FFFFF) & ~(uint64_t)0x1;
-} 
+}
 
 void pageFaultHandler(){
   copyAndExectueDefaultModule();
-} 
+}
 
 void clearBSS(void * bssAddress, uint64_t bssSize)
 {
@@ -132,7 +132,7 @@ void * getStackBase()
 void * initializeKernelBinary()
 {
 
-  ncPrint("ASD");
+  ncPrint("Initializing Kernel...\n");
 
   loadModules(&endOfKernelBinary, moduleAddresses);
   clearBSS(&bss, &endOfKernel - &bss);
