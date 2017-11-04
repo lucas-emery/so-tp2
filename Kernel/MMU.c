@@ -47,6 +47,16 @@ void * malloc(uint64_t request) {
   return blockAddress;
 }
 
+void * realloc(void * ptr, uint64_t size) {
+	void *  newptr = malloc(size);
+	memcpy(newptr, ptr, size);
+	return newptr;
+}
+
+void free(void * ptr) {
+	
+}
+
 char** backupArguments(int argc, char * argv[]) {
   if(argc > 0) {
     if(argv >= executableMemoryAdress && argv < executableMemoryEndAdress) {
