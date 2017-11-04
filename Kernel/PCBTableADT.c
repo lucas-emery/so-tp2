@@ -1,5 +1,6 @@
 #include <PCBTableADT.h>
 #include <lib.h>
+#include <MMU.h>
 
 typedef struct pcbCDT{
 	int pid;
@@ -7,19 +8,22 @@ typedef struct pcbCDT{
 	int state;
 	int childrenCount;
 	int children[MAX_CHILDREN];
-	uint64_t stack;
 };
 
+void createTable(){
+	pcbTable = malloc(sizeof(pcbADT));
+}
+
 int addPCB(int privilege){
-	pcbADT newPCB;//reservar memoria
-	pcbTable[tableSize] = newPCB;
+	pcbADT newPCB;
 	newPCB->pid = idCount;
 	idCount++;
-	tableSize++;
-	newPCB->state = READY;
+	newPCB->state = NEW;//llamar a dispatcher y que ponga en cola
 	newPCB->privilege = privilege;
 	newPCB->childrenCount = 0;
-	//newPCB->stack=dir;
+	tableSize++;
+	realloc(pcbTable, tableSize * sizeof(pcbADT));
+	pcbTable[tableSize-1] = newPCB;
 	return newPCB->pid;
 }
 
@@ -27,15 +31,16 @@ void removePCB(int id){
 	int found = FALSE;
 	for (int i = 0; i < tableSize || found; ++i){
 		if(pcbTable[i]->pid == id){
-			//free de pcbTable[i] y stack
-			pcbTable[i] = NULL;
+			free(pcbTable[i]);
+			for(int j = i; j < tableSize-1; j++)
+				pcbTable[j] = pcbTable[j+1];
+			tableSize--;
 			found = TRUE;
 		}
 	}
 }
 
 void changeState(int id, int state){
-	//hay que hacer las colas (dispatcher)
 	int found = FALSE;
 	for (int i = 0; i < tableSize || found; ++i){
 		if(pcbTable[i]->pid == id){
@@ -46,7 +51,6 @@ void changeState(int id, int state){
 }
 
 int addChild(int fatherId){
-	//pcbADT pcbTable = pcbTable;
 	int childId;
 	int found = FALSE;
 	for (int i = 0; i < tableSize || found; ++i){
@@ -66,17 +70,19 @@ int createChild(pcbADT father){
 }
 
 void processesInfo(char* buffer){
-	/*strcat(buffer, "PID PRIVILEGE STATE\n");
-	for (int i = 0; i < tableSize; ++i)
-		strcat(buffer, makeString(pcbTable[i]));*/
+	*buffer = 0;
+	strcat(buffer, "PID PRIVILEGE STATE\n");
+	for (int i = 0; i < tableSize; ++i){
+		strcat(buffer, makeString(pcbTable[i]));
+	}
 } 
 
 char* makeString(pcbADT process){
-	char aux[100];
+	char aux[100] = {0};
 	char str[15];
-	/*itoa(process->pid,str,10);
+	uintToBase(process->pid,str,10);
 	strcat(aux, str);
-	itoa(process->privilege,str,10);
+	uintToBase(process->privilege,str,10);
 	strcat(aux, str);
 	if(process->state == RUNNING)
 		strcpy(str, "running");
@@ -85,6 +91,6 @@ char* makeString(pcbADT process){
 	else if(process->state == READY)
 		strcpy(str, "ready");
 	strcat(aux, str);
-	strcat(aux, "\n");*/
+	strcat(aux, "\n");
 	return aux;
 }

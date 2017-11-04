@@ -139,3 +139,11 @@ void * initializeKernelBinary()
   changePDEPresent(4, 0); //Empty page between heap and modules
   return getStackBase();
 }
+
+void free(void* mem){
+
+}
+
+void realloc(void* mem, int size){
+  
+}
