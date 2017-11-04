@@ -3,8 +3,13 @@
 #include <lib.h>
 #include <terminal.h>
 #include <naiveConsole.h>
+#include <terminal.h>
 
-static const uint64_t PageSize = 0x200000;
+#define PAGESIZE 0x200000
+#define MAPPEDMEMORY 0x100000000
+#define HEAPBASE (MAPPEDMEMORY/2)
+#define EXEC_MEM_ADDR 0x400000
+
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -15,34 +20,33 @@ extern uint8_t endOfKernel;
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
 
-static void * const executableMemoryAdress = (void*)0x400000;
-static void * const executableMemoryEndAdress = (void*)0x5FFFFF;
-static void * const heapAddress = (void*)0x600000;
+//static void * const executableMemoryEndAdress = (void*)0x5FFFFF;
+//static void * const heapAddress = (void*)0x600000;
 
 char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao",0};
-void * moduleAddresses[] = {0x0A00000, 0x0C00000, 0x0E00000, 0x1000000, 0x1200000, 0x1400000, 0x1600000, 0x1800000, 0x2000000};
+void ** moduleAddresses;
 
 
 void copyAndExectueDefaultModule(){
-	memcpy(executableMemoryAdress, moduleAddresses[0], 0x200000);
+	memcpy(EXEC_MEM_ADDR, moduleAddresses[0], PAGESIZE);
   sti();
-	((EntryPoint)executableMemoryAdress)(0,0);
+	((EntryPoint)EXEC_MEM_ADDR)(0,0);
 }
 void copyAndExecuteModule(int moduleIndex, int argc, char *argv[]){
-	memcpy(executableMemoryAdress, moduleAddresses[moduleIndex], 0x200000);
+	memcpy(EXEC_MEM_ADDR, moduleAddresses[moduleIndex], PAGESIZE);
   sti();
-	((EntryPoint)executableMemoryAdress)(argc, argv);
+	((EntryPoint)EXEC_MEM_ADDR)(argc, argv);
   copyAndExectueDefaultModule();
 }
 
 void * malloc(uint64_t request) {
-  static uint64_t capacity = 0x200000;
-  static uint64_t size = 0;
+  static uint64_t capacity = PAGESIZE;
+  static uint64_t size = 1; //Para que no quede en la bss
   uint64_t futureSize = size + request;
   if(futureSize > capacity)
     return 0;
 
-  uint64_t blockAddress = heapAddress + size;
+  uint64_t blockAddress = HEAPBASE + size;
   size = futureSize;
   return blockAddress;
 }
@@ -54,29 +58,29 @@ void * realloc(void * ptr, uint64_t size) {
 }
 
 void free(void * ptr) {
-	
+
 }
 
-char** backupArguments(int argc, char * argv[]) {
-  if(argc > 0) {
-    if(argv >= executableMemoryAdress && argv < executableMemoryEndAdress) {
-      char ** temp = malloc(argc*sizeof(char **));
-      if(temp == 0)
-        return argv;
-      memcpy(temp, argv, argc*sizeof(char **));
-      argv = temp;
-    }
-    for(int i = 0; i < argc; i++) {
-      size_t len = strlen(argv[i]) + 1;
-      char * temp = malloc(len*sizeof(char));
-      if(temp == 0)
-        break;
-      memcpy(temp, argv[i], len*sizeof(char));
-      argv[i] = temp;
-    }
-  }
-  return argv;
-}
+// char** backupArguments(int argc, char * argv[]) {
+//   if(argc > 0) {
+//     if(argv >= EXEC_MEM_ADDR && argv < executableMemoryEndAdress) {
+//       char ** temp = malloc(argc*sizeof(char **));
+//       if(temp == 0)
+//         return argv;
+//       memcpy(temp, argv, argc*sizeof(char **));
+//       argv = temp;
+//     }
+//     for(int i = 0; i < argc; i++) {
+//       size_t len = strlen(argv[i]) + 1;
+//       char * temp = malloc(len*sizeof(char));
+//       if(temp == 0)
+//         break;
+//       memcpy(temp, argv[i], len*sizeof(char));
+//       argv[i] = temp;
+//     }
+//   }
+//   return argv;
+// }
 
 void setKernelPresent(int present){
   uint64_t *PD = 0x10000;
@@ -133,19 +137,28 @@ void clearBSS(void * bssAddress, uint64_t bssSize)
 void * getStackBase()
 {
   return (void*)(
-    (uint64_t)&endOfKernel
-    + PageSize * 8        //The size of the stack itself, 32KiB
+    MAPPEDMEMORY						//Stack starts at the end of the virtual memory
     - sizeof(uint64_t)      //Begin at the top of the stack
   );
 }
 
+void * getFreePage() {
+	static uint64_t last = 0x800000;
+	last += PAGESIZE;
+	return (void *)last;
+}
+
 void * initializeKernelBinary()
 {
-
   ncPrint("Initializing Kernel...\n");
+	changePDE(HEAPBASE/PAGESIZE, (uint64_t)getFreePage(), 1); //TODO: Move inside malloc
 
-  loadModules(&endOfKernelBinary, moduleAddresses);
+  void ** modules = loadModules(&endOfKernelBinary);
   clearBSS(&bss, &endOfKernel - &bss);
+	moduleAddresses = modules; //AFTER BSS CLEAR
+
   changePDEPresent(4, 0); //Empty page between heap and modules
-  return getStackBase();
+	void * stackBase = getStackBase();
+	changePDE((uint64_t)stackBase/PAGESIZE, (uint64_t)getFreePage(), 1);
+  return stackBase;
 }
