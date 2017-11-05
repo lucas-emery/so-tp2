@@ -10,6 +10,12 @@ void kill(int pid){
 	int80(11,pid,0,0);
 }
 
+char* ps(){
+	char* buffer;
+	int80(12, buffer,0,0);
+	return buffer;
+}
+
 void block(int pid){
 	int80(13,pid,0,0);
 }

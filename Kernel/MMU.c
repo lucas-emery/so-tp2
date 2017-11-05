@@ -162,11 +162,3 @@ void * initializeKernelBinary()
 	changePDE((uint64_t)stackBase/PAGESIZE, (uint64_t)getFreePage(), 1);
   return stackBase;
 }
-
-void free(void* mem){
-
-}
-
-void realloc(void* mem, int size){
-  
-}

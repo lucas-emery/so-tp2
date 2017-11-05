@@ -2,7 +2,8 @@
 #include <sysCallsProcess.h>
 
 int sysForkProcess(uint64_t pidReturn, uint64_t rdx, uint64_t rcx){
-	//*pidReturn = addChild(fatherPid); que pid de papa le paso?!
+	/*int fatherPid = getCurrentProcess();
+	*pidReturn = addChild(fatherPid); //que pid de papa le paso?!*/
 }
 
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
