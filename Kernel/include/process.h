@@ -1,13 +1,29 @@
-#ifndef PROCESS_H
-#define PROCESS_H
+#ifndef PCBTABLEADT_H
+#define PCBTABLEADT_H
 
-#include <stdint.h>
+#define RUNNING 0
+#define BLOCKED 1
+#define READY 2
+#define NEW 3
+#define TRUE 1
+#define FALSE 0
+#define NULL 0
+#define MAX_CHILDREN 10
 
-int sysForkProcess(uint64_t pidReturn, uint64_t rdx, uint64_t rcx);
-int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
-int sysListProcesses(uint64_t rsi, uint64_t rdx, uint64_t rcx);
-int sysBlockProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
-int sysUnblockProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
-int sysYieldProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
+typedef struct pcbCDT;
+typedef struct pcbCDT* pcbADT;
 
+static int idCount = 0;
+static pcbADT* pcbTable;
+static int tableSize = 0;
+
+int addPCB(int privilege);
+void removePCB(int id);
+void changeState(int id, int state);
+int addChild(int fatherId);
+int createChild(pcbADT father);
+void processesInfo(char* buffer);
+char* makeString(pcbADT process);
+int getState(int pid);
+ 
 #endif

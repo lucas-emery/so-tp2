@@ -1,4 +1,4 @@
-#include <PCBTableADT.h>
+#include <process.h>
 #include <lib.h>
 #include <MMU.h>
 
@@ -50,8 +50,8 @@ void changeState(int id, int state){
 	}
 }
 
-int getState(int pid){
-	for (int i = 0; i < tableSize || found; ++i){
+int getState(int id){
+	for (int i = 0; i < tableSize; ++i){
 		if(pcbTable[i]->pid == id)
 			return pcbTable[i]->state;
 	}
