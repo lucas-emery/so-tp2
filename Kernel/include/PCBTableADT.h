@@ -24,5 +24,6 @@ int addChild(int fatherId);
 int createChild(pcbADT father);
 void processesInfo(char* buffer);
 char* makeString(pcbADT process);
+int getState(int pid);
  
 #endif

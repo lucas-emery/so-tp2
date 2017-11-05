@@ -50,6 +50,14 @@ void changeState(int id, int state){
 	}
 }
 
+int getState(int pid){
+	for (int i = 0; i < tableSize || found; ++i){
+		if(pcbTable[i]->pid == id)
+			return pcbTable[i]->state;
+	}
+	return -1;
+}
+
 int addChild(int fatherId){
 	int childId;
 	int found = FALSE;
