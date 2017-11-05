@@ -7,6 +7,7 @@
 #include <video.h>
 #include <sysCalls.h>
 #include <rtc.h>
+#include <MMU.h>
 
 #pragma pack(push)
 #pragma pack(1)
@@ -70,7 +71,7 @@ void iSetHandler(int index, uint64_t handler) {
 }
 
 void setupIDT() {
-	iSetHandler(0x14, (uint64_t) &PFHandler);
+	iSetHandler(0x0E, (uint64_t) &PFHandler);
 	iSetHandler(0x20, (uint64_t) &irq0Handler);
 	iSetHandler(0x21, (uint64_t) &irq1Handler);
 	iSetHandler(0x2C, (uint64_t) &irq12Handler);

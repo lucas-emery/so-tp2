@@ -9,5 +9,5 @@
 int main(){
 	clearScreen();
 	setupIDT();
-	copyAndExectueDefaultModule();
+	copyAndExecuteDefaultModule();
 }

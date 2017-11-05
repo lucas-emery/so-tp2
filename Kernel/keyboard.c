@@ -41,7 +41,7 @@ void parseScanCode(uint8_t scanCode) {
 					if(ch != 0)
 						if(ctrl && ch == 'c') {
 							sendEOI(1);
-							copyAndExectueDefaultModule();
+							copyAndExecuteDefaultModule();
 						}
 						else
 							writeBuffer(ch);

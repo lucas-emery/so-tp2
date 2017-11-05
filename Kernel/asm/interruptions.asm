@@ -29,7 +29,8 @@ irq12Handler:
 	irqHandler 12
 
 PFHandler:
-	mov QWORD[rsp], pageFaultHandler
+	; mov QWORD[rsp], pageFaultHandler
+	call pageFaultHandler
 	iretq
 
 int80Handler:
