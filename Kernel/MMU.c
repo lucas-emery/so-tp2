@@ -9,11 +9,17 @@
 #define PAGESIZE 0x200000
 #define MAPPEDMEMORY 0x100000000
 #define HEAPBASE (MAPPEDMEMORY/2)
+#define STACKBASE (MAPPEDMEMORY - sizeof(uint64_t))
 #define EXEC_MEM_ADDR 0x400000
 #define ROM 0x600000
 #define PRESENT 1
 #define NOT_PRESENT 0
 #define AVOID_BSS 1
+#define INITIAL_PC 3
+#define DATA_PAGE_IDX 0
+#define HEAP_PAGE_IDX 1
+#define STACK_PAGE_IDX 2
+#define EMPTY 0
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -30,8 +36,7 @@ typedef int (*EntryPoint)(int argc, char *argv[]);
 char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao",0};
 void ** moduleAddresses;
 context_t * context = AVOID_BSS;
-context_t ** contexts;
-int activePID;
+context_t * kernelContext;
 
 
 void copyAndExecuteDefaultModule(){
@@ -51,6 +56,49 @@ void * getFreePage() {
   static uint64_t last = EXEC_MEM_ADDR;
   last += PAGESIZE;
   return (void *)last;
+}
+
+void * getStackBase()
+{
+  return (void*)(
+    MAPPEDMEMORY						//Stack starts at the end of the virtual memory
+    - sizeof(uint64_t)      //Begin at the top of the stack
+  );
+}
+
+context_t * createContext(uint64_t dataPageAddress) {
+	void * heapPageAddress = getFreePage();
+	void * stackPageAddress = getFreePage();
+
+	context_t * newContext = malloc(sizeof(context_t));
+	newContext->pages = malloc(INITIAL_PC * sizeof(page_t));
+	newContext->pages[DATA_PAGE_IDX].index = EXEC_MEM_ADDR/PAGESIZE;
+	newContext->pages[DATA_PAGE_IDX].address = (uint64_t)dataPageAddress;
+	newContext->pages[HEAP_PAGE_IDX].index = HEAPBASE/PAGESIZE;
+	newContext->pages[HEAP_PAGE_IDX].address = (uint64_t)heapPageAddress;
+	newContext->pages[STACK_PAGE_IDX].index = STACKBASE/PAGESIZE;
+	newContext->pages[STACK_PAGE_IDX].address = (uint64_t)stackPageAddress;
+	newContext->pageCount = INITIAL_PC;
+	newContext->heapSize = EMPTY;
+	newContext->heapCapacity = PAGESIZE;
+	newContext->stackPtr = STACKBASE;
+
+	return newContext;
+}
+
+context_t * createFirstThreadContext(int moduleIndex) {
+	void * dataPageAddress = getFreePage();
+	memcpy(dataPageAddress, moduleAddresses[moduleIndex], PAGESIZE);
+	return createContext(dataPageAddress);
+}
+
+context_t * createThreadContext(context_t * siblingContext) {
+	return createContext(siblingContext->pages[DATA_PAGE_IDX].address);
+}
+
+//Mepa que va a quedar ree distinto, no diseñen nada en base a esto
+void switchContext(context_t newContext) {
+	//WIP
 }
 
 void * malloc(uint64_t request) {
@@ -131,14 +179,6 @@ void pageFaultHandler(){
 void clearBSS(void * bssAddress, uint64_t bssSize)
 {
   memset(bssAddress, 0, bssSize);
-}
-
-void * getStackBase()
-{
-  return (void*)(
-    MAPPEDMEMORY						//Stack starts at the end of the virtual memory
-    - sizeof(uint64_t)      //Begin at the top of the stack
-  );
 }
 
 void initializeKernelContext(int stackPage, uint64_t stackPhyAddress, int heapPage, uint64_t heapPhyAddress, uint64_t heapCapacity, uint64_t heapSize) {
