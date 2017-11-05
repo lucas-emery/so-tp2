@@ -1,26 +1,104 @@
 #include <process.h>
-#include <PCBTableADT.h>
+#include <lib.h>
+#include <MMU.h>
 
-int sysForkProcess(uint64_t pidReturn, uint64_t rdx, uint64_t rcx){
-	//*pidReturn = addChild(fatherPid); que pid de papa le paso?!
+typedef struct pcbCDT{
+	int pid;
+	int privilege;
+	int state;
+	int childrenCount;
+	int children[MAX_CHILDREN];
+};
+
+void createTable(){
+	pcbTable = malloc(sizeof(pcbADT));
 }
 
-int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
-	removePCB(pid);
+int addPCB(int privilege){
+	pcbADT newPCB;
+	newPCB->pid = idCount;
+	idCount++;
+	newPCB->state = NEW;//llamar a dispatcher y que ponga en cola
+	newPCB->privilege = privilege;
+	newPCB->childrenCount = 0;
+	tableSize++;
+	realloc(pcbTable, tableSize * sizeof(pcbADT));
+	pcbTable[tableSize-1] = newPCB;
+	return newPCB->pid;
 }
 
-int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
-	processesInfo(buffer);
+void removePCB(int id){
+	int found = FALSE;
+	for (int i = 0; i < tableSize || found; ++i){
+		if(pcbTable[i]->pid == id){
+			free(pcbTable[i]);
+			for(int j = i; j < tableSize-1; j++)
+				pcbTable[j] = pcbTable[j+1];
+			tableSize--;
+			found = TRUE;
+		}
+	}
 }
 
-int sysBlockProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//block();
+void changeState(int id, int state){
+	int found = FALSE;
+	for (int i = 0; i < tableSize || found; ++i){
+		if(pcbTable[i]->pid == id){
+			pcbTable[i]->state = state;
+			found = TRUE;
+		}
+	}
 }
 
-int sysUnblockProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//unblock();
+int getState(int id){
+	for (int i = 0; i < tableSize; ++i){
+		if(pcbTable[i]->pid == id)
+			return pcbTable[i]->state;
+	}
+	return -1;
 }
 
-int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//block();
+int addChild(int fatherId){
+	int childId;
+	int found = FALSE;
+	for (int i = 0; i < tableSize || found; ++i){
+		if(pcbTable[i]->pid == fatherId){
+			childId = createChild(pcbTable[i]);
+			found = TRUE;
+		}
+	}
+	return childId;
+}
+
+int createChild(pcbADT father){
+	int childId = addPCB(father->privilege);//no se que poner
+	father->children[father->childrenCount] = childId;
+	(father->childrenCount)++;
+	return childId;
+}
+
+void processesInfo(char* buffer){
+	*buffer = 0;
+	strcat(buffer, "PID PRIVILEGE STATE\n");
+	for (int i = 0; i < tableSize; ++i){
+		strcat(buffer, makeString(pcbTable[i]));
+	}
+} 
+
+char* makeString(pcbADT process){
+	char aux[100] = {0};
+	char str[15];
+	uintToBase(process->pid,str,10);
+	strcat(aux, str);
+	uintToBase(process->privilege,str,10);
+	strcat(aux, str);
+	if(process->state == RUNNING)
+		strcpy(str, "running");
+	else if(process->state == BLOCKED)
+		strcpy(str, "blocked");
+	else if(process->state == READY)
+		strcpy(str, "ready");
+	strcat(aux, str);
+	strcat(aux, "\n");
+	return aux;
 }
