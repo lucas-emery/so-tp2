@@ -4,6 +4,7 @@
 #include <terminal.h>
 #include <naiveConsole.h>
 #include <terminal.h>
+#include <MMU.h>
 
 #define PAGESIZE 0x200000
 #define MAPPEDMEMORY 0x100000000
@@ -25,19 +26,6 @@ extern uint64_t getStackPtr();
 extern void setStackPtr(uint64_t rsp);
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
-
-typedef struct {
-	int index;
-	uint64_t address;
-} page_t;
-
-typedef struct {
-	page_t * pages;
-	int pageCount;
-	uint64_t stackPtr;
-	uint64_t heapSize;
-	uint64_t heapCapacity;
-} context_t;
 
 char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao",0};
 void ** moduleAddresses;
