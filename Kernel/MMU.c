@@ -30,7 +30,7 @@ extern uint8_t endOfKernel;
 extern void hang();
 extern uint64_t getStackPtr();
 extern void setStackPtr(uint64_t rsp);
-extern void buildStack(int argc, char * argv[], uint64_t rsp);
+extern void buildStack(int argc, char * argv[], uint64_t rip);
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
 
@@ -89,7 +89,11 @@ context_t * createContext(uint64_t dataPageAddress) {
 
 void buildThreadStack(int argc, char * argv[], context_t * threadContext) {
 	changePDE(threadContext->pages[STACK_PAGE_IDX].index, threadContext->pages[STACK_PAGE_IDX].address, PRESENT);
-	buildStack(argc, argv, threadContext->stackPtr);
+	context->stackPtr = getStackPtr();
+	setStackPtr(threadContext->stackPtr);
+	buildStack(argc, argv, EXEC_MEM_ADDR);
+	threadContext->stackPtr = getStackPtr();
+	setStackPtr(context->stackPtr);
 	changePDE(context->pages[STACK_PAGE_IDX].index, context->pages[STACK_PAGE_IDX].address, PRESENT);
 }
 
