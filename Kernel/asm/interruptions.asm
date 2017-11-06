@@ -4,6 +4,7 @@ GLOBAL irq0Handler
 GLOBAL irq1Handler
 GLOBAL irq12Handler
 GLOBAL PFHandler
+GLOBAL TTHandler
 GLOBAL setPicMaster
 GLOBAL setPicSlave
 GLOBAL int80Handler
@@ -16,8 +17,25 @@ EXTERN sysCallHandler
 EXTERN sendEOI
 EXTERN pageFaultHandler
 EXTERN runModule
+EXTERN timerTickHandler
 
 section .text
+
+TTHandler:
+	pushaq
+
+	mov rdi, rsp
+	call timerTickHandler
+	push rax
+
+	mov rdi, 0x20
+	call sendEOI
+
+	pop rax
+	mov rsp, rax
+
+	popaq
+	iretq
 
 irq0Handler:
 	irqHandler 0
