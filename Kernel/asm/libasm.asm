@@ -4,10 +4,24 @@ GLOBAL writePort
 GLOBAL hang
 GLOBAL getStackPtr
 GLOBAL setStackPtr
+GLOBAL dispatch
 
 %include "./asm/macros.m"
 
 section .text
+
+dispatch:
+	mov rsp, rdi
+	cmp rsi,0
+	je .L1
+
+	mov QWORD [rsp], rsi
+	mov QWORD [rsp + 8], 0x0 ;no se cuales son los flags que corresponden para un proceso nuevo
+	pushaq
+
+.L1
+	popaq
+	iretq
 
 readPort:	;(Recibe el puerto a leer en rdi)
 	push rbp
