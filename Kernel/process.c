@@ -29,7 +29,7 @@ int addPCB(int privilege){
 
 void removePCB(int id){
 	int found = FALSE;
-	for (int i = 0; i < tableSize || found; ++i){
+	for (int i = 0; i < tableSize || !found; ++i){
 		if(pcbTable[i]->pid == id){
 			free(pcbTable[i]);
 			for(int j = i; j < tableSize-1; j++)
@@ -42,7 +42,7 @@ void removePCB(int id){
 
 void changeState(int id, int state){
 	int found = FALSE;
-	for (int i = 0; i < tableSize || found; ++i){
+	for (int i = 0; i < tableSize || !found; ++i){
 		if(pcbTable[i]->pid == id){
 			pcbTable[i]->state = state;
 			found = TRUE;
@@ -61,7 +61,7 @@ int getState(int id){
 int addChild(int fatherId){
 	int childId;
 	int found = FALSE;
-	for (int i = 0; i < tableSize || found; ++i){
+	for (int i = 0; i < tableSize || !found; ++i){
 		if(pcbTable[i]->pid == fatherId){
 			childId = createChild(pcbTable[i]);
 			found = TRUE;

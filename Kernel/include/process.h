@@ -5,9 +5,6 @@
 #define BLOCKED 1
 #define READY 2
 #define NEW 3
-#define TRUE 1
-#define FALSE 0
-#define NULL 0
 #define MAX_CHILDREN 10
 
 typedef struct pcbCDT;
