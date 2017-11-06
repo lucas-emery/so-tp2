@@ -1,5 +1,5 @@
-#ifndef SEMAPHORES_H
-#define SEMAPHORES_H
+#ifndef SEMAPHORE_H
+#define SEMAPHORE_H
 
 int sem_open(char* name, int value);
 void sem_close(int id);

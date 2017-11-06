@@ -1,15 +1,24 @@
-#ifndef SYSCALLSIPC_H
-#define SYSCALLSIPC_H
+#ifndef _IPC_H_
+#define _IPC_H_
 
-typedef struct sem_t;
+#include <lib.h>
+#include <MMU.h>
+
+typedef struct sem_tCDT{
+	int value;
+	char* name;
+	int id;
+};
+
+typedef struct sem_tCDT* sem_t;
 
 static int semCount = 0;
 static int id = 0;
 
-sem_t* semaphores;
-int sem_open(char* name, int value);
-int sem_close(int id);
-int sem_post(int id);
-int sem_wait(int id);
+int semOpen(char* name, int value);
+void semClose(int id);
+void semPost(int id);
+void semWait(int id);
+int exists(char* name);
 
 #endif

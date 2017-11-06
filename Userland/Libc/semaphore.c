@@ -1,4 +1,4 @@
-#include<semaphore.h>
+#include <semaphore.h>
 
 int sem_open(char* name, int value){
 	int id;

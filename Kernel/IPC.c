@@ -1,13 +1,9 @@
 #include <IPC.h>
-#include <lib.h>
 
-typedef struct sem_t{
-	int value;
-	char* name;
-	int id;
-};
+static sem_t* semaphores;
 
-int exists(){
+
+int exists(char* name){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->name == name)
 			return TRUE;
@@ -15,7 +11,7 @@ int exists(){
 	return FALSE;
 }
 
-int sem_open(char* name, int value){
+int semOpen(char* name, int value){
 	if(exists(name))
 		return NULL;
 	sem_t newSem;
@@ -24,13 +20,13 @@ int sem_open(char* name, int value){
 	newSem->id = id;
 	id++;
 	semCount++;
-	semaphores = realloc(semaphores, semCount * sizeof(*sem_t));
+	semaphores = realloc(semaphores, semCount * sizeof(sem_t));
 	semaphores[semCount - 1] = newSem;
-	//createQueue(newSem->id);
+	//initSemaphore(newSem->id);
 	return newSem->id;
 }
 
-void closeMutex(int id){
+void semClose(int id){
 	int found = FALSE;
 	for (int i = 0; i < semCount || !found; ++i){
 		if(semaphores[i]->id == id){
@@ -43,18 +39,18 @@ void closeMutex(int id){
 	}
 }
 
-void up(int id){
+void semPost(int id){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id)
 			semaphores[i]->value++;
 	}
 }
 
-void down(int id){
+void semWait(int id){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
 			if(semaphores[i]->value <= 0){
-				//sem_block(semaphores[i]->id);
+				//semBlock(semaphores[i]->id);
 				semaphores[i]->value = -1;
 			}
 			else

@@ -2,6 +2,17 @@
 #define _INTERRUPTIONS_H_
 
 #include <stdint.h>
+#include <lib.h>
+#include <terminal.h>
+#include <keyboard.h>
+#include <mouse.h>
+#include <video.h>
+#include <sysCalls.h>
+#include <rtc.h>
+#include <MMU.h>
+
+#pragma pack(push)
+#pragma pack(1)
 
 void iSetHandler(int index, uint64_t handler);
 void sendEOI(int irq);

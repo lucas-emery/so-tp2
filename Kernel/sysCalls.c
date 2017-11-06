@@ -1,18 +1,4 @@
 #include <sysCalls.h>
-#include <terminal.h>
-#include <rtc.h>
-#include <lib.h>
-#include <MMU.h>
-#include <sysCallsProcess.h>
-#include <IPC.h>
-
-extern char* moduleNames[];
-
-#define SYSCALLS 30
-
-typedef int (*sys)(uint64_t rsi, uint64_t rdx, uint64_t rcx);
-
-static sys sysCalls[SYSCALLS];
 
 int sysRead(uint64_t fileDescriptor, uint64_t buffer, uint64_t size) {
 	int index = 0;
@@ -89,20 +75,24 @@ int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
 	//TO DO
 }
 
-void sysOpenSem(uint64_t name, uint64_t value, uint64_t id){
-	*id = sem_open(name, value);
+int sysOpenSem(uint64_t name, uint64_t value, uint64_t id){
+	*((uint8_t *)id) = semOpen((char*)name, (int)value);
+	return 0;
 }
 
-void sysCloseSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	sem_close(id);
+int sysCloseSem(uint64_t id, uint64_t rdx, uint64_t rcx){
+	semClose((int)id);
+	return 0;
 }
 
-void sysUpSem(uint64_t semaphore, uint64_t rdx, uint64_t rcx){
-	sem_post(id);
+int sysUpSem(uint64_t id, uint64_t rdx, uint64_t rcx){
+	semPost((int)id);
+	return 0;
 }
 
-void sysDownSem(uint64_t semaphore, uint64_t rdx, uint64_t rcx){
-	sem_wait(id);
+int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
+	semWait((int)id);
+	return 0;
 }
 
 int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {

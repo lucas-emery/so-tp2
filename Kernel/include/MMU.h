@@ -24,6 +24,8 @@ void changePDEPresent(int entry, int present);
 void * initializeKernelBinary();
 void * malloc(uint64_t size);
 void * getFreePage();
+void free(void * ptr);
+void * realloc(void * ptr, uint64_t size);
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]);
 context_t * createThreadContext(context_t * siblingContext);
 
