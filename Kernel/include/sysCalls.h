@@ -6,7 +6,7 @@
 #include <rtc.h>
 #include <lib.h>
 #include <MMU.h>
-#include <sysCallsProcess.h>
+#include <process.h>
 #include <IPC.h>
 
 #define SYSCALLS 30

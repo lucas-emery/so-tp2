@@ -95,6 +95,31 @@ int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
 	return 0;
 }
 
+int sysForkProcess(uint64_t pidReturn, uint64_t rdx, uint64_t rcx){
+	/*int fatherPid = getCurrentProcess();
+	*pidReturn = addChild(fatherPid);*/
+}
+
+int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
+	removePCB(pid);
+}
+
+int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
+	processesInfo(buffer);
+}
+
+int sysBlockProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
+	//block();
+}
+
+int sysUnblockProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
+	//unblock();
+}
+
+int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
+	//block();
+}
+
 int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
 	if(rdi < 0 || rdi >= SYSCALLS)
 		return -1; //Tirar error??
