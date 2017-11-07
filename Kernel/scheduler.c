@@ -1,132 +1,148 @@
 #include <scheduler.h>
 
-
 queueADT RRqueue;
 queueADT * semQueues;
-processADT * processes;
-uint8_t processCount = 0;
 uint8_t semCount = 0;
 tcbADT current;
 
-int addProcess(int pid){
-  processes = realloc(processes,++processCount*sizeof(processADT));
-  if(processes == NULL)
-    return 0;
-  processes[processCount-1] = malloc(sizeof(processCDT));
-  processADT aux = processes[processCount-1];
-  if(aux == NULL)
-    return 0;
-  aux->pid = pid;
-  aux->threadCount = 0;
-  return 1;
+uint8_t initScheduler(){
+  RRqueue = initQueue();
+  return RRqueue != NULL;
 }
 
-int addThread(tcbADT t){
+uint8_t addThread(tcbADT t){
   if(t == NULL)
     return 0;
-  addThreadToProcess(getProcess(t->pid),t);
+  t->state = NEW;
   return enqueue(RRqueue, (void*) t);
 }
 
-static void addThreadToProcess(processADT p,tcbADT t){
-  if(t == NULL || p == NULL)
-    return;
-  p->threads = realloc(p->threads,++threadCount*sizeof(tcbADT));
-  p->threads[threadCount-1] = t;
-}
-
-static processADT getProcess(int pid){
-  for(int i = 0; i < processCount; i++){
-    if(processes[i]->id == pid){
-      return processes[i];
-    }
-  }
-}
-
-int getCurrentThread(){
+int getCurrentProcess(){
   return current->pid;
 }
 
-void dispatchNextProcess(){
+void schedule(){
   current->state = READY;
   enqueue(RRqueue, (void*) current);
   current = (tcbADT) dequeue(RRqueue);
-  int isNew = (current->state == NEW);
+  setContext(current->context);
   current->state = RUNNING;
-  dispatch(current->stack, isNew?executableMemoryAdress:0x0);
 }
 
-int initSemaphore(int semId){
-    semQueues = realloc(semQueues,(semId+1)*sizeof(queueADT));
-    if(!semQueues)
-        return 0;
-    semQueues[semId] = malloc(sizeof(queueCDT));
-    if(!semQueues[semId])
-        return 0;
-    return 1;
+uint8_t semOpen(int semId){
+  semQueues = realloc(semQueues,(semId+1)*sizeof(queueADT));
+  if(!semQueues)
+    return 0;
+  semQueues[semId] = malloc(sizeof(queueCDT));
+  if(!semQueues[semId])
+    return 0;
+  return 1;
 }
 
-void closeSemaphore(int semId){
-    free(semQueues[semId]);
-    semQueues[semId] = NULL:
+void semClose(int semId){
+  free(semQueues[semId]);
+  semQueues[semId] = NULL:
 }
 
-
-
-int initScheduler(){
-   RRqueue = initQueue();
-   return (RRqueue!=NULL);
+uint8_t semBlock(int semId){
+  if(semQueues[semId] == NULL)
+    return FAIL;
+  threadPackADT pack = malloc(sizeof(packCDT));
+  if(pack == NULL)
+    return FAIL;
+  pack->threads = getThreads(getCurrentThread(),pack->count);
+  if(!enqueue(semQueues[semId],pack))
+    return FAIL;
+  managePack(pack,BLOCK);
+  return SUCCESS;
 }
 
-void semBlock(int semId){
-    
+uint8_t semUnblock(int semId){
+  if(semQueues[semId] == NULL)
+    return FAIL;
+  threadPackADT pack = (threadPackADT*) dequeue(semQueues[semId]);
+  managePack(pack,UNBLOCK);
+}
+
+static void managePack(threadPackADT pack,uint8_t type){
+  if(pack == NULL)
+    return;
+
+  for(int i = 0;i < pack->count; i++){
+    if(type == BLOCK)
+      remove(RRqueue, pack->threads[i]);
+    else
+      enqueue(RRqueue,pack->threads[i]);
+    pack->threads[i]->state = (type==BLOCK)?BLOCKED:READY;
+  }
+
 }
 
 static queueADT initQueue(){
-    queueADT ret = malloc(sizeof(queueCDT));
-    if (!ret)
-           return NULL;
-    ret->back = NULL;
-    ret->front = NULL;
-    return ret;
+  queueADT ret = malloc(sizeof(queueCDT));
+  if(ret == NULL)
+    return NULL;
+  ret->back = NULL;
+  ret->front = NULL;
+  return ret;
 }
 
 static int isEmpty(queueADT q){
-   if (!q)
-           return 1;
-   if (!q->front)
-           return 1;
-   else
-           return 0;
+  if(q == NULL)
+    return 1;
+  return q->front != NULL;
 }
 
-static int enqueue(queueADT q,void* elem){
-   qnode *new = malloc(sizeof(qnode));
-   if (!new)
-           return 0;
-   if (!q || !elem){
-           free(new);
-           return 0;
-   }
-   new->elem = elem;
-   new->next = q->back;
-   new->prev = NULL;
-   if (q->back)
-           q->back->prev = new;
-   q->back = new;
-   if (!q->front)
-           q->front = new;
-   return 1;
+static uint8_t enqueue(queueADT q,void* elem){
+  if(q == NULL || elem == NULL)
+    return FAIL;
+  qnode *new = malloc(sizeof(qnode));
+  if(new == NULL)
+    return FAIL;
+  new->elem = elem;
+  new->next = q->back;
+  new->prev = NULL;
+
+  if(q->back)
+    q->back->prev = new;
+
+  q->back = new;
+
+  if(!q->front)
+    q->front = new;
+
+  return SUCCESS;
+}
+
+static void remove(queueADT q, void* elem){
+  removeR(q,elem,q->front);
+}
+
+static void removeR(queueADT q, void* elem, qnode current){
+  if(current == NULL)
+    return;
+
+  if(current->elem == elem){
+    qnode aux = current->next;
+    if(aux != NULL)
+      aux->prev = current->prev;
+    if(prev != NULL)
+      prev->next = aux;
+    free(current);
+    return;
+  }
+
+  removeR(q,elem,current->next);
 }
 
 static void* dequeue(queueADT q){
-   qnode *prev;
-   void* elem;
-   if (isempty(q))
-           return NULL;
-   prev = q->front->prev;
-   elem = q->front->elem;
-   free(q->front);
-   q->front = prev;
-   return elem;
+  if(isEmpty(q))
+    return NULL;
+  qnode *prev;
+  void* elem;
+  prev = q->front->prev;
+  elem = q->front->elem;
+  free(q->front);
+  q->front = prev;
+  return elem;
 }
