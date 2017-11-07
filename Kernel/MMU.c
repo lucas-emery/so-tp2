@@ -20,6 +20,7 @@
 #define STACK_PAGE_IDX 1
 #define DATA_PAGE_IDX 2
 #define EMPTY 0
+#define NULL 0
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -36,9 +37,9 @@ typedef int (*EntryPoint)(int argc, char *argv[]);
 
 char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao",0};
 void ** moduleAddresses;
-context_t * context = AVOID_BSS;
-context_t * kernelContext;
-
+static context_t * context = AVOID_BSS;
+static context_t * kernelContext = AVOID_BSS;
+static context_t * processContext = AVOID_BSS;
 
 void copyAndExecuteDefaultModule(){
 	memcpy(EXEC_MEM_ADDR, moduleAddresses[0], PAGESIZE);
@@ -67,31 +68,36 @@ void * getStackBase()
 	);
 }
 
-context_t * createContext(uint64_t dataPageAddress) {
-	void * heapPageAddress = getFreePage();
-	void * stackPageAddress = getFreePage();
+context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, uint64_t heapCapacity, uint64_t heapSize) { //TODO: Support many heap pages
+	if(heapPageAddress == NULL) {
+		heapPageAddress = (uint64_t)getFreePage();
+		heapCapacity = PAGESIZE;
+		heapSize = EMPTY;
+	}
+
+	uint64_t stackPageAddress = (uint64_t)getFreePage();
 
 	context_t * newContext = malloc(sizeof(context_t));
 	newContext->pages = malloc(INITIAL_PC * sizeof(page_t));
 	newContext->pages[DATA_PAGE_IDX].index = EXEC_MEM_ADDR/PAGESIZE;
-	newContext->pages[DATA_PAGE_IDX].address = (uint64_t)dataPageAddress;
+	newContext->pages[DATA_PAGE_IDX].address = dataPageAddress;
 	newContext->pages[HEAP_PAGE_IDX].index = HEAPBASE/PAGESIZE;
-	newContext->pages[HEAP_PAGE_IDX].address = (uint64_t)heapPageAddress;
+	newContext->pages[HEAP_PAGE_IDX].address = heapPageAddress;
 	newContext->pages[STACK_PAGE_IDX].index = STACKBASE/PAGESIZE;
-	newContext->pages[STACK_PAGE_IDX].address = (uint64_t)stackPageAddress;
+	newContext->pages[STACK_PAGE_IDX].address = stackPageAddress;
 	newContext->pageCount = INITIAL_PC;
-	newContext->heapSize = EMPTY;
-	newContext->heapCapacity = PAGESIZE;
+	newContext->heapSize = heapSize;
+	newContext->heapCapacity = heapCapacity;
 	newContext->stackPtr = STACKBASE;
 
 	return newContext;
 }
 
-void buildThreadStack(int argc, char * argv[], context_t * threadContext) {
+void buildThreadStack(uint64_t rdi, uint64_t rsi, uint64_t rip, context_t * threadContext) {
 	changePDE(threadContext->pages[STACK_PAGE_IDX].index, threadContext->pages[STACK_PAGE_IDX].address, PRESENT);
 	context->stackPtr = getStackPtr();
 	setStackPtr(threadContext->stackPtr);
-	buildStack(argc, argv, EXEC_MEM_ADDR);
+	buildStack(rdi, rsi, rip);
 	threadContext->stackPtr = getStackPtr();
 	setStackPtr(context->stackPtr);
 	changePDE(context->pages[STACK_PAGE_IDX].index, context->pages[STACK_PAGE_IDX].address, PRESENT);
@@ -100,20 +106,27 @@ void buildThreadStack(int argc, char * argv[], context_t * threadContext) {
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
 	void * dataPageAddress = getFreePage();
 	memcpy(dataPageAddress, moduleAddresses[moduleIndex], PAGESIZE);
-	context_t * newContext = createContext(dataPageAddress);
-	buildThreadStack(argc, argv, newContext);
+	context_t * newContext = createContext(dataPageAddress, NULL, NULL, NULL);
+	buildThreadStack((uint64_t)argc, (uint64_t)argv, EXEC_MEM_ADDR, newContext);
 	return newContext;
 }
 
-context_t * createThreadContext(context_t * siblingContext) {
-	context_t * newContext = createContext(siblingContext->pages[DATA_PAGE_IDX].address);
-	buildThreadStack(0, 0, newContext);
+context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg) {
+	context_t * newContext = createContext(siblingContext->pages[DATA_PAGE_IDX].address, siblingContext->pages[HEAP_PAGE_IDX].address, siblingContext->heapCapacity, siblingContext->heapSize);
+	buildThreadStack((uint64_t)arg, 0, (uint64_t)start_routine, newContext);
 	return newContext;
 }
 
-//Mepa que va a quedar ree distinto, no diseñen nada en base a esto
-void switchContext(context_t newContext) {
-	//WIP
+void saveContext(uint64_t rsp) {
+	
+}
+
+uint64_t loadContext() {
+
+}
+
+void setContext(context_t * newContext) {
+	processContext = newContext;
 }
 
 void * malloc(uint64_t request) {
@@ -208,6 +221,8 @@ void initializeKernelContext(int stackPage, uint64_t stackPhyAddress, int heapPa
 	context->pages[HEAP_PAGE_IDX].address = heapPhyAddress;
 	context->pageCount = 2;
 	context->stackPtr = (uint64_t)getStackBase();
+
+	kernelContext = context; //Invert for clarity
 }
 
 void * initializeKernelBinary()
