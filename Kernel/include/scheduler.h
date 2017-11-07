@@ -1,60 +1,122 @@
 #ifndef SCHED_H
 #define SCHED_H
 
-#include <PCBTableADT.h>
+#include <process.h>
 #include <MMU.h>
-#include <PCBTableADT.h>
+#include <thread.h>
+#include <lib.h>
 
-typedef struct qnode
-{
-        tcbADT elem;
+typedef struct{
+    int count;
+    tcbADT * threads;
+} threadPackCDT;
+
+typedef struct qnode{
+        void * elem;
         struct qnode *next;
         struct qnode *prev;
 } qnode;
 
-typedef struct
-{
+typedef struct{
         qnode *back;
         qnode *front;
 }queueCDT;
 
+typedef * threadPackCDT threadPackADT;
 typedef * queueCDT queueADT;
 
-queueADT queue;
+/*
+ *	Author: stu
+ *	# -> defined constant
+ *	$ -> global variable
+ *	@ -> function parameter
+ */
+
 
 /*
- * Initialize scheduler.
+ * 	Initializes $RRqueue.
+ *	Return: #SUCCESS on success, otherwise #FAIL.
  */
-void initScheduler();
+uint8_t initScheduler();
 
 /*
- * Add a new thread into the scheduler.
- * Retunrs 1 on success, otherwise 0.
+ *	Sets state of @thread to NEW and queues @thread into $RRqueue.
+ *	Parameters: thread
+ *	Return: #SUCCESS on success, otherwise #FAIL.
  */
-int addThread(tcbADT);
+uint8_t addThread(tcbADT thread);
 
 /*
- * Dispatch the next process in the queue.
- * If it's a new process, it fakes an initial state.
+ *	Enqueues $current and sets $current to the next thread in the queue.
+ *	Sets system context $current's context.
  */
-void dispatchNextProcess();
+void schedule();
+
+/*
+ *	Returns the pid of $current.
+ *	Return: $current.pid
+ */
+int getCurrentProcess();
+
+/*
+ * Called upon the opening of a semaphore to initialize the queue used for the event.
+ * Paramaters: semId
+ * Returns #SUCCESS on success, otherwise #FAIL.
+ */
+uint8_t semOpen(int semId);
+
+/*
+ *	Called upon the closing of a semaphore to destroy the queue used for the event.
+ *	Parameters: semId
+ */
+void semClose(int semId);
+
+/*
+ * Blocks all of the running process´ threads, packing and queueing them together into the corresponding semQueue.
+ * Paramaters: semId
+ * Returns #SUCCESS on success, otherwise #FAIL.
+ */
+uint8_t semBlock(int semId);
+
+/*
+ * Dequeues a pack of threads from the corresponding semQueue, unpacking and queueing them into the RRqueue.
+ * Paramaters: semId
+ * Returns #SUCCESS on success, otherwise #FAIL.
+ */
+uint8_t semUnblock(int semId);
+
+/*
+ *	If @type is BLOCK, it removes all threads in @pack from the queue and sets their state to BLOCKED.
+ *	If @type is UNBLOCK, it enqueues all threads in @pack
+ *	Paramaters: pack, type
+ */
+static void manageThreads(packADT pack,uint8_t type);
+
+/*
+ * Create an empty queue.
+ */
+static queueADT create();
 
 /*
  * Check if queue is empty.
- * Returns 1 if the queue is empty, and otherwise 0.
+ * Returns #SUCCESS if the queue is empty, and otherwise #FAIL.
  */
-static int isEmpty();
+static int isEmpty(queueADT);
 
 /*
  * Add element to queue.
- * Returns 1 on success, and otherwise 0.
+ * Returns #SUCCESS on success, and otherwise #FAIL.
  */
-static int enqueue(tcbADT elem);
+static int enqueue(queueADT, void*);
 
 /*
- * Remove element from queue, and return it.
+ * Remove last element from queue, and return it.
  */
-static tcbADT dequeue();
+static void* dequeue(queueADT);
 
+/*
+ * Remove element from queue, using a static recursive function
+ */
+static void remove(queueADT,void*);
 
 #endif
