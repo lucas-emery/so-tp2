@@ -3,7 +3,7 @@
 #include <rtc.h>
 #include <lib.h>
 #include <MMU.h>
-#include <process.h>
+#include <sysCallsProcess.h>
 
 extern char* moduleNames[];
 

@@ -7,6 +7,7 @@
 #include <video.h>
 #include <sysCalls.h>
 #include <rtc.h>
+#include <MMU.h>
 
 #pragma pack(push)
 #pragma pack(1)
@@ -27,7 +28,7 @@ typedef void (*handler_t)(void);
 
 static IDTEntry_t* IDT = (IDTEntry_t*) 0x0;
 
-void tickHandler() {
+void screenTickHandler() {
 	static int count = 0;
 	count++;
 	if(count == 10) { //Cada 825ms
@@ -36,11 +37,18 @@ void tickHandler() {
 	}
 }
 
+uint64_t timerTickHandler(uint64_t rsp) {
+	screenTickHandler();
+
+	saveContext(rsp);
+	//scheduler();
+	//rsp = loadContext();
+
+	return rsp;
+}
+
 void irqDispatcher(int irq) {
 	switch(irq) {
-		case 0:
-			tickHandler();
-			break;
 		case 1:
 			keyboardHandler();
 			break;
@@ -70,8 +78,8 @@ void iSetHandler(int index, uint64_t handler) {
 }
 
 void setupIDT() {
-	iSetHandler(0x14, (uint64_t) &PFHandler);
-	iSetHandler(0x20, (uint64_t) &irq0Handler);
+	iSetHandler(0x0E, (uint64_t) &PFHandler);
+	iSetHandler(0x20, (uint64_t) &TTHandler);
 	iSetHandler(0x21, (uint64_t) &irq1Handler);
 	iSetHandler(0x2C, (uint64_t) &irq12Handler);
 	iSetHandler(0x80, (uint64_t) &int80Handler);
