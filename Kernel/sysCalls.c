@@ -76,22 +76,22 @@ int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
 }
 
 int sysOpenSem(uint64_t name, uint64_t value, uint64_t id){
-	*((uint8_t *)id) = semOpen((char*)name, (int)value);
+	*((uint8_t *)id) = execute(OPEN, (char*) name, (int) value);
 	return 0;
 }
 
 int sysCloseSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	semClose((int)id);
+	execute(CLOSE, NULL, (int) id);
 	return 0;
 }
 
 int sysUpSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	semPost((int)id);
+	execute(POST, NULL, (int) id);
 	return 0;
 }
 
 int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	semWait((int)id);
+	execute(WAIT, NULL, (int) id);
 	return 0;
 }
 

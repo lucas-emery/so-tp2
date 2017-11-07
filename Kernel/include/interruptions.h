@@ -10,6 +10,7 @@
 #include <sysCalls.h>
 #include <rtc.h>
 #include <MMU.h>
+#include <IPC.h>
 
 #pragma pack(push)
 #pragma pack(1)

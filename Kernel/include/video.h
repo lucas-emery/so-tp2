@@ -18,7 +18,6 @@ typedef struct {
 	char style;
 } cell_t;
 
-
 typedef cell_t video_row[80];
 
 void writeAtCursor(char ch, char style);

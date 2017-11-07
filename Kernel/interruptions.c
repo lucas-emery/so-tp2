@@ -75,6 +75,7 @@ void setupIDT() {
 	initializeMouse();
 	sysCallsSetup();
 	setupRTC();
+	semOperationsSetup();
 
 	setPicMaster(0xF8);
 	setPicSlave(0xEF);

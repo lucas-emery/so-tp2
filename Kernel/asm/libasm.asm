@@ -4,6 +4,7 @@ GLOBAL writePort
 GLOBAL hang
 GLOBAL getStackPtr
 GLOBAL setStackPtr
+GLOBAL testAndSet
 
 %include "./asm/macros.m"
 
@@ -70,3 +71,7 @@ hang:
 	cli
 	hlt	; halt machine should kernel return
 	jmp hang
+
+testAndSet:
+	tsl ebx, rdi 
+	ret

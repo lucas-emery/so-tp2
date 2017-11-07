@@ -4,6 +4,12 @@
 #include <lib.h>
 #include <MMU.h>
 
+#define SEM_OPERATIONS 4
+#define OPEN 0
+#define CLOSE 1
+#define POST 2
+#define WAIT 3
+
 typedef struct sem_tCDT{
 	int value;
 	char* name;
@@ -12,13 +18,14 @@ typedef struct sem_tCDT{
 
 typedef struct sem_tCDT* sem_t;
 
-static int semCount = 0;
-static int id = 0;
+typedef int (*semOperation)(char*, int);
 
 int semOpen(char* name, int value);
-void semClose(int id);
-void semPost(int id);
-void semWait(int id);
-int exists(char* name);
+int semClose(char*, int id);
+int semPost(char*, int id);
+int semWait(char*, int id);
+void semOperationsSetup();
+
+extern int testAndSet(uint64_t lock);
 
 #endif

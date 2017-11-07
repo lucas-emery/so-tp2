@@ -1,9 +1,14 @@
 #include <IPC.h>
 
 static sem_t* semaphores;
+static int semCount = 0;
+static int id = 0;
+static semOperation semOperations[SEM_OPERATIONS];
+volatile int lock = 0;
 
+static int exists(char* name);
 
-int exists(char* name){
+static int exists(char* name){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->name == name)
 			return TRUE;
@@ -26,27 +31,30 @@ int semOpen(char* name, int value){
 	return newSem->id;
 }
 
-void semClose(int id){
-	int found = FALSE;
-	for (int i = 0; i < semCount || !found; ++i){
+int semClose(char* name, int id){
+	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
 			free(semaphores[i]);
 			for(int j = i; j < semCount-1; j++)
 				semaphores[j] = semaphores[j+1];
 			semCount--;
-			found = TRUE;
+			return 0;
 		}
 	}
+	return 1;
 }
 
-void semPost(int id){
+int semPost(char* name, int id){
 	for (int i = 0; i < semCount; ++i){
-		if(semaphores[i]->id == id)
+		if(semaphores[i]->id == id){
 			semaphores[i]->value++;
+			return 0;
+		}
 	}
+	return 1;
 }
 
-void semWait(int id){
+int semWait(char* name, int id){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
 			if(semaphores[i]->value <= 0){
@@ -55,7 +63,24 @@ void semWait(int id){
 			}
 			else
 				semaphores[i]->value--;
+			return 0;
 		}
 	}
+	return 1;
 }
 
+void execute(int operation, char* name, int id){
+	if(operation < 0 || operation > 4)
+		return;
+	while(testAndSet(&lock));
+	(semOperations[operation])(name, id);
+	lock = FALSE;
+}
+
+
+void semOperationsSetup(){
+	semOperations[OPEN] = &semOpen;
+	semOperations[CLOSE] = &semClose;
+	semOperations[POST] = &semPost;
+	semOperations[WAIT] = &semWait;
+}
