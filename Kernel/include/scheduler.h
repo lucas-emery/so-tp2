@@ -3,24 +3,27 @@
 
 #include <PCBTableADT.h>
 #include <MMU.h>
-#include <PCBTableADT.h>
 
-typedef struct qnode
-{
-        tcbADT elem;
+typedef struct{
+    int pid;
+    int threadCount;
+    tcbADT * threads;
+} processCDT;
+
+typedef * processCDT processADT;
+
+typedef struct qnode{
+        void * elem;
         struct qnode *next;
         struct qnode *prev;
 } qnode;
 
-typedef struct
-{
+typedef struct{
         qnode *back;
         qnode *front;
 }queueCDT;
 
 typedef * queueCDT queueADT;
-
-queueADT queue;
 
 /*
  * Initialize scheduler.
@@ -34,27 +37,32 @@ void initScheduler();
 int addThread(tcbADT);
 
 /*
- * Dispatch the next process in the queue.
- * If it's a new process, it fakes an initial state.
+ * Dispatch the next thread in the queue.
+ * If it's a new thread, it fakes an initial state in the new stack.
  */
-void dispatchNextProcess();
+void dispatchNextThread();
+
+/*
+ * Create an empty queue.
+ */
+static queueADT create();
 
 /*
  * Check if queue is empty.
  * Returns 1 if the queue is empty, and otherwise 0.
  */
-static int isEmpty();
+static int isEmpty(queueADT);
 
 /*
  * Add element to queue.
  * Returns 1 on success, and otherwise 0.
  */
-static int enqueue(tcbADT elem);
+static int enqueue(queueADT, void*);
 
 /*
  * Remove element from queue, and return it.
  */
-static tcbADT dequeue();
+static void* dequeue(queueADT);
 
 
 #endif
