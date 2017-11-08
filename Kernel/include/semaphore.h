@@ -20,12 +20,12 @@ typedef struct sem_tCDT* sem_t;
 
 typedef int (*semOperation)(char*, int);
 
+extern int testAndSet(uint64_t lock);
+
 int semOpen(char* name, int value);
 int semClose(char*, int id);
 int semPost(char*, int id);
 int semWait(char*, int id);
 void semOperationsSetup();
-
-extern int testAndSet(uint64_t lock);
 
 #endif

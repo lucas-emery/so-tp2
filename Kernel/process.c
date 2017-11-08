@@ -8,7 +8,7 @@ typedef struct pcbCDT{
 	int children[MAX_CHILDREN];
 	//TCB* threads;
 	//int threadCount;
-};
+}pcbCDT;
 
 static int idCount = 0;
 static pcbADT* pcbTable;

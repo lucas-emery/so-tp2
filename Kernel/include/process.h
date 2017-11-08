@@ -10,7 +10,6 @@
 #define NEW 3
 #define MAX_CHILDREN 10
 
-typedef struct pcbCDT;
 typedef struct pcbCDT* pcbADT;
 
 /*

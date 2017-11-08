@@ -10,7 +10,7 @@
 #include <sysCalls.h>
 #include <rtc.h>
 #include <MMU.h>
-#include <IPC.h>
+#include <semaphore.h>
 
 #pragma pack(push)
 #pragma pack(1)

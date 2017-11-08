@@ -7,7 +7,7 @@
 #include <lib.h>
 #include <MMU.h>
 #include <process.h>
-#include <IPC.h>
+#include <semaphore.h>
 
 #define SYSCALLS 30
 

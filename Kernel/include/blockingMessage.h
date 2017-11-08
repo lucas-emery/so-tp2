@@ -2,16 +2,15 @@
 #define _BLOCKING_MESSAGE_H_
 
 #include <lib.h>
+#include <MMU.h>
 
 #define BYTES 4
 #define MAX_SIZE_BUFFER 100
 
-typedef char[BYTES] content_t;
-typedef struct messageCDT;
 typedef struct messageCDT* messageADT;
 
-int initMessage(char* name, content_t content);
+int initMessage(char* name, char* content);
 void readMessage(int id, char* buffer);
-void writeMessage(int id, content_t content);
+void writeMessage(int id, char* content);
 
 #endif
