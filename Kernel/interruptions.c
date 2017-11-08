@@ -18,7 +18,7 @@ typedef void (*handler_t)(void);
 
 static IDTEntry_t* IDT = (IDTEntry_t*) 0x0;
 
-void tickHandler() {
+void screenTickHandler() {
 	static int count = 0;
 	count++;
 	if(count == 10) { //Cada 825ms
@@ -28,15 +28,17 @@ void tickHandler() {
 }
 
 uint64_t timerTickHandler(uint64_t rsp) {
-	tickHandler();
+	screenTickHandler();
+
+	saveContext(rsp);
+	//scheduler();
+	//rsp = loadContext();
+
 	return rsp;
 }
 
 void irqDispatcher(int irq) {
 	switch(irq) {
-		case 0:
-			tickHandler();
-			break;
 		case 1:
 			keyboardHandler();
 			break;

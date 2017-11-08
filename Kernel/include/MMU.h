@@ -27,6 +27,9 @@ void * getFreePage();
 void free(void * ptr);
 void * realloc(void * ptr, uint64_t size);
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]);
-context_t * createThreadContext(context_t * siblingContext);
+context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg);
+void saveContext(uint64_t rsp);
+uint64_t loadContext();
+void setContext(context_t * newContext);
 
 #endif
