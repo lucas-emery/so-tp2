@@ -1,11 +1,13 @@
-#ifndef LIB_H
-#define LIB_H
+#ifndef _LIB_H_
+#define _LIB_H_
 
 #include <stdint.h>
 #include <stddef.h>
 
 #define TRUE 1
 #define FALSE 0
+#define READ 0
+#define WRITE 1
 
 void * memset(void * destination, int32_t character, uint64_t length);
 void * memcpy(void * destination, const void * source, uint64_t length);

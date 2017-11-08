@@ -73,5 +73,5 @@ hang:
 	jmp hang
 
 testAndSet:
-	tsl ebx, rdi 
+	tsl rbx, rdi 
 	ret

@@ -1,4 +1,4 @@
-#include <IPC.h>
+#include <semaphore.h>
 
 static sem_t* semaphores;
 static int semCount = 0;

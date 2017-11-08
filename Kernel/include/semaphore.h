@@ -1,5 +1,5 @@
-#ifndef _IPC_H_
-#define _IPC_H_
+#ifndef _SEMAPHORE_H_
+#define _SEMAPHORE_H_
 
 #include <lib.h>
 #include <MMU.h>
