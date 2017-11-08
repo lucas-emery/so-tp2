@@ -27,13 +27,14 @@ int semOpen(char* name, int value){
 	semCount++;
 	semaphores = realloc(semaphores, semCount * sizeof(sem_t));
 	semaphores[semCount - 1] = newSem;
-	//initSemaphore(newSem->id);
+	initSem(newSem->id);
 	return newSem->id;
 }
 
 int semClose(char* name, int id){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
+			destroySem(id);
 			free(semaphores[i]);
 			for(int j = i; j < semCount-1; j++)
 				semaphores[j] = semaphores[j+1];

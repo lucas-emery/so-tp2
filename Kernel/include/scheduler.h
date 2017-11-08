@@ -71,22 +71,21 @@ int getCurrentProcess();
  * Paramaters: msgId
  * Returns #SUCCESS on success, otherwise #FAIL.
  */
-uint8_t msgOpen(int msgId);
+uint8_t initMsg(int msgId);
 
 /*
  *	Called upon the closing of a message to destroy the queue used for the event.
  *	Parameters: msgId
  */
-void msgClose(int msgId);
+void destroyMsg(int msgId);
 
 /*
  *	If @blocking is #TRUE, it blocks all of the running process´ threads, 
  *	packing and queueing them together into the corresponding msgQueue, depending on @type.
  *	Otherwise, it packs only the running thread.
  *	Paramaters: msgId, type, blocking
- *	Returns #SUCCESS on success, otherwise #FAIL.
  */
-uint8_t msgBlock(int msgId, int type, int blocking);
+void msgBlock(int msgId, int type, int blocking);
 
 /*
  *	Dequeues a pack of threads from the corresponding msgQueue, depending on @type,
@@ -101,21 +100,20 @@ uint8_t msgUnblock(int msgId, int type);
  * Paramaters: semId
  * Returns #SUCCESS on success, otherwise #FAIL.
  */
-uint8_t semOpen(int semId);
+uint8_t initSem(int semId);
 
 /*
  *	Called upon the closing of a semaphore to destroy the queue used for the event.
  *	Parameters: semId
  */
-void semClose(int semId);
+void destroySem(int semId);
 
 /*
  *	If @blocking is #TRUE, it blocks all of the running process´ threads,
  *	packing and queueing them together into the corresponding semQueue.
  *	Paramaters: semId, blocking
- *	Returns #SUCCESS on success, otherwise #FAIL.
  */
-uint8_t semBlock(int semId, int blocking);
+void semBlock(int semId, int blocking);
 
 /*
  * Dequeues a pack of threads from the corresponding semQueue, unpacking and queueing them into the $RRqueue.

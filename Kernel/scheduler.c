@@ -71,18 +71,18 @@ static uint8_t unblock(int i, queueADT * queueArray){
   managePack(pack,UNBLOCK);
 }
 
-uint8_t msgOpen(int msgId){
+uint8_t initMsg(int msgId){
   return open(msgId,&rMsgQueues) && open(msgId, &wMsgQueues);
 }
 
-void msgClose(int msgId){
+void destroyMsg(int msgId){
   free(rMsgQueues[msgId]);
   rMsgQueues[msgId] = NULL;
   free(wMsgQueues[msgId]);
   wMsgQueues[msgId] = NULL;
 }
 
-uint8_t msgBlock(int msgId,int type, int blocking){
+void msgBlock(int msgId,int type, int blocking){
   block(msgId, type==READ?rMsgQueues:wMsgQueues, blocking);
 }
 
@@ -90,16 +90,16 @@ uint8_t msgUnblock(int msgId, int type){
   return unblock(msgId, type==READ?rMsgQueues:wMsgQueues);
 }
 
-uint8_t semOpen(int semId){
+uint8_t initSem(int semId){
   return open(semId,&semQueues);
 }
 
-void semClose(int semId){
+void destroySem(int semId){
   free(semQueues[semId]);
   semQueues[semId] = NULL;
 }
 
-uint8_t semBlock(int semId,int blocking){
+void semBlock(int semId,int blocking){
   block(semId, semQueues, blocking);
 }
 

@@ -6,8 +6,8 @@ typedef struct pcbCDT{
 	int state;
 	int childrenCount;
 	int children[MAX_CHILDREN];
-	//TCB* threads;
-	//int threadCount;
+	tcbADT * threads;
+	int threadCount;
 }pcbCDT;
 
 static int idCount = 0;
@@ -128,17 +128,17 @@ static char* makeString(pcbADT process){
 		}
 	}
 }
-
-context_t getContextOfSibling(int id){
+*/
+context_t * getContextOfSibling(int id){
 	for (int i = 0; i < tableSize; i++){
-		if(pcbTable[i]->pid == tcb->pid){
-			return *threads->context;
+		if(pcbTable[i]->pid == id){
+			return pcbTable[i]->threads[0]->context;
 		}
 	}
 	return NULL;
 }
 
-TCB getThreads(int id, int* count){
+tcbADT * getThreads(int id, int* count){
 	for (int i = 0; i < tableSize; i++){
 		if(pcbTable[i]->pid == id){
 			*count = pcbTable[i]->threadCount;
@@ -146,4 +146,4 @@ TCB getThreads(int id, int* count){
 		}
 	}
 	return NULL;
-}*/
+}
