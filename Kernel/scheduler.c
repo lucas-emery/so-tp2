@@ -1,7 +1,7 @@
 #include <scheduler.h>
 
 queueADT RRqueue;
-queueADT * semQueues;
+queueADT * semQueues,rMsgQueues,wMsgQueues;
 uint8_t semCount = 0;
 tcbADT current;
 
@@ -22,21 +22,71 @@ int getCurrentProcess(){
 }
 
 void schedule(){
-  current->state = READY;
-  enqueue(RRqueue, (void*) current);
+  if(current->state != BLOCKED){
+    current->state = READY;
+    enqueue(RRqueue, (void*) current);
+  }
   current = (tcbADT) dequeue(RRqueue);
   setContext(current->context);
   current->state = RUNNING;
 }
 
+static uint8_t open(int i, queueADT ** array){
+  *array = realloc(*array, (i+1)*sizeof(queueCDT));
+  if(*array == NULL)
+    return FAIL;
+  *array[i] = malloc(sizeof(queueCDT));
+  if(*array[i] == NULL)
+    return FAIL;
+  return SUCCESS;
+}
+
+static void block(int i, queueADT * queueArray, int blocking){
+  if(queueArray == NULL)
+    return FAIL;
+  threadPackADT pack = malloc(sizeof(packCDT));
+    if(pack == NULL)
+      return FAIL;
+
+  if(!blocking){
+    pack->threads = malloc(sizeof(tcbADT));
+    *pack->threads = current;
+    pack->count = 1;
+  } else
+    pack->threads = getThreads(getCurrentThread(),&pack->count);
+
+  if(enqueue(queueArray[i],pack) == FAIL)
+    return FAIL;
+  managePack(pack, BLOCK);
+  timerTickHandler();
+}
+
+static uint8_t unblock(int i, queueADT * queueArray){
+  if(queueArray[i] == NULL)
+    return FAIL;
+  threadPackADT pack = (threadPackADT*) dequeue(queueArray[i]);
+  managePack(pack,UNBLOCK);
+}
+
+uint8_t msgOpen(int msgId){
+  return open(msgId,&rMsgQueues) && open(msgId, &wMsgQueues);
+}
+
+void msgClose(int msgId){
+  free(msgQueues[msgId]);
+  msgQueues[msgId] = NULL;
+}
+
+uint8_t msgBlock(int msgId,int type, int blocking){
+  return block(msgId, type==READ?rMsgQueues:wMsgQueues, blocking);
+}
+
+uint8_t msgUnblock(int msgId, int type){
+  return unblock(msgId, type==READ?rMsgQueues:wMsgQueues);
+}
+
 uint8_t semOpen(int semId){
-  semQueues = realloc(semQueues,(semId+1)*sizeof(queueADT));
-  if(!semQueues)
-    return 0;
-  semQueues[semId] = malloc(sizeof(queueCDT));
-  if(!semQueues[semId])
-    return 0;
-  return 1;
+  return open(semId,&semQueues);
 }
 
 void semClose(int semId){
@@ -44,25 +94,14 @@ void semClose(int semId){
   semQueues[semId] = NULL:
 }
 
-uint8_t semBlock(int semId){
-  if(semQueues[semId] == NULL)
-    return FAIL;
-  threadPackADT pack = malloc(sizeof(packCDT));
-  if(pack == NULL)
-    return FAIL;
-  pack->threads = getThreads(getCurrentThread(),pack->count);
-  if(!enqueue(semQueues[semId],pack))
-    return FAIL;
-  managePack(pack,BLOCK);
-  return SUCCESS;
+uint8_t semBlock(int semId,int blocking){
+  return block(semId, semQueues, blocking);
 }
 
 uint8_t semUnblock(int semId){
-  if(semQueues[semId] == NULL)
-    return FAIL;
-  threadPackADT pack = (threadPackADT*) dequeue(semQueues[semId]);
-  managePack(pack,UNBLOCK);
+  return unblock(semId,semQueues);
 }
+
 
 static void managePack(threadPackADT pack,uint8_t type){
   if(pack == NULL)
@@ -70,7 +109,7 @@ static void managePack(threadPackADT pack,uint8_t type){
 
   for(int i = 0;i < pack->count; i++){
     if(type == BLOCK)
-      remove(RRqueue, pack->threads[i]);
+      remove(RRqueue,pack->threads[i]);
     else
       enqueue(RRqueue,pack->threads[i]);
     pack->threads[i]->state = (type==BLOCK)?BLOCKED:READY;
