@@ -13,6 +13,7 @@ typedef struct {
   uint64_t instPtr;
 	uint64_t heapSize;
 	uint64_t heapCapacity;
+	void * interruptStack;
 } context_t;
 
 void changePDEPresent(int entry, int present);
@@ -26,8 +27,11 @@ void * malloc(uint64_t size);
 void * getFreePage();
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]);
 context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg);
-void saveContext(uint64_t rsp);
-uint64_t loadContext();
+void saveContext();
+void loadContext();
 void setContext(context_t * newContext);
+
+extern uint64_t cleanReturnAddress();
+extern void injectReturnAddress(uint64_t returnAddress);
 
 #endif

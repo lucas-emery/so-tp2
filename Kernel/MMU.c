@@ -6,6 +6,7 @@
 #include <terminal.h>
 #include <MMU.h>
 
+#define PD_ADDR 0x10000
 #define PAGESIZE 0x200000
 #define MAPPEDMEMORY 0x100000000
 #define HEAPBASE (MAPPEDMEMORY/2)
@@ -32,6 +33,7 @@ extern void hang();
 extern uint64_t getStackPtr();
 extern void setStackPtr(uint64_t rsp);
 extern void buildStack(int argc, char * argv[], uint64_t rip);
+extern uint64_t swapStack(uint64_t newStackPtr, int pageIndex, uint64_t pageAddress);
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
 
@@ -94,13 +96,9 @@ context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, ui
 }
 
 void buildThreadStack(uint64_t rdi, uint64_t rsi, uint64_t rip, context_t * threadContext) {
-	changePDE(threadContext->pages[STACK_PAGE_IDX].index, threadContext->pages[STACK_PAGE_IDX].address, PRESENT);
-	context->stackPtr = getStackPtr();
-	setStackPtr(threadContext->stackPtr);
+	context->stackPtr = swapStack(threadContext->stackPtr, threadContext->pages[STACK_PAGE_IDX].index, threadContext->pages[STACK_PAGE_IDX].address);
 	buildStack(rdi, rsi, rip);
-	threadContext->stackPtr = getStackPtr();
-	setStackPtr(context->stackPtr);
-	changePDE(context->pages[STACK_PAGE_IDX].index, context->pages[STACK_PAGE_IDX].address, PRESENT);
+	threadContext->stackPtr = swapStack(context->stackPtr, context->pages[STACK_PAGE_IDX].index, context->pages[STACK_PAGE_IDX].address);
 }
 
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
@@ -117,12 +115,24 @@ context_t * createThreadContext(context_t * siblingContext, void * start_routine
 	return newContext;
 }
 
-void saveContext(uint64_t rsp) {
-	
+loadPages(page_t * pages);
+
+void saveContext() {
+	static uint64_t returnAddress = AVOID_BSS;
+	returnAddress = cleanReturnAddress();
+	processContext->stackPtr = swapStack(kernelContext->stackPtr, kernelContext->pages[STACK_PAGE_IDX].index, kernelContext->pages[STACK_PAGE_IDX].address);
+	loadPages(kernelContext->pages);	//TODO: only heap
+	context = kernelContext;
+	injectReturnAddress(returnAddress);
 }
 
-uint64_t loadContext() {
-
+void loadContext() {
+	static uint64_t returnAddress = AVOID_BSS;
+	returnAddress = cleanReturnAddress();
+	kernelContext->stackPtr = swapStack(processContext->stackPtr, processContext->pages[STACK_PAGE_IDX].index, processContext->pages[STACK_PAGE_IDX].address);
+	loadPages(processContext->pages);
+	context = processContext;
+	injectReturnAddress(returnAddress);
 }
 
 void setContext(context_t * newContext) {
@@ -183,7 +193,7 @@ void changePDE(int entry, uint64_t physAddr, int present){
 		return;
 
 
-	uint64_t PD = 0x10000;
+	uint64_t PD = PD_ADDR;
 
 	while(entry){
 		PD += 8;

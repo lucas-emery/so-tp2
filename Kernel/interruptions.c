@@ -9,6 +9,8 @@
 #include <rtc.h>
 #include <MMU.h>
 
+#define AVOID_BSS 1
+
 #pragma pack(push)
 #pragma pack(1)
 
@@ -37,14 +39,17 @@ void screenTickHandler() {
 	}
 }
 
-uint64_t timerTickHandler(uint64_t rsp) {
+void timerTickHandler() {
+	static uint64_t returnAddress = AVOID_BSS;
+
+	returnAddress = cleanReturnAddress();
+	saveContext();
+
 	screenTickHandler();
+	//schedule();
 
-	saveContext(rsp);
-	//scheduler();
-	//rsp = loadContext();
-
-	return rsp;
+	loadContext();
+	injectReturnAddress(returnAddress);
 }
 
 void irqDispatcher(int irq) {

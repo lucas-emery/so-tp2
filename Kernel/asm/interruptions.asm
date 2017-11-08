@@ -24,15 +24,10 @@ section .text
 TTHandler:
 	pushaq
 
-	mov rdi, rsp
 	call timerTickHandler
-	push rax
 
 	mov rdi, 0x20
 	call sendEOI
-
-	pop rax
-	mov rsp, rax
 
 	popaq
 	iretq
