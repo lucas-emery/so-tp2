@@ -40,16 +40,12 @@ void screenTickHandler() {
 }
 
 void timerTickHandler() {
-	static uint64_t returnAddress = AVOID_BSS;
-
-	returnAddress = cleanReturnAddress();
-	saveContext();
+	kernelMode();
 
 	screenTickHandler();
 	//schedule();
 
-	loadContext();
-	injectReturnAddress(returnAddress);
+	userMode(); //Puedo llegar a querer salir en kernel mode?
 }
 
 void irqDispatcher(int irq) {

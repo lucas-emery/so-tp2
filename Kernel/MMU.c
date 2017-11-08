@@ -8,11 +8,14 @@
 
 #define PD_ADDR 0x10000
 #define PAGESIZE 0x200000
+#define KERNEL_HEAP 0x200000
+#define KERNEL_STACK 0x400000
+#define EXEC_MEM_ADDR 0x600000
+#define ROM 0x800000
 #define MAPPEDMEMORY 0x100000000
-#define HEAPBASE (MAPPEDMEMORY/2)
+#define USER_HEAP (MAPPEDMEMORY/2)
 #define STACKBASE (MAPPEDMEMORY - sizeof(uint64_t))
-#define EXEC_MEM_ADDR 0x400000
-#define ROM 0x600000
+#define KERNEL_STACKBASE (KERNEL_STACK + PAGESIZE - sizeof(uint64_t))
 #define PRESENT 1
 #define NOT_PRESENT 0
 #define AVOID_BSS 1
@@ -22,6 +25,7 @@
 #define DATA_PAGE_IDX 2
 #define EMPTY 0
 #define NULL 0
+#define INT_STACK_SIZE (20 * 8)
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -32,7 +36,7 @@ extern uint8_t endOfKernel;
 extern void hang();
 extern uint64_t getStackPtr();
 extern void setStackPtr(uint64_t rsp);
-extern void buildStack(int argc, char * argv[], uint64_t rip);
+extern void * buildStack(uint64_t argc, uint64_t argv, uint64_t rip, uint64_t rsp);
 extern uint64_t swapStack(uint64_t newStackPtr, int pageIndex, uint64_t pageAddress);
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
@@ -70,85 +74,89 @@ void * getStackBase()
 	);
 }
 
-context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, uint64_t heapCapacity, uint64_t heapSize) { //TODO: Support many heap pages
+context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, uint64_t heapSize) { //TODO: Support many heap pages
 	if(heapPageAddress == NULL) {
 		heapPageAddress = (uint64_t)getFreePage();
-		heapCapacity = PAGESIZE;
 		heapSize = EMPTY;
 	}
 
 	uint64_t stackPageAddress = (uint64_t)getFreePage();
 
 	context_t * newContext = malloc(sizeof(context_t));
-	newContext->pages = malloc(INITIAL_PC * sizeof(page_t));
-	newContext->pages[DATA_PAGE_IDX].index = EXEC_MEM_ADDR/PAGESIZE;
-	newContext->pages[DATA_PAGE_IDX].address = dataPageAddress;
-	newContext->pages[HEAP_PAGE_IDX].index = HEAPBASE/PAGESIZE;
-	newContext->pages[HEAP_PAGE_IDX].address = heapPageAddress;
-	newContext->pages[STACK_PAGE_IDX].index = STACKBASE/PAGESIZE;
-	newContext->pages[STACK_PAGE_IDX].address = stackPageAddress;
-	newContext->pageCount = INITIAL_PC;
+	newContext->dataPage.index = EXEC_MEM_ADDR/PAGESIZE;
+	newContext->dataPage.address = dataPageAddress;
+	newContext->heapPage.index = USER_HEAP/PAGESIZE;
+	newContext->heapPage.address = heapPageAddress;
+	newContext->stackPage.index = STACKBASE/PAGESIZE;
+	newContext->stackPage.address = stackPageAddress;
+	newContext->heapBase = USER_HEAP;
 	newContext->heapSize = heapSize;
-	newContext->heapCapacity = heapCapacity;
-	newContext->stackPtr = STACKBASE;
 
 	return newContext;
 }
 
 void buildThreadStack(uint64_t rdi, uint64_t rsi, uint64_t rip, context_t * threadContext) {
-	context->stackPtr = swapStack(threadContext->stackPtr, threadContext->pages[STACK_PAGE_IDX].index, threadContext->pages[STACK_PAGE_IDX].address);
-	buildStack(rdi, rsi, rip);
-	threadContext->stackPtr = swapStack(context->stackPtr, context->pages[STACK_PAGE_IDX].index, context->pages[STACK_PAGE_IDX].address);
+	void * from = buildStack(rdi, rsi, rip, STACKBASE);
+
+	threadContext->interruptStack = malloc(INT_STACK_SIZE);
+	memcpy(threadContext->interruptStack, from, INT_STACK_SIZE);
 }
 
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
 	void * dataPageAddress = getFreePage();
+	//ChangePDE
 	memcpy(dataPageAddress, moduleAddresses[moduleIndex], PAGESIZE);
-	context_t * newContext = createContext(dataPageAddress, NULL, NULL, NULL);
+	context_t * newContext = createContext(dataPageAddress, NULL, NULL);
 	buildThreadStack((uint64_t)argc, (uint64_t)argv, EXEC_MEM_ADDR, newContext);
 	return newContext;
 }
 
 context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg) {
-	context_t * newContext = createContext(siblingContext->pages[DATA_PAGE_IDX].address, siblingContext->pages[HEAP_PAGE_IDX].address, siblingContext->heapCapacity, siblingContext->heapSize);
-	buildThreadStack((uint64_t)arg, 0, (uint64_t)start_routine, newContext);
+	context_t * newContext = createContext(siblingContext->dataPage.address, siblingContext->heapPage.address, siblingContext->heapSize);
+	buildThreadStack((uint64_t)arg, NULL, (uint64_t)start_routine, newContext);
 	return newContext;
 }
 
-loadPages(page_t * pages);
-
-void saveContext() {
-	static uint64_t returnAddress = AVOID_BSS;
-	returnAddress = cleanReturnAddress();
-	processContext->stackPtr = swapStack(kernelContext->stackPtr, kernelContext->pages[STACK_PAGE_IDX].index, kernelContext->pages[STACK_PAGE_IDX].address);
-	loadPages(kernelContext->pages);	//TODO: only heap
-	context = kernelContext;
-	injectReturnAddress(returnAddress);
+void loadPage(page_t page) {
+	changePDE(page.index, page.address, PRESENT);
 }
 
-void loadContext() {
-	static uint64_t returnAddress = AVOID_BSS;
-	returnAddress = cleanReturnAddress();
-	kernelContext->stackPtr = swapStack(processContext->stackPtr, processContext->pages[STACK_PAGE_IDX].index, processContext->pages[STACK_PAGE_IDX].address);
-	loadPages(processContext->pages);
-	context = processContext;
-	injectReturnAddress(returnAddress);
+void kernelMode() {
+	context = kernelContext; //Just affects the heap
+}
+
+void userMode() {
+	context = processContext; //Just affects the heap
 }
 
 void setContext(context_t * newContext) {
+	if(processContext != NULL)
+		saveContext();
+
 	processContext = newContext;
+
+	loadContext();
+}
+
+void saveContext() {
+	memcpy(processContext->interruptStack, KERNEL_STACKBASE, INT_STACK_SIZE); //TODO: Is it set the first time?
+}
+
+void loadContext() {
+	loadPage(processContext->dataPage);
+	loadPage(processContext->heapPage);
+	loadPage(processContext->stackPage);
+	memcpy(KERNEL_STACKBASE, processContext->interruptStack, INT_STACK_SIZE);
 }
 
 void * malloc(uint64_t request) {
 
 	uint64_t futureSize = context->heapSize + request;
-	while (futureSize > context->heapCapacity) {	//Add a page to the heap
-		changePDE((HEAPBASE + context->heapCapacity) / PAGESIZE, (uint64_t)getFreePage(), 1);
-		context->heapCapacity += PAGESIZE;
-		//TODO: Add page to context
+	if (futureSize > PAGESIZE) {	//TODO: Add a page to the heap
+		return NULL;
 	}
 
-	uint64_t blockAddress = HEAPBASE + context->heapSize;
+	uint64_t blockAddress = context->heapBase + context->heapSize;
 	context->heapSize = futureSize;
 
 	return blockAddress;
@@ -164,6 +172,7 @@ void free(void * ptr) {
 
 }
 
+//LEGACY
 void setKernelPresent(int present){
 	uint64_t *PD = 0x10000;
 	uint64_t entry= *PD;
@@ -173,6 +182,7 @@ void setKernelPresent(int present){
 		*PD = entry & ~0x1;
 }
 
+//TODO: Refactor
 void changePDEPresent(int entry, int present){
 	uint64_t PD = 0x10000;
 
@@ -188,6 +198,7 @@ void changePDEPresent(int entry, int present){
 		*((uint64_t*)PD) = PDE & ~0x1;
 }
 
+//TODO: Refactor
 void changePDE(int entry, uint64_t physAddr, int present){
 	if(physAddr & 0x001FFFFF != 0)
 		return;
@@ -207,7 +218,7 @@ void changePDE(int entry, uint64_t physAddr, int present){
 		*((uint64_t*)PD) = ((uint64_t)physAddr & ~(uint64_t)0x1FFFFF) & ~(uint64_t)0x1;
 }
 
-void pageFaultHandler(){
+void pageFaultHandler(){ //TODO
 	//Expand stack???
 	print("PAGEFAULT");
 	newLine();
@@ -220,46 +231,39 @@ void clearBSS(void * bssAddress, uint64_t bssSize)
 	memset(bssAddress, 0, bssSize);
 }
 
-void initializeKernelContext(int stackPage, uint64_t stackPhyAddress, int heapPage, uint64_t heapPhyAddress, uint64_t heapCapacity, uint64_t heapSize) {
-	context = (context_t *) malloc(sizeof(context_t));
-	context->heapCapacity = heapCapacity;
-	context->heapSize = heapSize + sizeof(context_t);
-	context->pages = (page_t *) malloc(sizeof(page_t) * 2);
-	context->pages[STACK_PAGE_IDX].index = stackPage;
-	context->pages[STACK_PAGE_IDX].address = stackPhyAddress;
-	context->pages[HEAP_PAGE_IDX].index = heapPage;
-	context->pages[HEAP_PAGE_IDX].address = heapPhyAddress;
-	context->pageCount = 2;
-	context->stackPtr = (uint64_t)getStackBase();
+void initializeKernelContext(uint64_t heapSize) {
+	kernelContext = (context_t *) malloc(sizeof(context_t));
+	kernelContext->heapSize = heapSize + sizeof(context_t);
+	kernelContext->heapBase = KERNEL_HEAP;
 
-	kernelContext = context; //Invert for clarity
+	context = kernelContext;
 }
 
 void * initializeKernelBinary()
 {
 	ncPrint("Initializing Kernel...\n");
 
-	int heapPage = HEAPBASE/PAGESIZE;
+	int heapPage = KERNEL_HEAP/PAGESIZE;
 	uint64_t heapPhyAddress = (uint64_t)getFreePage();
 	changePDE(heapPage, heapPhyAddress, PRESENT); //Initialize Heap
 
 	context_t tempContext;
-	tempContext.heapCapacity = PAGESIZE;
+	tempContext.heapBase = KERNEL_HEAP;
 	tempContext.heapSize = EMPTY;
 	context = &tempContext; //So module loader has a working heap
 
 	void ** modules = loadModules(&endOfKernelBinary);
 	clearBSS(&bss, &endOfKernel - &bss);
-	moduleAddresses = modules; //AFTER BSS CLEAR
+	moduleAddresses = modules; //AFTER BSS CLEAR TODO: Use avoid bss
 
-	changePDEPresent(40, NOT_PRESENT); //Just for PageFault Testing
+	//changePDEPresent(40, NOT_PRESENT); //Just for PageFault Testing
 
-	void * stackBase = getStackBase();
-	int stackPage = (uint64_t)stackBase / PAGESIZE;
+	int stackPage = KERNEL_STACK / PAGESIZE;
 	uint64_t stackPhyAddress = (uint64_t)getFreePage();
 	changePDE(stackPage, stackPhyAddress, PRESENT); // Initialize Stack
 
-	initializeKernelContext(stackPage, stackPhyAddress, heapPage, heapPhyAddress, tempContext.heapCapacity, tempContext.heapSize);
+	initializeKernelContext(tempContext.heapSize);
+	processContext = NULL;
 
-	return stackBase;
+	return getStackBase();
 }

@@ -52,21 +52,20 @@ injectReturnAddress: ;Params: newRetAddress
   push rbx
   ret
 
-buildStack: ;argc, argv, rip
+buildStack: ;Params argc, argv, rip, rsp(Process) - Return: rsp(Kernel)
   ;Save return ptr
-  pop rax
-  mov rbx, rsp
+  pop rbx
 
   ;For iretq
   xor r15, r15
   mov r15, ss
   push r15
-  push rbx  ;RSP
+  push rcx  ;RSP
 
   pushfq
-  pop rbx
-  or rbx, 0x9
-  push rbx  ;Rflags with IF in 1
+  pop rax
+  or rax, 0x9
+  push rax  ;Rflags with IF in 1
 
   xor r15, r15
   mov r15, cs
@@ -74,8 +73,11 @@ buildStack: ;argc, argv, rip
   push rdx ;RIP
 
   ;For TTHandler
-  pushaq
+  push 0x0  ;Fake rax
+  pushaq    ;argc and argv are already in the correct registers
+
+  mov rax, rsp
 
   ;Restore return ptr
-  push rax
+  push rbx
   ret

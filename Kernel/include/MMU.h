@@ -7,12 +7,11 @@ typedef struct {
 } page_t;
 
 typedef struct {
-	page_t * pages;
-	int pageCount;
-	uint64_t stackPtr;
-  uint64_t instPtr;
+	page_t dataPage;
+	page_t heapPage;
+	page_t stackPage;
+	uint64_t heapBase;
 	uint64_t heapSize;
-	uint64_t heapCapacity;
 	void * interruptStack;
 } context_t;
 
@@ -27,8 +26,8 @@ void * malloc(uint64_t size);
 void * getFreePage();
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]);
 context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg);
-void saveContext();
-void loadContext();
+void kernelMode();
+void userMode();
 void setContext(context_t * newContext);
 
 extern uint64_t cleanReturnAddress();
