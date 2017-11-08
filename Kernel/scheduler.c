@@ -1,7 +1,10 @@
 #include <scheduler.h>
+#include <stdint.h>
+
+
 
 queueADT RRqueue;
-queueADT * semQueues,rMsgQueues,wMsgQueues;
+queueADT * semQueues, * rMsgQueues, * wMsgQueues;
 uint8_t semCount = 0;
 tcbADT current;
 
@@ -35,7 +38,7 @@ static uint8_t open(int i, queueADT ** array){
   *array = realloc(*array, (i+1)*sizeof(queueCDT));
   if(*array == NULL)
     return FAIL;
-  *array[i] = malloc(sizeof(queueCDT));
+  *array[i] = initQueue();
   if(*array[i] == NULL)
     return FAIL;
   return SUCCESS;
@@ -44,7 +47,7 @@ static uint8_t open(int i, queueADT ** array){
 static void block(int i, queueADT * queueArray, int blocking){
   if(queueArray == NULL)
     return FAIL;
-  threadPackADT pack = malloc(sizeof(packCDT));
+  threadPackADT pack = malloc(sizeof(threadPackCDT));
     if(pack == NULL)
       return FAIL;
 
@@ -53,7 +56,7 @@ static void block(int i, queueADT * queueArray, int blocking){
     *pack->threads = current;
     pack->count = 1;
   } else
-    pack->threads = getThreads(getCurrentThread(),&pack->count);
+    pack->threads = getThreads(getCurrentProcess(),&pack->count);
 
   if(enqueue(queueArray[i],pack) == FAIL)
     return FAIL;
@@ -73,12 +76,14 @@ uint8_t msgOpen(int msgId){
 }
 
 void msgClose(int msgId){
-  free(msgQueues[msgId]);
-  msgQueues[msgId] = NULL;
+  free(rMsgQueues[msgId]);
+  rMsgQueues[msgId] = NULL;
+  free(wMsgQueues[msgId]);
+  wMsgQueues[msgId] = NULL;
 }
 
 uint8_t msgBlock(int msgId,int type, int blocking){
-  return block(msgId, type==READ?rMsgQueues:wMsgQueues, blocking);
+  block(msgId, type==READ?rMsgQueues:wMsgQueues, blocking);
 }
 
 uint8_t msgUnblock(int msgId, int type){
@@ -91,11 +96,11 @@ uint8_t semOpen(int semId){
 
 void semClose(int semId){
   free(semQueues[semId]);
-  semQueues[semId] = NULL:
+  semQueues[semId] = NULL;
 }
 
 uint8_t semBlock(int semId,int blocking){
-  return block(semId, semQueues, blocking);
+  block(semId, semQueues, blocking);
 }
 
 uint8_t semUnblock(int semId){
@@ -153,25 +158,25 @@ static uint8_t enqueue(queueADT q,void* elem){
   return SUCCESS;
 }
 
-static void remove(queueADT q, void* elem){
-  removeR(q,elem,q->front);
-}
-
-static void removeR(queueADT q, void* elem, qnode current){
+static void removeR(queueADT q, void* elem, qnode * current){
   if(current == NULL)
     return;
 
   if(current->elem == elem){
-    qnode aux = current->next;
+    qnode * aux = current->next;
     if(aux != NULL)
       aux->prev = current->prev;
-    if(prev != NULL)
-      prev->next = aux;
+    if(current->prev != NULL)
+      current->prev->next = aux;
     free(current);
     return;
   }
 
   removeR(q,elem,current->next);
+}
+
+static void remove(queueADT q, void* elem){
+  removeR(q,elem,q->front);
 }
 
 static void* dequeue(queueADT q){

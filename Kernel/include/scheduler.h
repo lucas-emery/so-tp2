@@ -3,7 +3,12 @@
 
 #define SUCCESS 0
 #define FAIL 1
+#define READ 0
+#define WRITE 1
+#define BLOCK 0
+#define UNBLOCK 1
 
+#include <stdint.h>
 #include <process.h>
 #include <MMU.h>
 #include <thread.h>
@@ -25,8 +30,8 @@ typedef struct{
         qnode *front;
 }queueCDT;
 
-typedef * threadPackCDT threadPackADT;
-typedef * queueCDT queueADT;
+typedef threadPackCDT * threadPackADT;
+typedef queueCDT * queueADT;
 
 /*
  *	Author: stu
@@ -143,12 +148,12 @@ static uint8_t unblock(int i, queueADT * array);
  *	If @type is UNBLOCK, it enqueues all threads in @pack
  *	Paramaters: pack, type
  */
-static void managePack(packADT pack,uint8_t type);
+static void managePack(threadPackADT pack,uint8_t type);
 
 /*
  * Create an empty queue.
  */
-static queueADT create();
+static queueADT initQueue();
 
 /*
  * Check if queue is empty.
@@ -160,7 +165,7 @@ static int isEmpty(queueADT);
  * Add element to queue.
  * Returns #SUCCESS on success, and otherwise #FAIL.
  */
-static int enqueue(queueADT, void*);
+static uint8_t enqueue(queueADT, void*);
 
 /*
  * Remove last element from queue, and return it.

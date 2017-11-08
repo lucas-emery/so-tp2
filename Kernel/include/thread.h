@@ -3,7 +3,6 @@
 
 #include <lib.h>
 #include <MMU.h>
-#include <scheduler.h>
 #include <process.h>
 
 #define RUNNING 0
@@ -11,8 +10,18 @@
 #define READY 2
 #define NEW 3
 
-typedef struct tcbCDT;
+typedef struct tcbCDT{
+	int tid;
+	int pid;
+	context_t * context;
+	int state;
+	int privilage;
+} tcbCDT;
+
 typedef struct tcbCDT* tcbADT;
+
+
+#include <scheduler.h>
 
 tcbADT createFirstTCB(int privilege, int moduleIndex, int argc, char *argv[]);
 tcbADT createTCB(int privilege, void * start_routine, void * arg);
