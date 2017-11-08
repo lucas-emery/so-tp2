@@ -1,16 +1,6 @@
 //interruptions.c
 #include <interruptions.h>
-#include <lib.h>
-#include <terminal.h>
-#include <keyboard.h>
-#include <mouse.h>
-#include <video.h>
-#include <sysCalls.h>
-#include <rtc.h>
-#include <MMU.h>
 
-#pragma pack(push)
-#pragma pack(1)
 
 typedef struct {
 	uint16_t offset_l; //bit 0..15
@@ -85,6 +75,7 @@ void setupIDT() {
 	initializeMouse();
 	sysCallsSetup();
 	setupRTC();
+	semOperationsSetup();
 
 	setPicMaster(0xF8);
 	setPicSlave(0xEF);

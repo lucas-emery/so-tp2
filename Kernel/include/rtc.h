@@ -12,13 +12,9 @@
 #include <stdint.h>
 
 uint8_t getTime(uint8_t value);
-
 void recalculate(int * hours, int * day, int * month, int * year);
-
 uint8_t days(int month);
-
 void setTimeZone(int tz);
-
 void setupRTC();
 
 #endif

@@ -1,6 +1,4 @@
 #include <process.h>
-#include <lib.h>
-#include <MMU.h>
 
 typedef struct pcbCDT{
 	int pid;
@@ -8,7 +6,25 @@ typedef struct pcbCDT{
 	int state;
 	int childrenCount;
 	int children[MAX_CHILDREN];
-};
+	//TCB* threads;
+	//int threadCount;
+}pcbCDT;
+
+static int idCount = 0;
+static pcbADT* pcbTable;
+static int tableSize = 0;
+
+/*
+*Creates the new id for the child and puts it in the father's PCB
+*Returns the new child id
+*/
+static int createChild(pcbADT father);
+
+/*
+*Creates the string having the info of the process in parameter
+*Returns the string created
+*/
+static char* makeString(pcbADT process);
 
 void createTable(){
 	pcbTable = malloc(sizeof(pcbADT));
@@ -16,42 +32,42 @@ void createTable(){
 
 int addPCB(int privilege){
 	pcbADT newPCB;
-	newPCB->pid = idCount;
-	idCount++;
-	newPCB->state = NEW;//llamar a dispatcher y que ponga en cola
+	newPCB->pid = idCount++;
+	newPCB->state = NEW;
 	newPCB->privilege = privilege;
 	newPCB->childrenCount = 0;
 	tableSize++;
 	realloc(pcbTable, tableSize * sizeof(pcbADT));
 	pcbTable[tableSize-1] = newPCB;
+	//*threads=firstTCB(privilege);
 	return newPCB->pid;
 }
 
-void removePCB(int id){
-	int found = FALSE;
-	for (int i = 0; i < tableSize || found; ++i){
+int removePCB(int id){
+	for (int i = 0; i < tableSize; i++){
 		if(pcbTable[i]->pid == id){
 			free(pcbTable[i]);
 			for(int j = i; j < tableSize-1; j++)
 				pcbTable[j] = pcbTable[j+1];
 			tableSize--;
-			found = TRUE;
+			return 0;
 		}
 	}
+	return 1;
 }
 
-void changeState(int id, int state){
-	int found = FALSE;
-	for (int i = 0; i < tableSize || found; ++i){
+int changeState(int id, int state){
+	for (int i = 0; i < tableSize; i++){
 		if(pcbTable[i]->pid == id){
 			pcbTable[i]->state = state;
-			found = TRUE;
+			return 0;
 		}
 	}
+	return 1;
 }
 
 int getState(int id){
-	for (int i = 0; i < tableSize; ++i){
+	for (int i = 0; i < tableSize; i++){
 		if(pcbTable[i]->pid == id)
 			return pcbTable[i]->state;
 	}
@@ -60,18 +76,17 @@ int getState(int id){
 
 int addChild(int fatherId){
 	int childId;
-	int found = FALSE;
-	for (int i = 0; i < tableSize || found; ++i){
+	for (int i = 0; i < tableSize; i++){
 		if(pcbTable[i]->pid == fatherId){
 			childId = createChild(pcbTable[i]);
-			found = TRUE;
+			return childId;
 		}
 	}
-	return childId;
+	return -1;
 }
 
-int createChild(pcbADT father){
-	int childId = addPCB(father->privilege);//no se que poner
+static int createChild(pcbADT father){
+	int childId = addPCB(father->privilege);
 	father->children[father->childrenCount] = childId;
 	(father->childrenCount)++;
 	return childId;
@@ -80,12 +95,12 @@ int createChild(pcbADT father){
 void processesInfo(char* buffer){
 	*buffer = 0;
 	strcat(buffer, "PID PRIVILEGE STATE\n");
-	for (int i = 0; i < tableSize; ++i){
+	for (int i = 0; i < tableSize; i++){
 		strcat(buffer, makeString(pcbTable[i]));
 	}
 } 
 
-char* makeString(pcbADT process){
+static char* makeString(pcbADT process){
 	char aux[100] = {0};
 	char str[15];
 	uintToBase(process->pid,str,10);
@@ -102,3 +117,33 @@ char* makeString(pcbADT process){
 	strcat(aux, "\n");
 	return aux;
 }
+
+/*void addTCB(TCB tcb){
+	for (int i = 0; i < tableSize; i++){
+		if(pcbTable[i]->pid == tcb->pid){
+			threadCount++;
+			realloc(TCB, threadCount * sizeof(TCB));
+			threads[threadCount-1] = tcb;
+			return;
+		}
+	}
+}
+
+context_t getContextOfSibling(int id){
+	for (int i = 0; i < tableSize; i++){
+		if(pcbTable[i]->pid == tcb->pid){
+			return *threads->context;
+		}
+	}
+	return NULL;
+}
+
+TCB getThreads(int id, int* count){
+	for (int i = 0; i < tableSize; i++){
+		if(pcbTable[i]->pid == id){
+			*count = pcbTable[i]->threadCount;
+			return pcbTable[i]->threads;
+		}
+	}
+	return NULL;
+}*/
