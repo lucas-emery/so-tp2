@@ -1,7 +1,11 @@
 GLOBAL buildStack
+GLOBAL loadTR
 
 %include "./asm/macros.m"
 
+loadTR:
+  ltr rdi
+  ret
 
 buildStack: ;argc, argv, rip
   ;Save return ptr

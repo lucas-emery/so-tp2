@@ -7,12 +7,19 @@
 #include <MMU.h>
 
 #define GDTR 0x1000
+#define TSS_ADDR 0x50000 //Free space based on Pure64 Manual
+#define TSS_LIMIT 0x1000
+#define KERNEL_CS 0x8
+#define USER_CS 0x18
+#define TR 0x20
 #define PAGESIZE 0x200000
+#define KERNEL_STACK 0x400000
 #define MAPPEDMEMORY 0x100000000
 #define HEAPBASE (MAPPEDMEMORY/2)
 #define STACKBASE (MAPPEDMEMORY - sizeof(uint64_t))
 #define EXEC_MEM_ADDR 0x400000
 #define ROM 0x600000
+#define KERNEL_STACKBASE (KERNEL_STACK + PAGESIZE - sizeof(uint64_t))
 #define PRESENT 1
 #define NOT_PRESENT 0
 #define AVOID_BSS 1
@@ -33,6 +40,7 @@ extern void hang();
 extern uint64_t getStackPtr();
 extern void setStackPtr(uint64_t rsp);
 extern void buildStack(int argc, char * argv[], uint64_t rip);
+extern void loadTR(uint16_t tr);
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
 
@@ -274,7 +282,29 @@ uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag){
     return descriptor;
 }
 
+uint64_t create_upper_system_descriptor(uint64_t base){
+	uint64_t descriptor;
+
+	descriptor = (base >> 32);         // set base bits 63:32
+
+	return descriptor;
+}
+
+uint64_t create_lower_system_descriptor(uint64_t base, uint32_t limit, uint16_t flags){
+	return create_descriptor((uint32_t)base, limit, flags);
+}
+
 void setupGDT(){
 	uint64_t * GDT = GDTR;
-	GDT[3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
+	GDT[USER_CS >> 3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
+	GDT[TR >> 3] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x0089);
+	GDT[(TR >> 3) + 1] = create_upper_system_descriptor(TSS_ADDR);
+}
+
+void setupTSS() {
+	uint32_t * TSS = TSS_ADDR;
+	TSS[1] = KERNEL_STACKBASE;				//Bits 31-0
+	TSS[2] = KERNEL_STACKBASE >> 32;	//Bits 63-32
+
+	loadTR(TR);
 }
