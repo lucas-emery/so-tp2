@@ -276,6 +276,5 @@ uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag){
 
 void setupGDT(){
 	uint64_t * GDT = GDTR;
-	GDT[1] = create_descriptor(0x0,0xFFFFFFFF,0xFA);
-	GDT[2] = create_descriptor(0x0,0xFFFFFFFF,0xF2);
+	GDT[3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
 }
