@@ -5,6 +5,7 @@
 #include <interruptions.h>
 #include <terminal.h>
 #include <MMU.h>
+#include <pcb.h>
 
 int main(){
 	clearScreen();
@@ -13,5 +14,6 @@ int main(){
 	setupTSS();
 	setupIDT();
 	sti();
+	initPCB();
 	copyAndExecuteDefaultModule();
 }
