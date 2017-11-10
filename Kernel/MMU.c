@@ -6,7 +6,7 @@
 #include <terminal.h>
 #include <MMU.h>
 
-#define GDTR 0x1000
+#define GDT_ADDR 0x1000
 #define TSS_ADDR 0x50000 //Free space based on Pure64 Manual
 #define TSS_LIMIT 0x1000
 #define KERNEL_CS 0x8
@@ -40,6 +40,7 @@ extern void hang();
 extern uint64_t getStackPtr();
 extern void setStackPtr(uint64_t rsp);
 extern void buildStack(int argc, char * argv[], uint64_t rip);
+extern void loadGDTR(uint64_t * gdtr);
 extern void loadTR(uint16_t tr);
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
@@ -295,7 +296,7 @@ uint64_t create_lower_system_descriptor(uint64_t base, uint32_t limit, uint16_t 
 }
 
 void setupGDT(){
-	uint64_t * GDT = GDTR;
+	uint64_t * GDT = GDT_ADDR;
 	/*
 	GDT[USER_CS >> 3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
 	GDT[TR >> 3] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x0089);
@@ -304,6 +305,9 @@ void setupGDT(){
 	GDT[3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
 	GDT[4] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x0089);
 	GDT[5] = create_upper_system_descriptor(TSS_ADDR);
+
+	uint64_t GDTR = (GDT_ADDR << 16) | 6;
+	loadGDTR(&GDTR);
 }
 
 void setupTSS() {

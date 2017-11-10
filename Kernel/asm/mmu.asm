@@ -1,5 +1,6 @@
 GLOBAL buildStack
 GLOBAL loadTR
+GLOBAL loadGDTR
 
 %include "./asm/macros.m"
 
@@ -7,6 +8,10 @@ loadTR:
   mov rax,rdi
   mov rbx, cs
   ltr ax
+  ret
+
+loadGDTR:
+  lgdt [rdi]
   ret
 
 buildStack: ;argc, argv, rip
