@@ -273,7 +273,7 @@ void * initializeKernelBinary()
 	initializeKernelContext(tempContext.heapSize);
 	processContext = NULL;
 
-	return getStackBase();
+	return KERNEL_STACKBASE;
 }
 
 uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag){
