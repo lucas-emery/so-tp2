@@ -6,6 +6,7 @@
 #include <terminal.h>
 #include <MMU.h>
 
+#define GDTR 0x1000
 #define PAGESIZE 0x200000
 #define MAPPEDMEMORY 0x100000000
 #define HEAPBASE (MAPPEDMEMORY/2)
@@ -118,7 +119,7 @@ context_t * createThreadContext(context_t * siblingContext, void * start_routine
 }
 
 void saveContext(uint64_t rsp) {
-	
+
 }
 
 uint64_t loadContext() {
@@ -252,4 +253,29 @@ void * initializeKernelBinary()
 	initializeKernelContext(stackPage, stackPhyAddress, heapPage, heapPhyAddress, tempContext.heapCapacity, tempContext.heapSize);
 
 	return stackBase;
+}
+
+uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag){
+    uint64_t descriptor;
+
+    // Create the high 32 bit segment
+    descriptor  =  limit       & 0x000F0000;         // set limit bits 19:16
+    descriptor |= (flag <<  8) & 0x00F0FF00;         // set type, p, dpl, s, g, d/b, l and avl fields
+    descriptor |= (base >> 16) & 0x000000FF;         // set base bits 23:16
+    descriptor |=  base        & 0xFF000000;         // set base bits 31:24
+
+    // Shift by 32 to allow for low part of segment
+    descriptor <<= 32;
+
+    // Create the low 32 bit segment
+    descriptor |= base  << 16;                       // set base bits 15:0
+    descriptor |= limit  & 0x0000FFFF;               // set limit bits 15:0
+
+    return descriptor;
+}
+
+void setupGDT(){
+	uint64_t * GDT = GDTR;
+	GDT[1] = create_descriptor(0x0,0xFFFFFFFF,0xFA);
+	GDT[2] = create_descriptor(0x0,0xFFFFFFFF,0xF2);
 }

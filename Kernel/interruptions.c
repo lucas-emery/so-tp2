@@ -62,7 +62,7 @@ void iSetHandler(int index, uint64_t handler) {
 	IDT[index].selector = 0x08;
 	IDT[index].zero_l = 0;
 
-	IDT[index].attrs = 0x8E;
+	IDT[index].attrs = 0xEE;
 	IDT[index].zero_h = 0;
 
 }
