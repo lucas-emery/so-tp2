@@ -29,8 +29,9 @@ void screenTickHandler() {
 
 uint64_t timerTickHandler(uint64_t rsp) {
 	screenTickHandler();
+	//ncPrintHex(rsp);
 
-	saveContext(rsp);
+	//saveContext(rsp);
 	//scheduler();
 	//rsp = loadContext();
 

@@ -1,7 +1,24 @@
 GLOBAL buildStack
+GLOBAL loadTR
+GLOBAL loadGDTR
 
 %include "./asm/macros.m"
 
+loadTR:
+  mov rax,rdi
+  mov rbx, cs
+  ltr ax
+  ret
+
+gdtr dw 0 ;Limit
+     dq 0 ;Base
+
+loadGDTR:
+  mov [gdtr+2], rdi
+  mov rax, rsi
+  mov [gdtr], ax
+  lgdt [gdtr]
+  ret
 
 buildStack: ;argc, argv, rip
   ;Save return ptr
@@ -22,7 +39,7 @@ buildStack: ;argc, argv, rip
   xor r15, r15
   mov r15, cs
   push r15
-  push rdx ;RIP
+  push rdx  ;RIP
 
   ;For TTHandler
   pushaq

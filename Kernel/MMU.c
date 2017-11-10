@@ -6,12 +6,20 @@
 #include <terminal.h>
 #include <MMU.h>
 
+#define GDT_ADDR 0x1000
+#define TSS_ADDR 0x50000 //Free space based on Pure64 Manual
+#define TSS_LIMIT 0x1000
+#define KERNEL_CS 0x8
+#define USER_CS 0x18
+#define TR 0x20
 #define PAGESIZE 0x200000
+#define KERNEL_STACK 0x400000
 #define MAPPEDMEMORY 0x100000000
 #define HEAPBASE (MAPPEDMEMORY/2)
 #define STACKBASE (MAPPEDMEMORY - sizeof(uint64_t))
 #define EXEC_MEM_ADDR 0x400000
 #define ROM 0x600000
+#define KERNEL_STACKBASE (KERNEL_STACK + PAGESIZE - sizeof(uint64_t))
 #define PRESENT 1
 #define NOT_PRESENT 0
 #define AVOID_BSS 1
@@ -32,6 +40,8 @@ extern void hang();
 extern uint64_t getStackPtr();
 extern void setStackPtr(uint64_t rsp);
 extern void buildStack(int argc, char * argv[], uint64_t rip);
+extern void loadGDTR(uint32_t address, uint16_t limit);
+extern void loadTR(uint16_t tr);
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
 
@@ -118,7 +128,7 @@ context_t * createThreadContext(context_t * siblingContext, void * start_routine
 }
 
 void saveContext(uint64_t rsp) {
-	
+
 }
 
 uint64_t loadContext() {
@@ -252,4 +262,57 @@ void * initializeKernelBinary()
 	initializeKernelContext(stackPage, stackPhyAddress, heapPage, heapPhyAddress, tempContext.heapCapacity, tempContext.heapSize);
 
 	return stackBase;
+}
+
+uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag){
+    uint64_t descriptor;
+
+    // Create the high 32 bit segment
+    descriptor  =  limit       & 0x000F0000;         // set limit bits 19:16
+    descriptor |= (flag <<  8) & 0x00F0FF00;         // set type, p, dpl, s, g, d/b, l and avl fields
+    descriptor |= (base >> 16) & 0x000000FF;         // set base bits 23:16
+    descriptor |=  base        & 0xFF000000;         // set base bits 31:24
+
+    // Shift by 32 to allow for low part of segment
+    descriptor <<= 32;
+
+    // Create the low 32 bit segment
+    descriptor |= base  << 16;                       // set base bits 15:0
+    descriptor |= limit  & 0x0000FFFF;               // set limit bits 15:0
+
+    return descriptor;
+}
+
+uint64_t create_upper_system_descriptor(uint64_t base){
+	uint64_t descriptor;
+
+	descriptor = (base >> 32);         // set base bits 63:32
+
+	return descriptor;
+}
+
+uint64_t create_lower_system_descriptor(uint64_t base, uint32_t limit, uint16_t flags){
+	return create_descriptor((uint32_t)base, limit, flags);
+}
+
+void setupGDT(){
+	uint64_t * GDT = GDT_ADDR;
+	/*
+	GDT[USER_CS >> 3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
+	GDT[TR >> 3] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x0089);
+	GDT[(TR >> 3) + 1] = create_upper_system_descriptor(TSS_ADDR);
+	*/
+	GDT[3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
+	GDT[4] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x2089);
+	GDT[5] = create_upper_system_descriptor(TSS_ADDR);
+
+	loadGDTR(GDT_ADDR, 6 * sizeof(uint64_t));
+}
+
+void setupTSS() {
+	uint32_t * TSS = TSS_ADDR;
+	TSS[1] = KERNEL_STACKBASE;				//Bits 31-0
+	TSS[2] = KERNEL_STACKBASE >> 32;	//Bits 63-32
+
+	loadTR(TR);
 }
