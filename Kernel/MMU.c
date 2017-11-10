@@ -296,9 +296,14 @@ uint64_t create_lower_system_descriptor(uint64_t base, uint32_t limit, uint16_t 
 
 void setupGDT(){
 	uint64_t * GDT = GDTR;
+	/*
 	GDT[USER_CS >> 3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
 	GDT[TR >> 3] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x0089);
 	GDT[(TR >> 3) + 1] = create_upper_system_descriptor(TSS_ADDR);
+	*/
+	GDT[3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
+	GDT[4] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x0089);
+	GDT[5] = create_upper_system_descriptor(TSS_ADDR);
 }
 
 void setupTSS() {

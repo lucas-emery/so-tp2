@@ -4,7 +4,9 @@ GLOBAL loadTR
 %include "./asm/macros.m"
 
 loadTR:
-  ltr rdi
+  mov rax,rdi
+  mov rbx, cs
+  ltr ax
   ret
 
 buildStack: ;argc, argv, rip

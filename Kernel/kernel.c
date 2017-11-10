@@ -8,7 +8,7 @@
 
 int main(){
 	clearScreen();
-	//setupGDT();
+	setupGDT();
 	setupTSS();
 	setupIDT();
 	copyAndExecuteDefaultModule();
