@@ -5,7 +5,7 @@
 #include <interruptions.h>
 #include <terminal.h>
 #include <MMU.h>
-#include <process.h>
+#include <pcb.h>
 
 int main(){
 	clearScreen();
