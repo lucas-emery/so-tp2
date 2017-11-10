@@ -10,8 +10,26 @@ loadTR:
   ltr ax
   ret
 
+gdtr dw 100 ;Limit
+     dq 0x1000 ;Base
+
 loadGDTR:
-  lgdt [rdi]
+  cli
+  mov rax, rdi
+  ;mov [gdtr+2], eax
+  mov rax, rsi
+  ;mov [gdtr], ax
+  lgdt [gdtr]
+  ret
+  ;jmp dword 0x08:flush
+
+flush:
+  mov ax, 0x10
+  mov ds, ax
+  mov es, ax
+  mov fs, ax
+  mov gs, ax
+  mov ss, ax
   ret
 
 buildStack: ;argc, argv, rip

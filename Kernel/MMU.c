@@ -40,7 +40,7 @@ extern void hang();
 extern uint64_t getStackPtr();
 extern void setStackPtr(uint64_t rsp);
 extern void buildStack(int argc, char * argv[], uint64_t rip);
-extern void loadGDTR(uint64_t * gdtr);
+extern void loadGDTR(uint32_t address, uint16_t limit);
 extern void loadTR(uint16_t tr);
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
@@ -303,11 +303,10 @@ void setupGDT(){
 	GDT[(TR >> 3) + 1] = create_upper_system_descriptor(TSS_ADDR);
 	*/
 	GDT[3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
-	GDT[4] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x0089);
+	GDT[4] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x2089);
 	GDT[5] = create_upper_system_descriptor(TSS_ADDR);
 
-	uint64_t GDTR = (GDT_ADDR << 16) | 6;
-	loadGDTR(&GDTR);
+	loadGDTR(GDT_ADDR, 6 * sizeof(uint64_t));
 }
 
 void setupTSS() {
