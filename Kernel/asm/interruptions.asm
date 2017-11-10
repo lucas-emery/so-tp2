@@ -22,19 +22,16 @@ EXTERN timerTickHandler
 section .text
 
 TTHandler:
+	push rax
 	pushaq
 
-	mov rdi, rsp
 	call timerTickHandler
-	push rax
 
 	mov rdi, 0x20
 	call sendEOI
 
-	pop rax
-	mov rsp, rax
-
 	popaq
+	pop rax
 	iretq
 
 irq0Handler:

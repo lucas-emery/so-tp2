@@ -19,7 +19,6 @@ void iSetHandler(int index, uint64_t handler);
 void sendEOI(int irq);
 void setupIDT();
 void irqDispatcher(int irq);
-void tickHandler();
 
 extern void PFHandler();
 extern void TTHandler();

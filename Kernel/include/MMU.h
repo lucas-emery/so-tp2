@@ -7,12 +7,12 @@ typedef struct {
 } page_t;
 
 typedef struct {
-	page_t * pages;
-	int pageCount;
-	uint64_t stackPtr;
-  uint64_t instPtr;
+	page_t dataPage;
+	page_t heapPage;
+	page_t stackPage;
+	uint64_t heapBase;
 	uint64_t heapSize;
-	uint64_t heapCapacity;
+	void * interruptStack;
 } context_t;
 
 void changePDEPresent(int entry, int present);
@@ -28,8 +28,11 @@ void free(void * ptr);
 void * realloc(void * ptr, uint64_t size);
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]);
 context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg);
-void saveContext(uint64_t rsp);
-uint64_t loadContext();
+void kernelMode();
+void userMode();
 void setContext(context_t * newContext);
+
+extern uint64_t cleanReturnAddress();
+extern void injectReturnAddress(uint64_t returnAddress);
 
 #endif

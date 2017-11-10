@@ -2,12 +2,12 @@ GLOBAL cpuVendor
 GLOBAL readPort
 GLOBAL writePort
 GLOBAL hang
-GLOBAL getStackPtr
-GLOBAL setStackPtr
 GLOBAL dispatch
 GLOBAL testAndSet
 
 %include "./asm/macros.m"
+
+
 
 section .text
 
@@ -69,16 +69,6 @@ cpuVendor:
 
 	mov rsp, rbp
 	pop rbp
-	ret
-
-getStackPtr:
-	lea rax, [rsp+8]
-	ret
-
-setStackPtr:
-	pop rbx
-	mov rsp, rax
-	push rbx
 	ret
 
 hang:

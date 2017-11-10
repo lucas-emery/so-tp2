@@ -1,6 +1,7 @@
 //interruptions.c
 #include <interruptions.h>
 
+#define AVOID_BSS 1
 
 typedef struct {
 	uint16_t offset_l; //bit 0..15
@@ -27,15 +28,13 @@ void screenTickHandler() {
 	}
 }
 
-uint64_t timerTickHandler(uint64_t rsp) {
+void timerTickHandler() {
+	//kernelMode();
+
 	screenTickHandler();
-	//ncPrintHex(rsp);
+	//schedule();
 
-	//saveContext(rsp);
-	//scheduler();
-	//rsp = loadContext();
-
-	return rsp;
+	//userMode(); //Puedo llegar a querer salir en kernel mode?
 }
 
 void irqDispatcher(int irq) {
