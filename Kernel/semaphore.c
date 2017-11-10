@@ -72,7 +72,7 @@ int semWait(char* name, int id){
 void execute(int operation, char* name, int id){
 	if(operation < 0 || operation > 4)
 		return;
-	while(testAndSet(&lock));
+	testAndSet(&lock);
 	(semOperations[operation])(name, id);
 	lock = FALSE;
 }
