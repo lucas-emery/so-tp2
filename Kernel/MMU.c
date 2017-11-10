@@ -34,7 +34,7 @@ extern void buildStack(int argc, char * argv[], uint64_t rip);
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
 
-char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao",0};
+char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao","ps", "ls", 0};
 void ** moduleAddresses;
 context_t * context = AVOID_BSS;
 context_t * kernelContext;

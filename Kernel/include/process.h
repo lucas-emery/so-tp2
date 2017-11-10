@@ -8,15 +8,19 @@
 #define BLOCKED 1
 #define READY 2
 #define NEW 3
-#define MAX_CHILDREN 10
 
 typedef struct pcbCDT* pcbADT;
+
+/*
+*Initializes the PCB table by giving it memory 
+*/
+void initPCB();
 
 /*
 *Creates a new PCB entry in the PCB table with the privilidge in parameter 
 *Returns the new processes pid
 */
-int addPCB(int privilege);
+int addPCB(char* name, int privilege);
 
 /*
 *Removes the PCB entry correspoding to the processes id in parameter
@@ -29,12 +33,6 @@ int removePCB(int id);
 *Returns 0 if the process was found successfully, -1 if not
 */
 int changeState(int id, int state);
-
-/*
-*Adds a new child to the process with id in parameter
-*Returns child id if the process was found successfully, -1 if not
-*/
-int addChild(int fatherId);
 
 /*
 *Leaves in buffer the string containing the processes information

@@ -1,11 +1,10 @@
 #include <process.h>
 
 typedef struct pcbCDT{
+	char* name;
 	int pid;
-	int privilege;
 	int state;
-	int childrenCount;
-	int children[MAX_CHILDREN];
+	int privilege;
 	//TCB* threads;
 	//int threadCount;
 }pcbCDT;
@@ -15,29 +14,23 @@ static pcbADT* pcbTable;
 static int tableSize = 0;
 
 /*
-*Creates the new id for the child and puts it in the father's PCB
-*Returns the new child id
-*/
-static int createChild(pcbADT father);
-
-/*
 *Creates the string having the info of the process in parameter
 *Returns the string created
 */
 static char* makeString(pcbADT process);
 
-void createTable(){
+void initPCB(){
 	pcbTable = malloc(sizeof(pcbADT));
 }
 
-int addPCB(int privilege){
+int addPCB(char* name, int privilege){
 	pcbADT newPCB;
 	newPCB->pid = idCount++;
 	newPCB->state = NEW;
+	newPCB->name = name;
 	newPCB->privilege = privilege;
-	newPCB->childrenCount = 0;
 	tableSize++;
-	realloc(pcbTable, tableSize * sizeof(pcbADT));
+	pcbTable = realloc(pcbTable, tableSize * sizeof(pcbADT));
 	pcbTable[tableSize-1] = newPCB;
 	//*threads=firstTCB(privilege);
 	return newPCB->pid;
@@ -74,27 +67,9 @@ int getState(int id){
 	return -1;
 }
 
-int addChild(int fatherId){
-	int childId;
-	for (int i = 0; i < tableSize; i++){
-		if(pcbTable[i]->pid == fatherId){
-			childId = createChild(pcbTable[i]);
-			return childId;
-		}
-	}
-	return -1;
-}
-
-static int createChild(pcbADT father){
-	int childId = addPCB(father->privilege);
-	father->children[father->childrenCount] = childId;
-	(father->childrenCount)++;
-	return childId;
-}
-
 void processesInfo(char* buffer){
 	*buffer = 0;
-	strcat(buffer, "PID PRIVILEGE STATE\n");
+	strcat(buffer, "NAME PID STATE PRIVILEGE\n");
 	for (int i = 0; i < tableSize; i++){
 		strcat(buffer, makeString(pcbTable[i]));
 	}
@@ -105,14 +80,23 @@ static char* makeString(pcbADT process){
 	char str[15];
 	uintToBase(process->pid,str,10);
 	strcat(aux, str);
-	uintToBase(process->privilege,str,10);
+	strcat(aux, process->name);
+	switch(process->state){
+		case RUNNING:
+			strcpy(str, "running");
+		break;
+		case BLOCKED:
+			strcpy(str, "blocked");
+		break;
+		case READY:
+			strcpy(str, "ready");
+		break;
+		case NEW:
+			strcpy(str, "new");
+		break;
+	}
 	strcat(aux, str);
-	if(process->state == RUNNING)
-		strcpy(str, "running");
-	else if(process->state == BLOCKED)
-		strcpy(str, "blocked");
-	else if(process->state == READY)
-		strcpy(str, "ready");
+	uintToBase(process->privilege,str,10);
 	strcat(aux, str);
 	strcat(aux, "\n");
 	return aux;
