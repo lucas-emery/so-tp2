@@ -8,8 +8,10 @@
 
 int main(){
 	clearScreen();
+	cli();
 	setupGDT();
 	setupTSS();
 	setupIDT();
+	sti();
 	copyAndExecuteDefaultModule();
 }

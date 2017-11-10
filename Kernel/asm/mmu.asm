@@ -10,26 +10,14 @@ loadTR:
   ltr ax
   ret
 
-gdtr dw 100 ;Limit
-     dq 0x1000 ;Base
+gdtr dw 0 ;Limit
+     dq 0 ;Base
 
 loadGDTR:
-  cli
-  mov rax, rdi
-  ;mov [gdtr+2], eax
+  mov [gdtr+2], rdi
   mov rax, rsi
-  ;mov [gdtr], ax
+  mov [gdtr], ax
   lgdt [gdtr]
-  ret
-  ;jmp dword 0x08:flush
-
-flush:
-  mov ax, 0x10
-  mov ds, ax
-  mov es, ax
-  mov fs, ax
-  mov gs, ax
-  mov ss, ax
   ret
 
 buildStack: ;argc, argv, rip
@@ -51,7 +39,7 @@ buildStack: ;argc, argv, rip
   xor r15, r15
   mov r15, cs
   push r15
-  push rdx ;RIP
+  push rdx  ;RIP
 
   ;For TTHandler
   pushaq
