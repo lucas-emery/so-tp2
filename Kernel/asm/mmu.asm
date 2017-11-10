@@ -11,6 +11,7 @@ GLOBAL loadGDTR
 %include "./asm/macros.m"
 
 PD equ 0x10000
+
 loadTR:
   mov rax,rdi
   mov rbx, cs
@@ -27,7 +28,6 @@ loadGDTR:
   lgdt [gdtr]
   ret
 
-buildStack: ;argc, argv, rip
   ;Save return ptr
 getStackPtr:
   lea rax, [rsp+8]
