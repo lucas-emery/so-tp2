@@ -57,9 +57,9 @@ buildStack: ;Params argc, argv, rip, rsp(Process) - Return: rsp(Kernel)
   pop rbx
 
   ;For iretq
-  xor r15, r15
-  mov r15, ss
-  push r15
+  ;xor r15, r15
+  ;mov r15, ss
+  push 0x0  ;SS
   push rcx  ;RSP
 
   pushfq
@@ -67,10 +67,10 @@ buildStack: ;Params argc, argv, rip, rsp(Process) - Return: rsp(Kernel)
   or rax, 0x9
   push rax  ;Rflags with IF in 1
 
-  xor r15, r15
-  mov r15, cs
-  push r15
-  push rdx ;RIP
+  ;xor r15, r15
+  ;mov r15, cs
+  push 0x18 ;USER_CS
+  push rdx  ;RIP
 
   ;For TTHandler
   push 0x0  ;Fake rax

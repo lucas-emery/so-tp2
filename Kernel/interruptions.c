@@ -40,12 +40,12 @@ void screenTickHandler() {
 }
 
 void timerTickHandler() {
-	kernelMode();
+	//kernelMode();
 
 	screenTickHandler();
 	//schedule();
 
-	userMode(); //Puedo llegar a querer salir en kernel mode?
+	//userMode(); //Puedo llegar a querer salir en kernel mode?
 }
 
 void irqDispatcher(int irq) {
