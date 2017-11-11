@@ -15,7 +15,7 @@ typedef struct pcbCDT* pcbADT;
 /*
 *Initializes the PCB table by giving it memory 
 */
-void initPCB();
+void setupPCB();
 
 /*
 *Creates a new PCB entry in the PCB table with the privilidge in parameter 

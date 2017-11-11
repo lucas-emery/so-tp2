@@ -19,7 +19,7 @@ static int tableSize = 0;
 */
 static char* makeString(pcbADT process);
 
-void initPCB(){
+void setupPCB(){
 	pcbTable = malloc(sizeof(pcbADT));
 }
 

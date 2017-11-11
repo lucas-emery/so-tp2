@@ -12,6 +12,6 @@ int main(){
 	setupGDT();
 	setupTSS();
 	setupIDT();
-	initPCB();
+	setupPCB();
 	copyAndExecuteDefaultModule();
 }

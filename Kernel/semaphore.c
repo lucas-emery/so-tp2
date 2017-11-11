@@ -79,7 +79,7 @@ void execute(int operation, char* name, int id){
 }
 
 
-void semOperationsSetup(){
+void setupSemaphores(){
 	semOperations[OPEN] = &semOpen;
 	semOperations[CLOSE] = &semClose;
 	semOperations[POST] = &semPost;

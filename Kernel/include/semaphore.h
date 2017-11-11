@@ -26,6 +26,6 @@ int semOpen(char* name, int value);
 int semClose(char*, int id);
 int semPost(char*, int id);
 int semWait(char*, int id);
-void semOperationsSetup();
+void setupSemaphores();
 
 #endif

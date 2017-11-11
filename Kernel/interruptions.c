@@ -80,7 +80,7 @@ void setupIDT() {
 	initializeMouse();
 	sysCallsSetup();
 	setupRTC();
-	semOperationsSetup();
+	setupSemaphores();
 
 	setPicMaster(0xF8);
 	setPicSlave(0xEF);

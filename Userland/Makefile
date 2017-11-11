@@ -2,7 +2,7 @@ include Makefile.inc
 
 SAMPLE_DATA=0001-sampleDataModule.bin
 
-all: libc sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls
+all: libc sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls philosophers
 
 libc:
 	cd Libc; make
@@ -33,6 +33,9 @@ time:
 
 date:
 	cd Date; make
+	
+philosophers:
+	cd Philosophers; make
 
 roflcopter:
 	cd Roflcopter; make
