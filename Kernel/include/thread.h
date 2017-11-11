@@ -23,7 +23,7 @@ typedef struct tcbCDT* tcbADT;
 
 #include <scheduler.h>
 
-tcbADT createFirstTCB(int privilege, int moduleIndex, int argc, char *argv[]);
+tcbADT createFirstTCB(int privilege,int pid, int moduleIndex, int argc, char *argv[]);
 tcbADT createTCB(int privilege, void * start_routine, void * arg);
 
 #endif

@@ -29,15 +29,15 @@ void screenTickHandler() {
 }
 
 void timerTickHandler(uint64_t rsp) {
-	//kernelMode();
-	// printHex(rsp);
-	// print("\n");
-	// printHex(*((uint64_t *)(rsp + (8*15))));
-	// print("\n");
-	screenTickHandler();
-	//schedule();
+	kernelMode();
+	//printHex(rsp);
+	//print("\n");
+	//printHex(*((uint64_t *)(rsp + (8*15))));
+	//print("\n");
+	//screenTickHandler();
+	schedule();
 
-	//userMode(); //Puedo llegar a querer salir en kernel mode?
+	userMode(); //Puedo llegar a querer salir en kernel mode?
 }
 
 void irqDispatcher(int irq) {

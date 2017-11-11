@@ -9,6 +9,7 @@ int createProcess(char * processInfo){
 	int j = 0;
 	int k = 0;
 
+
 	while(processInfo[i] != ' ' && processInfo[i] != 0){
 		processName[j] = processInfo[i];
 		i++;
@@ -44,13 +45,14 @@ int createProcess(char * processInfo){
 
 	int newProcessID = addPCB(3, processName); // default privilege 3
 
+	//printDec(moduleIndex);
+	//printHex(newProcessID);
 
-
-	tcbADT newProcessThread = createFirstTCB(3, moduleIndex, argc, argv); // default privilege 3
+	tcbADT newProcessThread = createFirstTCB(3, newProcessID, moduleIndex, argc, argv); // default privilege 3
 	addTCB(newProcessThread);
 
 
-	printDec(removePCB(newProcessID));
+	//printDec(removePCB(newProcessID));
 	
 	return newProcessID;
 }

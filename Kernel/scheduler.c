@@ -6,7 +6,7 @@
 queueADT RRqueue;
 queueADT * semQueues, * rMsgQueues, * wMsgQueues;
 uint8_t semCount = 0;
-tcbADT current;
+tcbADT current = NULL;
 
 uint8_t initScheduler(){
   RRqueue = initQueue();
@@ -17,6 +17,10 @@ uint8_t addThread(tcbADT t){
   if(t == NULL)
     return 0;
   t->state = NEW;
+  if(current == NULL){
+    current = t;
+    return SUCCESS;
+  }
   return enqueue(RRqueue, (void*) t);
 }
 
@@ -25,11 +29,12 @@ int getCurrentProcess(){
 }
 
 void schedule(){
-  if(current->state != BLOCKED){
+  if(current != NULL && current->state != BLOCKED){
     current->state = READY;
     enqueue(RRqueue, (void*) current);
   }
   current = (tcbADT) dequeue(RRqueue);
+  //printHex(current->pid);
   setContext(current->context);
   current->state = RUNNING;
 }
