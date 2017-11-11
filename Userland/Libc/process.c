@@ -1,8 +1,9 @@
 #include <process.h>
+#include <stdio.h>
 
-int fork(){
-	int pid;
-	int80(10,&pid,0,0);
+int fork(char * processInfo){
+	int pid = 0;
+	int80(10, processInfo,0,0);
 	return pid;
 }
 
