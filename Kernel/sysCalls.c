@@ -118,8 +118,8 @@ int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
 	//block();
 }
 
-int sysCreateMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
-	createMessage(name);
+int sysCreateMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
+	createMessage(name, messageSize);
 	return SUCCESS;
 }
 

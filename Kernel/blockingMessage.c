@@ -5,6 +5,7 @@ typedef struct messageCDT{
 	int id;
 	char* buffer;
 	int contentCount;
+	int messageSize;
 }messageCDT;
 
 static int id = 0;
@@ -15,10 +16,11 @@ void initMessages(){
 	messages = malloc(sizeof(messageADT));
 }
 
-int createMessage(char* name){
+int createMessage(char* name, int messageSize){
 	messageADT newMessage = malloc(sizeof(messageCDT));
 	newMessage->name = name;
 	newMessage->id = id;
+	newMessage->messageSize = messageSize;
 	id++;
 	newMessage->buffer = malloc(sizeof(char));
 	newMessage->contentCount = 0;
@@ -52,7 +54,7 @@ void writeMessage(char* name, char* content){
 			else{
 				msgUnblock(messages[i]->id, READ);
 				messages[i]->contentCount++;
-				messages[i]->buffer = realloc(messages[i]->buffer, messages[i]->contentCount * BYTES);
+				messages[i]->buffer = realloc(messages[i]->buffer, messages[i]->contentCount * messages[i]->messageSize);
 				strcat(messages[i]->buffer, content);
 			}
 		}
