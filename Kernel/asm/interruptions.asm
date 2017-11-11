@@ -24,7 +24,7 @@ section .text
 TTHandler:
 	push rax
 	pushaq
-
+	mov rdi, rsp
 	call timerTickHandler
 
 	mov rdi, 0x20

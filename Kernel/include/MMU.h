@@ -10,9 +10,10 @@ typedef struct {
 	page_t dataPage;
 	page_t heapPage;
 	page_t stackPage;
+	page_t kernelPage;
 	uint64_t heapBase;
 	uint64_t heapSize;
-	void * interruptStack;
+	void * interruptContext;
 } context_t;
 
 void changePDEPresent(int entry, int present);

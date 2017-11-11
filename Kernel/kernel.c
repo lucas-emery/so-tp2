@@ -9,11 +9,9 @@
 
 int main(){
 	clearScreen();
-	cli();
 	setupGDT();
 	setupTSS();
 	setupIDT();
-	sti();
 	initPCB();
 	copyAndExecuteDefaultModule();
 }

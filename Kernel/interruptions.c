@@ -6,7 +6,7 @@
 typedef struct {
 	uint16_t offset_l; //bit 0..15
 	uint16_t selector;
-	uint8_t zero_l;
+	uint8_t ist;
 	uint8_t attrs;
 	uint16_t offset_m; //16..31
 	uint32_t offset_h; //32..63
@@ -28,9 +28,12 @@ void screenTickHandler() {
 	}
 }
 
-void timerTickHandler() {
+void timerTickHandler(uint64_t rsp) {
 	//kernelMode();
-
+	// printHex(rsp);
+	// print("\n");
+	// printHex(*((uint64_t *)(rsp + (8*15))));
+	// print("\n");
 	screenTickHandler();
 	//schedule();
 
@@ -54,25 +57,25 @@ void sendEOI(int irq) {
 	writePort(0x20, 0x20);
 }
 
-void iSetHandler(int index, uint64_t handler) {
+void iSetHandler(int index, uint8_t ist, uint64_t handler) {
 	IDT[index].offset_l = (uint16_t) handler & 0xFFFF;
 	IDT[index].offset_m = (uint16_t) (handler >> 16) & 0xFFFF;
 	IDT[index].offset_h = (uint32_t) (handler >> 32) & 0xFFFFFFFF;
 
 	IDT[index].selector = 0x08;
-	IDT[index].zero_l = 0;
-
 	IDT[index].attrs = 0x8E;
+	IDT[index].ist = ist;
+
 	IDT[index].zero_h = 0;
 
 }
 
 void setupIDT() {
-	iSetHandler(0x0E, (uint64_t) &PFHandler);
-	iSetHandler(0x20, (uint64_t) &TTHandler);
-	iSetHandler(0x21, (uint64_t) &irq1Handler);
-	iSetHandler(0x2C, (uint64_t) &irq12Handler);
-	iSetHandler(0x80, (uint64_t) &int80Handler);
+	//iSetHandler(0x0E, 0, (uint64_t) &PFHandler);
+	iSetHandler(0x20, 0, (uint64_t) &TTHandler);
+	iSetHandler(0x21, 0, (uint64_t) &irq1Handler);
+	iSetHandler(0x2C, 0, (uint64_t) &irq12Handler);
+	iSetHandler(0x80, 1, (uint64_t) &int80Handler);
 
 	initializeMouse();
 	sysCallsSetup();

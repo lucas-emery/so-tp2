@@ -15,7 +15,7 @@
 #pragma pack(push)
 #pragma pack(1)
 
-void iSetHandler(int index, uint64_t handler);
+void iSetHandler(int index, uint8_t ist, uint64_t handler);
 void sendEOI(int irq);
 void setupIDT();
 void irqDispatcher(int irq);

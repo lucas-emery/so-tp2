@@ -16,12 +16,14 @@
 #define PAGESIZE 0x200000
 #define KERNEL_HEAP 0x200000
 #define KERNEL_STACK 0x400000
-#define EXEC_MEM_ADDR 0x600000
-#define ROM 0x800000
+#define	CONTEXT_SWITCH_STACK 0x600000
+#define EXEC_MEM_ADDR 0x800000
+#define ROM 0xA00000
 #define MAPPEDMEMORY 0x100000000
 #define USER_HEAP (MAPPEDMEMORY/2)
 #define STACKBASE (MAPPEDMEMORY - sizeof(uint64_t))
 #define KERNEL_STACKBASE (KERNEL_STACK + PAGESIZE - sizeof(uint64_t))
+#define	CONTEXT_SWITCH_STACKBASE (CONTEXT_SWITCH_STACK + PAGESIZE - sizeof(uint64_t))
 #define PRESENT 1
 #define NOT_PRESENT 0
 #define AVOID_BSS 1
@@ -31,7 +33,7 @@
 #define DATA_PAGE_IDX 2
 #define EMPTY 0
 #define NULL 0
-#define INT_STACK_SIZE (20 * 8)
+#define CS_STACK_SIZE (20 * 8)
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -89,6 +91,7 @@ context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, ui
 	}
 
 	uint64_t stackPageAddress = (uint64_t)getFreePage();
+	uint64_t kernelPageAddress = (uint64_t)getFreePage();
 
 	context_t * newContext = malloc(sizeof(context_t));
 	newContext->dataPage.index = EXEC_MEM_ADDR/PAGESIZE;
@@ -97,6 +100,8 @@ context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, ui
 	newContext->heapPage.address = heapPageAddress;
 	newContext->stackPage.index = STACKBASE/PAGESIZE;
 	newContext->stackPage.address = stackPageAddress;
+	newContext->kernelPage.index = KERNEL_STACK/PAGESIZE;
+	newContext->kernelPage.address = kernelPageAddress;
 	newContext->heapBase = USER_HEAP;
 	newContext->heapSize = heapSize;
 
@@ -106,8 +111,9 @@ context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, ui
 void buildThreadStack(uint64_t rdi, uint64_t rsi, uint64_t rip, context_t * threadContext) {
 	void * from = buildStack(rdi, rsi, rip, STACKBASE);
 
-	threadContext->interruptStack = malloc(INT_STACK_SIZE);
-	memcpy(threadContext->interruptStack, from, INT_STACK_SIZE);
+	threadContext->interruptContext = malloc(CS_STACK_SIZE);
+	memcpy(threadContext->interruptContext, from, CS_STACK_SIZE);
+	//TODO fix rsp
 }
 
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
@@ -147,14 +153,15 @@ void setContext(context_t * newContext) {
 }
 
 void saveContext() {
-	memcpy(processContext->interruptStack, KERNEL_STACKBASE, INT_STACK_SIZE); //TODO: Is it set the first time?
+	memcpy(processContext->interruptContext, CONTEXT_SWITCH_STACKBASE, CS_STACK_SIZE); //TODO: Is it set the first time?
 }
 
 void loadContext() {
 	loadPage(processContext->dataPage);
 	loadPage(processContext->heapPage);
 	loadPage(processContext->stackPage);
-	memcpy(KERNEL_STACKBASE, processContext->interruptStack, INT_STACK_SIZE);
+	loadPage(processContext->kernelPage);
+	memcpy(CONTEXT_SWITCH_STACKBASE, processContext->interruptContext, CS_STACK_SIZE);
 }
 
 void * malloc(uint64_t request) {
@@ -251,7 +258,7 @@ void * initializeKernelBinary()
 {
 	ncPrint("Initializing Kernel...\n");
 
-	int heapPage = KERNEL_HEAP/PAGESIZE;
+	int heapPage = KERNEL_HEAP/PAGESIZE;				//TODO sacar esto
 	uint64_t heapPhyAddress = (uint64_t)getFreePage();
 	changePDE(heapPage, heapPhyAddress, PRESENT); //Initialize Heap
 
@@ -266,14 +273,14 @@ void * initializeKernelBinary()
 
 	//changePDEPresent(40, NOT_PRESENT); //Just for PageFault Testing
 
-	int stackPage = KERNEL_STACK / PAGESIZE;
-	uint64_t stackPhyAddress = (uint64_t)getFreePage();
-	changePDE(stackPage, stackPhyAddress, PRESENT); // Initialize Stack
+	//int stackPage = KERNEL_STACK / PAGESIZE;
+	//uint64_t stackPhyAddress = (uint64_t)getFreePage();
+	//changePDE(stackPage, stackPhyAddress, PRESENT); // Initialize Stack
 
 	initializeKernelContext(tempContext.heapSize);
 	processContext = NULL;
 
-	return KERNEL_STACKBASE;
+	return CONTEXT_SWITCH_STACKBASE;
 }
 
 uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag){
@@ -323,8 +330,10 @@ void setupGDT(){
 
 void setupTSS() {
 	uint32_t * TSS = TSS_ADDR;
-	TSS[1] = KERNEL_STACKBASE;				//Bits 31-0
-	TSS[2] = KERNEL_STACKBASE >> 32;	//Bits 63-32
+	TSS[1] = CONTEXT_SWITCH_STACKBASE;				//Bits 31-0
+	TSS[2] = CONTEXT_SWITCH_STACKBASE >> 32;	//Bits 63-32
+	TSS[9] = KERNEL_STACKBASE;								//IST for SysCalls
+	TSS[10] = KERNEL_STACKBASE >> 32;
 
 	loadTR(TR);
 }
