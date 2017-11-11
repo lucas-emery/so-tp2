@@ -20,7 +20,7 @@ typedef struct{
 } threadPackCDT;
 
 typedef struct qnode{
-        void * elem;
+        tcbADT thread;
         struct qnode *next;
         struct qnode *prev;
 } qnode;
@@ -146,7 +146,7 @@ static uint8_t unblock(int i, queueADT * array);
  *	If @type is UNBLOCK, it enqueues all threads in @pack
  *	Paramaters: pack, type
  */
-static void managePack(threadPackADT pack,uint8_t type);
+//static void managePack(threadPackADT pack,uint8_t type);
 
 /*
  * Create an empty queue.
@@ -163,16 +163,16 @@ static int isEmpty(queueADT);
  * Add element to queue.
  * Returns #SUCCESS on success, and otherwise #FAIL.
  */
-static uint8_t enqueue(queueADT, void*);
+static uint8_t enqueue(queueADT, qnode*);
 
 /*
  * Remove last element from queue, and return it.
  */
-static void* dequeue(queueADT);
+static qnode* dequeue(queueADT);
 
 /*
  * Remove element from queue, using a static recursive function
  */
-static void remove(queueADT,void*);
+//static void remove(queueADT,void*);
 
 #endif

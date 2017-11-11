@@ -16,7 +16,6 @@ int main(){
 	setupPCB();
 	initScheduler();
 	ncClear();
-	createProcess(0,0,0);
-	sti();
-	while(1);
+	cli();
+	while(1) schedule();
 }

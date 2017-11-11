@@ -6,7 +6,7 @@
 queueADT RRqueue;
 queueADT * semQueues, * rMsgQueues, * wMsgQueues;
 uint8_t semCount = 0;
-tcbADT current = NULL;
+qnode * current = NULL;
 
 uint8_t initScheduler(){
   RRqueue = initQueue();
@@ -17,36 +17,32 @@ uint8_t addThread(tcbADT t){
   if(t == NULL)
     return 0;
   t->state = NEW;
+  qnode * new = (qnode*) malloc(sizeof(qnode));
+  new->thread = t;
   if(current == NULL){
-    current = t;
+    current = new;
     return SUCCESS;
   }
-  return enqueue(RRqueue, (void*) t);
+  return enqueue(RRqueue,new);
 }
 
 int getCurrentProcess(){
-  return current->pid;
+  return current->thread->pid;
 }
 
 void schedule(){
-  // print("\nQueue");
-  // printHex(RRqueue);
-  // print("\nCurr");
-  // printHex(current);
-  // if(current != NULL && current->state != BLOCKED){
-  //   current->state = READY;
-  //   enqueue(RRqueue, (void*) current);
-  // }
-  // current = (tcbADT) dequeue(RRqueue);
-  // print("\nNew");
-  // printHex(current);
-  // newLine();
-  setContext(current->context);
-  current->state = RUNNING;
+  if(current != NULL && current->thread->state != BLOCKED){
+     current->thread->state = READY;
+     enqueue(RRqueue, current);
+  }
+  printHex(current->thread->tid);
+  current = dequeue(RRqueue);
+  setContext(current->thread->context);
+  current->thread->state = RUNNING;
 }
 
 static uint8_t open(int i, queueADT ** array){
-  *array = realloc(*array, (i+1)*sizeof(queueCDT));
+  *array = (queueADT *) realloc(*array, (i+1)*sizeof(queueCDT));
   if(*array == NULL)
     return FAIL;
   *array[i] = initQueue();
@@ -57,29 +53,19 @@ static uint8_t open(int i, queueADT ** array){
 
 static void block(int i, queueADT * queueArray, int blocking){
   if(queueArray == NULL)
-    return FAIL;
-  threadPackADT pack = malloc(sizeof(threadPackCDT));
-    if(pack == NULL)
-      return FAIL;
-
-  if(!blocking){
-    pack->threads = malloc(sizeof(tcbADT));
-    *pack->threads = current;
-    pack->count = 1;
-  } else
-    pack->threads = getThreads(getCurrentProcess(),&pack->count);
-
-  if(enqueue(queueArray[i],pack) == FAIL)
-    return FAIL;
-  managePack(pack, BLOCK);
-  timerTickHandler();
+    return;
+  current->thread->state = BLOCKED;
+  if(enqueue(queueArray[i],current) == FAIL)
+    return;
+  return; //yield.
 }
 
 static uint8_t unblock(int i, queueADT * queueArray){
   if(queueArray[i] == NULL)
     return FAIL;
-  threadPackADT pack = (threadPackADT*) dequeue(queueArray[i]);
-  managePack(pack,UNBLOCK);
+  qnode * node = dequeue(queueArray[i]);
+  node->thread->state = READY;
+  return enqueue(RRqueue,node);
 }
 
 uint8_t initMsg(int msgId){
@@ -118,23 +104,8 @@ uint8_t semUnblock(int semId){
   return unblock(semId,semQueues);
 }
 
-
-static void managePack(threadPackADT pack,uint8_t type){
-  if(pack == NULL)
-    return;
-
-  for(int i = 0;i < pack->count; i++){
-    if(type == BLOCK)
-      remove(RRqueue,pack->threads[i]);
-    else
-      enqueue(RRqueue,pack->threads[i]);
-    pack->threads[i]->state = (type==BLOCK)?BLOCKED:READY;
-  }
-
-}
-
 static queueADT initQueue(){
-  queueADT ret = malloc(sizeof(queueCDT));
+  queueADT ret = (queueADT) malloc(sizeof(queueCDT));
   if(ret == NULL)
     return NULL;
   ret->back = NULL;
@@ -145,59 +116,33 @@ static queueADT initQueue(){
 static int isEmpty(queueADT q){
   if(q == NULL)
     return 1;
-  return q->front != NULL;
+  return q->front == NULL;
 }
 
-static uint8_t enqueue(queueADT q,void* elem){
-  if(q == NULL || elem == NULL)
+static uint8_t enqueue(queueADT q, qnode* node){
+  if(q == NULL || node == NULL)
     return FAIL;
-  qnode *new = malloc(sizeof(qnode));
-  if(new == NULL)
-    return FAIL;
-  new->elem = elem;
-  new->next = NULL;
-  new->prev = q->back;
+  node->next = NULL;
+  node->prev = q->back;
 
   if(q->back)
-    q->back->next = new;
+    q->back->next = node;
 
-  q->back = new;
+  q->back = node;
 
   if(!q->front)
-    q->front = new;
+    q->front = node;
 
   return SUCCESS;
 }
 
-static void removeR(queueADT q, void* elem, qnode * current){
-  if(current == NULL)
-    return;
-
-  if(current->elem == elem){
-    qnode * aux = current->next;
-    if(aux != NULL)
-      aux->prev = current->prev;
-    if(current->prev != NULL)
-      current->prev->next = aux;
-    free(current);
-    return;
-  }
-
-  removeR(q,elem,current->next);
-}
-
-static void remove(queueADT q, void* elem){
-  removeR(q,elem,q->front);
-}
-
-static void* dequeue(queueADT q){
+static qnode* dequeue(queueADT q){
   if(isEmpty(q))
     return NULL;
   qnode *next;
-  void* elem;
   next = q->front->next;
-  elem = q->front->elem;
+  qnode * aux = q->front;
   free(q->front);
   q->front = next;
-  return elem;
+  return aux;
 }
