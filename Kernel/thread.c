@@ -22,8 +22,7 @@ tcbADT createTCB(int privilege, void * start_routine, void * arg){
 	return newTCB;
 }
 
-/*int pthread(tcbADT thread, void *(*start_routine)(void*), void * arg){
-	context_t sibling = getContextOfSibling(getCurrentProcess());
-	thread = createTCB(sibling->privilege, start_routine, arg);
-	return thread->tib;
-}*/
+int pthread(tcbADT thread, void *(*start_routine)(void*), void * arg){
+	thread = createTCB(3, start_routine, arg);
+	return thread->tid;
+}
