@@ -84,7 +84,7 @@ buildStack: ;Params argc, argv, rip, rsp(Process) - Return: rsp(Kernel)
   pushfq
   pop rax
   or rax, 0x9
-  push rax  ;Rflags with IF in 1
+  push 0x216  ;Rflags with IF in 1
 
   ;xor r15, r15
   ;mov r15, cs

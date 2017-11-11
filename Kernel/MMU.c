@@ -155,7 +155,7 @@ void setContext(context_t * newContext) {
 }
 
 void saveContext() {
-	memcpy(processContext->interruptContext, CONTEXT_SWITCH_STACKBASE, CS_STACK_SIZE); //TODO: Is it set the first time?
+	memcpy(processContext->interruptContext, CS_STACK_BOTTOM - CS_STACK_SIZE, CS_STACK_SIZE); //TODO: Is it set the first time?
 }
 
 void loadContext() {
@@ -164,17 +164,6 @@ void loadContext() {
 	loadPage(processContext->stackPage);
 	loadPage(processContext->kernelPage);
 	memcpy(CS_STACK_BOTTOM - CS_STACK_SIZE, processContext->interruptContext, CS_STACK_SIZE);
-	// uint64_t * reg = CS_STACK_BOTTOM - CS_STACK_SIZE;
-	// print("Context: ");
-	// printHex(reg);
-	// int count = 0;
-	// while(count < CS_STACK_SIZE) {
-	// 	newLine();
-	// 	printHex(*reg);
-	// 	reg++;
-	// 	count+=8;
-	// }
-	// while(1);
 }
 
 void * malloc(uint64_t request) {
