@@ -3,6 +3,9 @@
 
 #include <pcb.h>
 
-int createProcess(/*int moduleIndex, int argc, char *argv[]*/);
+extern char* moduleNames[];
+extern pcbADT* pcbTable;
+
+int createProcess(char * processInfo);
 
 #endif

@@ -29,7 +29,7 @@ int sysOpenSem(uint64_t name, uint64_t value, uint64_t id);
 int sysCloseSem(uint64_t id, uint64_t rdx, uint64_t rcx);
 int sysUpSem(uint64_t semaphore, uint64_t rdx, uint64_t rcx);
 int sysDownSem(uint64_t semaphore, uint64_t rdx, uint64_t rcx);
-int sysForkProcess(uint64_t pidReturn, uint64_t rdx, uint64_t rcx);
+int sysForkProcess(uint64_t processInfo, uint64_t rdx, uint64_t rcx);
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
 int sysListProcesses(uint64_t rsi, uint64_t rdx, uint64_t rcx);
 int sysBlockProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);

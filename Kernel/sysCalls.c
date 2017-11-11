@@ -95,8 +95,9 @@ int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
 	return 0;
 }
 
-int sysForkProcess(uint64_t pidReturn, uint64_t rdx, uint64_t rcx){
-	createProcess();
+int sysForkProcess(uint64_t processInfo, uint64_t rdx, uint64_t rcx){
+	
+	return createProcess(processInfo);
 }
 
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
