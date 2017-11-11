@@ -44,13 +44,8 @@ int createProcess(char * processInfo){
 
 	int newProcessID = addPCB(3, processName); // default privilege 3
 
-
-
 	tcbADT newProcessThread = createFirstTCB(3, moduleIndex, argc, argv); // default privilege 3
 	addTCB(newProcessThread);
-
-
-	printDec(removePCB(newProcessID));
 	
 	return newProcessID;
 }
