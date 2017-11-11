@@ -1,9 +1,11 @@
 #include <process.h>
 
-int fork(char * processInfo){
-	int pid = 0;
-	int80(10, processInfo,0,0);
-	return pid;
+int execv(char * filename, int argc, char * argv[]){
+	return int80(7, (uint64_t)filename, (uint64_t)argc, (uint64_t)argv);
+}
+
+int pthread_create(void *(*startRoutine)(void*), void * arg){
+	return int80(10, startRoutine, arg, 0);
 }
 
 void kill(int pid){

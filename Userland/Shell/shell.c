@@ -6,8 +6,6 @@
 #define STEP 10
 #define BUFFERSIZE 128
 
-extern int int80(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx);
-int execv(char * filename, int argc, char * argv[]);
 void freeParams(char ** argv);
 void parseParams(char * command, int * argc, char *** argv);
 
@@ -51,10 +49,6 @@ void parseParams(char * command, int * argc, char *** argv) {
   } while (command[i++] != 0);
 
   (*argc) = count;
-}
-
-int execv(char * filename, int argc, char * argv[]) {
-	return int80(7, (uint64_t)filename, (uint64_t)argc, (uint64_t)argv);
 }
 
 void freeParams(char ** argv) {

@@ -4,9 +4,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-extern void int80(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx); 
+extern int int80(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx); 
 
-int fork();
+int execv(char * filename, int argc, char * argv[]);
+int pthread_create(void *(*startRoutine)(void*), void * arg);
 void kill(int pid);
 void block(int pid);
 void unblock(int pid);

@@ -11,7 +11,6 @@ sampleCodeModule: A sample module\n\
 ps: Prints out processes information";
 
 int main(int argc, char *argv[]) {
-  fork("roflmao");
   printf("%s\n", man);
   return 0;
 }

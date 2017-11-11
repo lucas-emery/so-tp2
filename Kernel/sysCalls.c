@@ -93,9 +93,9 @@ int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
 	return 0;
 }
 
-int sysForkProcess(uint64_t processInfo, uint64_t rdx, uint64_t rcx){
+int sysPthread(uint64_t startRoutine, uint64_t arg, uint64_t rcx){
 
-	return createProcess(0, 0, 0); //Crea una shell sin args
+	return createThread(startRoutine, arg); //Crea una shell sin args
 }
 
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
@@ -154,7 +154,7 @@ void sysCallsSetup(){
 	sysCalls[7] = &sysExec;
 	sysCalls[8] = &sysMalloc;
 	sysCalls[9] = &sysFree;
-	sysCalls[10] = &sysForkProcess;
+	sysCalls[10] = &sysPthread;
 	sysCalls[11] = &sysKillProcess;
 	sysCalls[12] = &sysListProcesses;
 	sysCalls[13] = &sysBlockProcess;
