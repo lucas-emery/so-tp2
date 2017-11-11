@@ -1,6 +1,6 @@
 #include <process.h>
 
-int createProcess(char * moduleName, int argc, char *argv[]){
+/*int createProcess(char * moduleName, int argc, char *argv[]){
 
 	int moduleIndex = 0;
 	for(int i=0; moduleNames[i] != 0 or !found; i++){
@@ -18,4 +18,4 @@ int createProcess(char * moduleName, int argc, char *argv[]){
 	addTCB(newProcessThread);
 
 	return newProcessID;
-}
+}*/
