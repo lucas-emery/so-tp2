@@ -10,7 +10,7 @@ typedef struct pcbCDT{
 }pcbCDT;
 
 static int idCount = 0;
-static pcbADT* pcbTable;
+static pcbADT * pcbTable;
 static int tableSize = 0;
 
 /*
@@ -23,8 +23,8 @@ void setupPCB(){
 	pcbTable = malloc(sizeof(pcbADT));
 }
 
-int addPCB(char* name, int privilege){
-	pcbADT newPCB;
+int addPCB(char * name, int privilege){
+	pcbADT newPCB = malloc(sizeof(pcbCDT));
 	newPCB->pid = idCount++;
 	newPCB->state = NEW;
 	newPCB->name = name;
@@ -73,7 +73,7 @@ void processesInfo(char* buffer){
 	for (int i = 0; i < tableSize; i++){
 		strcat(buffer, makeString(pcbTable[i]));
 	}
-} 
+}
 
 static char* makeString(pcbADT process){
 	char aux[100] = {0};

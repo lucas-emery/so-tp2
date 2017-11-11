@@ -6,6 +6,7 @@
 #include <terminal.h>
 #include <MMU.h>
 #include <pcb.h>
+#include <scheduler.h>
 
 int main(){
 	clearScreen();
@@ -13,8 +14,9 @@ int main(){
 	setupTSS();
 	setupIDT();
 	setupPCB();
-	/*ncClear();
-	createProcess("shell");
-	while(1);*/
-	copyAndExecuteDefaultModule();
+	initScheduler();
+	ncClear();
+	createProcess(0,0,0);
+	sti();
+	while(1);
 }

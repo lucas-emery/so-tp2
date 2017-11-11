@@ -29,12 +29,18 @@ int getCurrentProcess(){
 }
 
 void schedule(){
-  if(current != NULL && current->state != BLOCKED){
-    current->state = READY;
-    enqueue(RRqueue, (void*) current);
-  }
-  current = (tcbADT) dequeue(RRqueue);
-  //printHex(current->pid);
+  // print("\nQueue");
+  // printHex(RRqueue);
+  // print("\nCurr");
+  // printHex(current);
+  // if(current != NULL && current->state != BLOCKED){
+  //   current->state = READY;
+  //   enqueue(RRqueue, (void*) current);
+  // }
+  // current = (tcbADT) dequeue(RRqueue);
+  // print("\nNew");
+  // printHex(current);
+  // newLine();
   setContext(current->context);
   current->state = RUNNING;
 }

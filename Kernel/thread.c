@@ -3,7 +3,7 @@
 static int tid = 0;
 
 tcbADT createFirstTCB(int privilege, int pid, int moduleIndex, int argc, char *argv[]){
-	tcbADT newTCB =	malloc(sizeof(tcbADT));
+	tcbADT newTCB =	malloc(sizeof(tcbCDT));
 	newTCB->tid = tid++;
 	newTCB->pid = pid;
 	newTCB->context = createFirstThreadContext(moduleIndex, argc, argv);
@@ -13,7 +13,7 @@ tcbADT createFirstTCB(int privilege, int pid, int moduleIndex, int argc, char *a
 }
 
 tcbADT createTCB(int privilege, void * start_routine, void * arg){
-	tcbADT newTCB =	malloc(sizeof(tcbADT));
+	tcbADT newTCB =	malloc(sizeof(tcbCDT));
 	newTCB->tid = tid++;
 	newTCB->pid = getCurrentProcess();
 	newTCB->context = createThreadContext(getContextOfSibling(newTCB->pid), start_routine, arg); //si marti devuelve null explota todo

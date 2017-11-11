@@ -6,6 +6,6 @@
 extern char* moduleNames[];
 extern pcbADT* pcbTable;
 
-int createProcess(char * processInfo);
+int createProcess(int moduleIndex, int argc, char * argv[]);
 
 #endif

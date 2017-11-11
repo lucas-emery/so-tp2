@@ -57,9 +57,7 @@ int sysExec(uint64_t filename, uint64_t argc, uint64_t argv) {
 	int i = 0;
 	while(moduleNames[i] != 0){
 		if(strcmp(filename, moduleNames[i]) == 0) {
-			//argv = backupArguments(argc, argv);
-			copyAndExecuteModule(i, argc, argv);
-			return 0;
+			return createProcess(i, argc, argv);
 		}
 		i++;
 	}
@@ -96,8 +94,8 @@ int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
 }
 
 int sysForkProcess(uint64_t processInfo, uint64_t rdx, uint64_t rcx){
-	
-	return createProcess(processInfo);
+
+	return createProcess(0, 0, 0); //Crea una shell sin args
 }
 
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
