@@ -13,7 +13,8 @@ int main(){
 	setupTSS();
 	setupIDT();
 	setupPCB();
-	ncClear();
+	/*ncClear();
 	createProcess("shell");
-	while(1);
+	while(1);*/
+	copyAndExecuteDefaultModule();
 }

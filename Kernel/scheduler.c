@@ -149,11 +149,11 @@ static uint8_t enqueue(queueADT q,void* elem){
   if(new == NULL)
     return FAIL;
   new->elem = elem;
-  new->next = q->back;
-  new->prev = NULL;
+  new->next = NULL;
+  new->prev = q->back;
 
   if(q->back)
-    q->back->prev = new;
+    q->back->next = new;
 
   q->back = new;
 
@@ -187,11 +187,11 @@ static void remove(queueADT q, void* elem){
 static void* dequeue(queueADT q){
   if(isEmpty(q))
     return NULL;
-  qnode *prev;
+  qnode *next;
   void* elem;
-  prev = q->front->prev;
+  next = q->front->next;
   elem = q->front->elem;
   free(q->front);
-  q->front = prev;
+  q->front = next;
   return elem;
 }
