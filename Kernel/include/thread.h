@@ -3,7 +3,7 @@
 
 #include <lib.h>
 #include <MMU.h>
-#include <process.h>
+#include <pcb.h>
 
 #define RUNNING 0
 #define BLOCKED 1

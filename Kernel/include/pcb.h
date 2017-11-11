@@ -3,6 +3,7 @@
 
 #include <lib.h>
 #include <MMU.h>
+#include <thread.h>
 
 #define RUNNING 0
 #define BLOCKED 1
