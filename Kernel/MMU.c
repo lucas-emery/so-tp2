@@ -109,11 +109,11 @@ context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, ui
 }
 
 void buildThreadStack(uint64_t rdi, uint64_t rsi, uint64_t rip, context_t * threadContext) {
-	void * from = buildStack(rdi, rsi, rip, STACKBASE);
+	void * rsp = buildStack(rdi, rsi, rip, STACKBASE);
 
 	threadContext->interruptContext = malloc(CS_STACK_SIZE);
-	memcpy(threadContext->interruptContext, from, CS_STACK_SIZE);
-	//TODO fix rsp
+	memcpy(threadContext->interruptContext, rsp, CS_STACK_SIZE);
+	setStackPtr(rsp - CS_STACK_SIZE); //Clean stack
 }
 
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
