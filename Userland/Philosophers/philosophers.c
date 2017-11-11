@@ -101,14 +101,15 @@ void test(int id) {
 int main(int argc, char ** argv) {
 	//Setup
 	mutex = sem_open("philosophers_mutex", 0);
-	char* number;
 	char* semaphoreName = "philosopher";
 
 	for (int i = 0; i < PHILOSOPHER_COUNT; i++) {
+		char* number = malloc(10);
 		itoa(i,number,10);
 		semaphoreName = strcat(semaphoreName, number);
 		sem_open(semaphoreName, -1);//Philosophers start not having ownership of the forks		
 		semaphoreName = "philosopher";
+		free(number);
 	}
 	
 	for (int i = 0; i < PHILOSOPHER_COUNT; i++) {

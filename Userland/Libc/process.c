@@ -1,5 +1,4 @@
 #include <process.h>
-#include <stdio.h>
 
 int fork(char * processInfo){
 	int pid = 0;

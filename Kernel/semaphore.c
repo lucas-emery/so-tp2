@@ -1,5 +1,11 @@
 #include <semaphore.h>
 
+typedef struct sem_tCDT{
+	int value;
+	char* name;
+	int id;
+}sem_tCDT;
+
 static sem_t* semaphores;
 static int semCount = 0;
 static int id = 0;
@@ -19,7 +25,7 @@ static int exists(char* name){
 int semOpen(char* name, int value){
 	if(exists(name))
 		return NULL;
-	sem_t newSem;
+	sem_t newSem = malloc(sizeof(sem_tCDT));
 	newSem->name = name;
 	newSem->value = value;
 	newSem->id = id;
@@ -39,20 +45,20 @@ int semClose(char* name, int id){
 			for(int j = i; j < semCount-1; j++)
 				semaphores[j] = semaphores[j+1];
 			semCount--;
-			return 0;
+			return SUCCESS;
 		}
 	}
-	return 1;
+	return FAIL;
 }
 
 int semPost(char* name, int id){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value++;
-			return 0;
+			return SUCCESS;
 		}
 	}
-	return 1;
+	return FAIL;
 }
 
 int semWait(char* name, int id){
@@ -64,10 +70,10 @@ int semWait(char* name, int id){
 			}
 			else
 				semaphores[i]->value--;
-			return 0;
+			return SUCCESS;
 		}
 	}
-	return 1;
+	return FAIL;
 }
 
 void execute(int operation, char* name, int id){

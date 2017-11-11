@@ -6,6 +6,8 @@
 
 #define TRUE 1
 #define FALSE 0
+#define SUCCESS 0
+#define FAIL 1
 #define READ 0
 #define WRITE 1
 

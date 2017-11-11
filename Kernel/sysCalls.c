@@ -118,6 +118,25 @@ int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
 	//block();
 }
 
+int sysCreateMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
+	createMessage(name);
+	return SUCCESS;
+}
+
+int sysDeleteMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
+	return closeMessage(name);
+}
+
+int sysWriteMsg(uint64_t name, uint64_t content, uint64_t rcx){
+	writeMessage(name, content);
+	return SUCCESS;
+}
+
+int sysReadMsg(uint64_t name, uint64_t buffer, uint64_t rcx){
+	readMessage(name, buffer);
+	return SUCCESS;
+}
+
 int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
 	if(rdi < 0 || rdi >= SYSCALLS)
 		return -1; //Tirar error??
@@ -145,4 +164,8 @@ void sysCallsSetup(){
 	sysCalls[17] = &sysCloseSem;
 	sysCalls[18] = &sysUpSem;
 	sysCalls[19] = &sysDownSem;
+	sysCalls[20] = &sysCreateMsg;
+	sysCalls[21] = &sysDeleteMsg;
+	sysCalls[22] = &sysWriteMsg;
+	sysCalls[23] = &sysReadMsg;
 }

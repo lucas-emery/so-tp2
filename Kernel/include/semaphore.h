@@ -3,18 +3,13 @@
 
 #include <lib.h>
 #include <MMU.h>
+#include <scheduler.h>
 
 #define SEM_OPERATIONS 4
 #define OPEN 0
 #define CLOSE 1
 #define POST 2
 #define WAIT 3
-
-typedef struct sem_tCDT{
-	int value;
-	char* name;
-	int id;
-};
 
 typedef struct sem_tCDT* sem_t;
 
