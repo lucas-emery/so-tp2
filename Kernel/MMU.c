@@ -24,6 +24,8 @@
 #define STACKBASE (MAPPEDMEMORY - sizeof(uint64_t))
 #define KERNEL_STACKBASE (KERNEL_STACK + PAGESIZE - sizeof(uint64_t))
 #define	CONTEXT_SWITCH_STACKBASE (CONTEXT_SWITCH_STACK + PAGESIZE - sizeof(uint64_t))
+#define KERNEL_STACK_BOTTOM (KERNEL_STACK + PAGESIZE)
+#define CS_STACK_BOTTOM (CONTEXT_SWITCH_STACK + PAGESIZE)
 #define PRESENT 1
 #define NOT_PRESENT 0
 #define AVOID_BSS 1
@@ -161,7 +163,18 @@ void loadContext() {
 	loadPage(processContext->heapPage);
 	loadPage(processContext->stackPage);
 	loadPage(processContext->kernelPage);
-	memcpy(CONTEXT_SWITCH_STACKBASE, processContext->interruptContext, CS_STACK_SIZE);
+	memcpy(CS_STACK_BOTTOM - CS_STACK_SIZE, processContext->interruptContext, CS_STACK_SIZE);
+	// uint64_t * reg = CS_STACK_BOTTOM - CS_STACK_SIZE;
+	// print("Context: ");
+	// printHex(reg);
+	// int count = 0;
+	// while(count < CS_STACK_SIZE) {
+	// 	newLine();
+	// 	printHex(*reg);
+	// 	reg++;
+	// 	count+=8;
+	// }
+	// while(1);
 }
 
 void * malloc(uint64_t request) {
@@ -330,12 +343,12 @@ void setupGDT(){
 
 void setupTSS() {
 	uint32_t * TSS = TSS_ADDR;
-	TSS[1] = CONTEXT_SWITCH_STACKBASE;				//Bits 31-0
-	TSS[2] = CONTEXT_SWITCH_STACKBASE >> 32;	//Bits 63-32
-	TSS[9] = KERNEL_STACKBASE;								//IST for SysCalls
-	TSS[10] = KERNEL_STACKBASE >> 32;
-	TSS[11] = CONTEXT_SWITCH_STACKBASE;
-	TSS[12] = CONTEXT_SWITCH_STACKBASE >> 32;
+	TSS[1] = CS_STACK_BOTTOM;				//Bits 31-0
+	TSS[2] = CS_STACK_BOTTOM >> 32;	//Bits 63-32
+	TSS[9] = KERNEL_STACK_BOTTOM;								//IST for SysCalls
+	TSS[10] = KERNEL_STACK_BOTTOM >> 32;
+	TSS[11] = CS_STACK_BOTTOM;
+	TSS[12] = CS_STACK_BOTTOM >> 32;
 
 	loadTR(TR);
 }

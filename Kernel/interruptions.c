@@ -2,6 +2,11 @@
 #include <interruptions.h>
 
 #define AVOID_BSS 1
+#define	CONTEXT_SWITCH_STACK 0x600000
+#define PAGESIZE 0x200000
+#define	CONTEXT_SWITCH_STACKBASE (CONTEXT_SWITCH_STACK + PAGESIZE - sizeof(uint64_t))
+
+extern uint64_t getStackPtr();
 
 typedef struct {
 	uint16_t offset_l; //bit 0..15
@@ -29,6 +34,15 @@ void screenTickHandler() {
 }
 
 void timerTickHandler(uint64_t rsp) {
+	// print("rsp");
+	// printHex(rsp);
+	uint64_t * reg = rsp;
+	// while(reg <= CONTEXT_SWITCH_STACKBASE) {
+	// 	newLine();
+	// 	printHex(*reg);
+	// 	reg++;
+	// }
+	// while(1);
 	kernelMode();
 	//printHex(rsp);
 	//print("\n");
@@ -38,6 +52,13 @@ void timerTickHandler(uint64_t rsp) {
 	schedule();
 
 	userMode(); //Puedo llegar a querer salir en kernel mode?
+	// reg = rsp;
+	// while(reg <= CONTEXT_SWITCH_STACKBASE) {
+	// 	newLine();
+	// 	printHex(*reg);
+	// 	reg++;
+	// }
+	//while(1);
 }
 
 void irqDispatcher(int irq) {
