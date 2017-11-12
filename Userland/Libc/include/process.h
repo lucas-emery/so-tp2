@@ -3,8 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-
-extern int int80(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx); 
+#include <stdlib.h>
 
 int execv(char * filename, int argc, char * argv[]);
 int pthread_create(void *(*startRoutine)(void*), void * arg);
