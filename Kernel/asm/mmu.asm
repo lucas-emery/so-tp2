@@ -7,6 +7,7 @@ GLOBAL cleanReturnAddress
 GLOBAL injectReturnAddress
 GLOBAL loadTR
 GLOBAL loadGDTR
+GLOBAL flushPaging
 
 %include "./asm/macros.m"
 
@@ -27,6 +28,11 @@ loadGDTR:
   mov [gdtr], ax
   lgdt [gdtr]
   ret
+
+flushPaging:
+	mov rax, cr3
+	mov cr3, rax
+	ret
 
   ;Save return ptr
 getStackPtr:

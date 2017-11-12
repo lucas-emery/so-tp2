@@ -54,6 +54,7 @@ extern void * buildStack(uint64_t argc, uint64_t argv, uint64_t rip, uint64_t rs
 extern uint64_t swapStack(uint64_t newStackPtr, int pageIndex, uint64_t pageAddress);
 extern void loadGDTR(uint32_t address, uint16_t limit);
 extern void loadTR(uint16_t tr);
+extern void flushPaging();
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
 
@@ -123,11 +124,9 @@ void buildThreadStack(uint64_t rdi, uint64_t rsi, uint64_t rip, context_t * thre
 	setStackPtr(rsp - CS_STACK_SIZE); //Clean stack
 }
 
-char** moveArgsToSHM(int argc, char * argv[]) {
+char** moveArgsToActiveHeap(int argc, char * argv[]) {
 	char ** new = argv;
   if(argc > 0) {
-		sharedMode();
-
     new = malloc(argc * sizeof(char **));
     if(new == 0)
       return argv;
@@ -139,17 +138,33 @@ char** moveArgsToSHM(int argc, char * argv[]) {
         return argv;
       memcpy(new[i], argv[i], len * sizeof(char));
     }
-
-		kernelMode();
   }
   return new;
+}
+
+void changeHeap(context_t * newContext) {
+	context = newContext;
+	loadPage(newContext->heapPage);
+	flushPaging();
+}
+
+void restoreProcessHeap() {
+	loadPage(processContext->heapPage);
+	flushPaging();
 }
 
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
 	void * dataPageAddress = getFreePage();
 	memcpy(dataPageAddress, moduleAddresses[moduleIndex], PAGESIZE);
 	context_t * newContext = createContext(dataPageAddress, NULL, NULL);
-	argv = moveArgsToSHM(argc, argv);
+
+	sharedMode();
+	argv = moveArgsToActiveHeap(argc, argv);
+	changeHeap(newContext);
+	argv = moveArgsToActiveHeap(argc, argv);
+	restoreProcessHeap();
+	kernelMode();
+
 	buildThreadStack((uint64_t)argc, (uint64_t)argv, EXEC_MEM_ADDR, newContext);
 	return newContext;
 }
@@ -183,7 +198,7 @@ void setContext(context_t * newContext) {
 	processContext = newContext;
 
 	loadContext();
-	updateCR3();
+	flushPaging();
 }
 
 void saveContext() {
