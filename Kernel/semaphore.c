@@ -67,7 +67,7 @@ int semPost(char* name, int id){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value++;
-			semUnblock(id);
+			unblock(id, SEM);
 			return SUCCESS;
 		}
 	}
@@ -79,7 +79,7 @@ int semWait(char* name, int id){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value--;
 			if(semaphores[i]->value < 0){
-				semBlock(semaphores[i]->id,0);
+				block(id, SEM);
 			}
 			return SUCCESS;
 		}

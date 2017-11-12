@@ -7,6 +7,8 @@
 #define WRITE 1
 #define BLOCK 0
 #define UNBLOCK 1
+#define SEM 3
+#define STDIN 4
 
 #include <stdint.h>
 #include <pcb.h>
@@ -80,7 +82,7 @@ uint8_t initMsg(int msgId);
 void destroyMsg(int msgId);
 
 /*
- *	If @blocking is #TRUE, it blocks all of the running process´ threads, 
+ *	If @blocking is #TRUE, it blocks all of the running process´ threads,
  *	packing and queueing them together into the corresponding msgQueue, depending on @type.
  *	Otherwise, it packs only the running thread.
  *	Paramaters: msgId, type, blocking
@@ -133,13 +135,13 @@ static uint8_t open(int i, queueADT ** array);
  *	If @blocking is #TRUE
  *	Paramaters: i, array, blocking
  */
-static void block(int i, queueADT * array,int blocking);
+//static void block(int i, queueADT * array,int blocking);
 
 /*
  *	Unblocks thread at end of the queue at index @i of @array and queues it at $RRqueue.
  *	Paramaters: i, array
  */
-static uint8_t unblock(int i, queueADT * array);
+//static uint8_t unblock(int i, queueADT * array);
 
 /*
  *	If @type is BLOCK, it removes all threads in @pack from the queue and sets their state to BLOCKED.
@@ -151,28 +153,28 @@ static uint8_t unblock(int i, queueADT * array);
 /*
  * Create an empty queue.
  */
-static queueADT initQueue();
+queueADT initQueue();
 
 /*
  * Check if queue is empty.
  * Returns #SUCCESS if the queue is empty, and otherwise #FAIL.
  */
-static int isEmpty(queueADT);
+int isEmpty(queueADT);
 
 /*
  * Add element to queue.
  * Returns #SUCCESS on success, and otherwise #FAIL.
  */
-static uint8_t enqueue(queueADT, qnode*);
+uint8_t enqueue(queueADT, qnode*);
 
 /*
  * Remove last element from queue, and return it.
  */
-static qnode* dequeue(queueADT);
+qnode* dequeue(queueADT);
 
 /*
  * Remove element from queue, using a static recursive function
  */
-//static void remove(queueADT,void*);
+void remove(queueADT,void*);
 
 #endif
