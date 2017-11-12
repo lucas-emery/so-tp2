@@ -43,6 +43,7 @@ typedef queueCDT * queueADT;
  */
 
 
+
 /*
  * 	Initializes $RRqueue.
  *	Return: #SUCCESS on success, otherwise #FAIL.
@@ -87,7 +88,7 @@ void destroyMsg(int msgId);
  *	Otherwise, it packs only the running thread.
  *	Paramaters: msgId, type, blocking
  */
-void msgBlock(int msgId, int type, int blocking);
+//void msgBlock(int msgId, int type, int blocking);
 
 /*
  *	Dequeues a pack of threads from the corresponding msgQueue, depending on @type,
@@ -95,7 +96,7 @@ void msgBlock(int msgId, int type, int blocking);
  *	Paramaters: msgId, type
  *	Returns #SUCCESS on success, otherwise #FAIL.
  */
-uint8_t msgUnblock(int msgId, int type);
+//uint8_t msgUnblock(int msgId, int type);
 
 /*
  * Called upon the opening of a semaphore to initialize the queue used for the event.
@@ -115,20 +116,20 @@ void destroySem(int semId);
  *	packing and queueing them together into the corresponding semQueue.
  *	Paramaters: semId, blocking
  */
-void semBlock(int semId, int blocking);
+//void semBlock(int semId, int blocking);
 
 /*
  * Dequeues a pack of threads from the corresponding semQueue, unpacking and queueing them into the $RRqueue.
  * Paramaters: semId
  * Returns #SUCCESS on success, otherwise #FAIL.
  */
-uint8_t semUnblock(int semId);
+//uint8_t semUnblock(int semId);
 
 /*
  *	Opens a queue at index @i of @array.
  *	Paramaters: i, array
  */
-static uint8_t open(int i, queueADT ** array);
+uint8_t open(int i, queueADT ** array);
 
 /*
  *	Blocks $current thread and offers it to the queue at index @i of @array.

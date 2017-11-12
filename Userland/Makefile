@@ -2,7 +2,7 @@ include Makefile.inc
 
 SAMPLE_DATA=0001-sampleDataModule.bin
 
-all: libc sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls philosophers multi sem echo
+all: libc sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls philosophers multi sem echo idle
 
 libc:
 	cd Libc; make
@@ -12,6 +12,9 @@ sampleCodeModule:
 
 sem:
 	cd Sem; make
+
+idle:
+	cd Idle; make
 
 sampleDataModule:
 	printf "This is sample data." >> $(SAMPLE_DATA) && dd if=/dev/zero bs=1 count=1 >> $(SAMPLE_DATA)
