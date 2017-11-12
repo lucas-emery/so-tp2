@@ -7,7 +7,7 @@ int doIt(int num){
   int timeout = 10000000;
   while(1){
     if(timeout == 0){
-      printf("%d",num);
+      //printf("%d",num);
       timeout=10000000;
     }
     timeout--;

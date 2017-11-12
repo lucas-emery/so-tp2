@@ -2,13 +2,16 @@ include Makefile.inc
 
 SAMPLE_DATA=0001-sampleDataModule.bin
 
-all: libc sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls philosophers multi sem echo idle
+all: libc sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls philosophers multi sem echo idle kill
 
 libc:
 	cd Libc; make
 
 sampleCodeModule:
 	cd SampleCodeModule; make
+
+kill:
+	cd Kill; make
 
 sem:
 	cd Sem; make

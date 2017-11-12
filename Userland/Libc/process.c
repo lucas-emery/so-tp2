@@ -1,11 +1,5 @@
 #include <process.h>
 
-#define STEP 10
-#define BUFFERSIZE 1024
-
-void freeParams(char ** argv);
-void parseParams(char * command, int * argc, char *** argv);
-
 int exec(char * command) {
 	char ** argv;
   int argc;

@@ -90,6 +90,7 @@ int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
 	//Change to userMode
 	//TO DO
 	//Return to kernelMode
+	return 0;
 }
 
 int sysOpenSem(uint64_t name, uint64_t value, uint64_t id){
@@ -113,11 +114,13 @@ int sysPthread(uint64_t startRoutine, uint64_t arg, uint64_t rcx){
 }
 
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
-	removePCB(pid);
+	exitProcess(pid, 1);
+	return 0;
 }
 
 int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
 	processesInfo(buffer);
+	return 0;
 }
 
 int sysSetSem(uint64_t id, uint64_t value, uint64_t rcx){
@@ -130,6 +133,7 @@ int sysInitMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
 
 int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
 	//block();
+	return 0;
 }
 
 int sysOpenMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
