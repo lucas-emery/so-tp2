@@ -15,8 +15,10 @@ int main(){
 	setupIDT();
 	setupPCB();
 	initScheduler();
+	initSharedMemory();
+	enableMemoryProtection();
 	ncClear();
 	createProcess(0,0,0);
   sti();
-  while(1); 
+  while(1);
 }

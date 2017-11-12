@@ -14,11 +14,13 @@
 #define TR 0x28
 #define PD_ADDR 0x10000
 #define PAGESIZE 0x200000
+#define KERNEL 0x0
 #define KERNEL_HEAP 0x200000
 #define KERNEL_STACK 0x400000
 #define	CONTEXT_SWITCH_STACK 0x600000
-#define EXEC_MEM_ADDR 0x800000
-#define ROM 0xA00000
+#define SHARED_MEMORY 0x800000
+#define EXEC_MEM_ADDR 0xA00000
+#define ROM 0xC00000
 #define MAPPEDMEMORY 0x100000000
 #define USER_HEAP (MAPPEDMEMORY/2)
 #define STACKBASE (MAPPEDMEMORY - sizeof(uint64_t))
@@ -36,6 +38,8 @@
 #define EMPTY 0
 #define NULL 0
 #define CS_STACK_SIZE (21 * 8)
+#define SUPERVISOR 0
+#define USER 1
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -58,6 +62,7 @@ void ** moduleAddresses;
 static context_t * context = AVOID_BSS;
 static context_t * kernelContext = AVOID_BSS;
 static context_t * processContext = AVOID_BSS;
+static context_t * sharedContext = AVOID_BSS;
 
 void copyAndExecuteDefaultModule(){
 	memcpy(EXEC_MEM_ADDR, moduleAddresses[0], PAGESIZE);
@@ -118,11 +123,33 @@ void buildThreadStack(uint64_t rdi, uint64_t rsi, uint64_t rip, context_t * thre
 	setStackPtr(rsp - CS_STACK_SIZE); //Clean stack
 }
 
+char** moveArgsToSHM(int argc, char * argv[]) {
+	char ** new = argv;
+  if(argc > 0) {
+		sharedMode();
+
+    new = malloc(argc * sizeof(char **));
+    if(new == 0)
+      return argv;
+
+    for(int i = 0; i < argc; i++) {
+      size_t len = strlen(argv[i]) + 1;
+      new[i] = malloc(len * sizeof(char));
+      if(new[i] == 0)
+        return argv;
+      memcpy(new[i], argv[i], len * sizeof(char));
+    }
+
+		kernelMode();
+  }
+  return new;
+}
+
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
 	void * dataPageAddress = getFreePage();
-	//ChangePDE
 	memcpy(dataPageAddress, moduleAddresses[moduleIndex], PAGESIZE);
 	context_t * newContext = createContext(dataPageAddress, NULL, NULL);
+	argv = moveArgsToSHM(argc, argv);
 	buildThreadStack((uint64_t)argc, (uint64_t)argv, EXEC_MEM_ADDR, newContext);
 	return newContext;
 }
@@ -143,6 +170,10 @@ void kernelMode() {
 
 void userMode() {
 	context = processContext; //Just affects the heap
+}
+
+void sharedMode() {
+	context = sharedContext;
 }
 
 void setContext(context_t * newContext) {
@@ -202,7 +233,7 @@ void setKernelPresent(int present){
 
 //TODO: Refactor
 void changePDEPresent(int entry, int present){
-	uint64_t PD = 0x10000;
+	uint64_t PD = PD_ADDR;
 
 	while(entry){
 		PD += 8;
@@ -211,9 +242,24 @@ void changePDEPresent(int entry, int present){
 	uint64_t PDE = *((uint64_t*)PD);
 
 	if(present)
-		*((uint64_t*)PD) =  PDE | 0x8F;
+		*((uint64_t*)PD) =  PDE | 0x1;
 	else
-		*((uint64_t*)PD) = PDE & ~0x1;
+		*((uint64_t*)PD) = PDE & ~(uint64_t)0x1;
+}
+
+void changePDEPrivilege(int entry, int privilege) {
+	uint64_t PD = PD_ADDR;
+
+	while(entry){
+		PD += 8;
+		--entry;
+	}
+	uint64_t PDE = *((uint64_t*)PD);
+
+	if(privilege == SUPERVISOR)
+		*((uint64_t*)PD) =  PDE & ~(uint64_t)0x4;
+	else
+		*((uint64_t*)PD) = PDE | 0x4;
 }
 
 //TODO: Refactor
@@ -233,7 +279,7 @@ void changePDE(int entry, uint64_t physAddr, int present){
 	if(present)
 		*((uint64_t*)PD) = (uint64_t)physAddr | 0x8F;
 	else
-		*((uint64_t*)PD) = ((uint64_t)physAddr & ~(uint64_t)0x1FFFFF) & ~(uint64_t)0x1;
+		*((uint64_t*)PD) = (uint64_t)physAddr & ~(uint64_t)0x1;
 }
 
 void pageFaultHandler(){ //TODO
@@ -255,6 +301,12 @@ void initializeKernelContext(uint64_t heapSize) {
 	kernelContext->heapBase = KERNEL_HEAP;
 
 	context = kernelContext;
+}
+
+void initSharedMemory() {
+	sharedContext = (context_t *) malloc(sizeof(context_t));
+	sharedContext->heapSize = EMPTY;
+	sharedContext->heapBase = SHARED_MEMORY;
 }
 
 void * initializeKernelBinary()
@@ -284,6 +336,19 @@ void * initializeKernelBinary()
 	processContext = NULL;
 
 	return CONTEXT_SWITCH_STACKBASE;
+}
+
+void enableMemoryProtection() {
+	changePDEPrivilege(KERNEL/PAGESIZE, SUPERVISOR);
+	changePDEPrivilege(KERNEL_HEAP/PAGESIZE, SUPERVISOR);
+	changePDEPrivilege(KERNEL_STACK/PAGESIZE, SUPERVISOR);
+	changePDEPrivilege(CONTEXT_SWITCH_STACK/PAGESIZE, SUPERVISOR);
+
+	int i = 0;
+	while(moduleNames[i] != 0) {
+		changePDEPrivilege((uint64_t)moduleAddresses[i]/PAGESIZE, SUPERVISOR);
+		i++;
+	}
 }
 
 uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag){

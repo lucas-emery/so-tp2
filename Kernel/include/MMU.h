@@ -32,6 +32,8 @@ context_t * createThreadContext(context_t * siblingContext, void * start_routine
 void kernelMode();
 void userMode();
 void setContext(context_t * newContext);
+void initSharedMemory();
+void enableMemoryProtection();
 
 extern uint64_t cleanReturnAddress();
 extern void injectReturnAddress(uint64_t returnAddress);

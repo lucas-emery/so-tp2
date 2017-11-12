@@ -65,12 +65,16 @@ int sysExec(uint64_t filename, uint64_t argc, uint64_t argv) {
 }
 
 int sysMalloc(uint64_t address, uint64_t size, uint64_t rcx) {
+	userMode();
 	*((uint64_t *)address) = malloc(size);
+	kernelMode();
 	return 0;
 }
 
 int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
+	//Change to userMode
 	//TO DO
+	//Return to kernelMode
 }
 
 int sysOpenSem(uint64_t name, uint64_t value, uint64_t id){
