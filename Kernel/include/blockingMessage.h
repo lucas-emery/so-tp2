@@ -10,9 +10,10 @@
 
 typedef struct messageCDT* messageADT;
 
-int initMessage(char* name, int messageSize);
-void readMessage(char* name, char* buffer);
-void writeMessage(char* name, char* content);
-int closeMessage(char* name);
+int createMessage(char* name, int messageSize);
+int openMessage(char* name);
+void readMessage(int id, char* buffer);
+void writeMessage(int id, char* content);
+int closeMessage(int id);
 
 #endif

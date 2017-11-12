@@ -5,9 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void message_open(char* name, int messageSize);
-void message_close(char* name);
-void message_write(char* name, char* content);
-void message_read(char* name, char* buffer);
+int message_init(char* name, int messageSize);
+int message_open(char* name);
+int message_close(int id);
+int message_write(int id, char* content);
+int message_read(int id, char* buffer);
 
 #endif

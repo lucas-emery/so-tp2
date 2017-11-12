@@ -1,17 +1,21 @@
 #include <message.h>
 
-void message_open(char* name, int messageSize){
-	int80(20, name, messageSize, 0);
+int message_init(char* name, int messageSize){
+	return int80(14, name, messageSize, 0);
 }
 
-void message_close(char* name){
-	int80(21, name, 0, 0);
+int message_open(char* name){
+	return int80(20, name, 0, 0);
 }
 
-void message_write(char* name, char* content){
-	int80(22, name, content, 0);
+int message_close(int id){
+	return int80(21, id, 0, 0);
 }
 
-void message_read(char* name, char* buffer){
-	int80(23, name, buffer, 0);
+int message_write(int id, char* content){
+	return int80(22, id, content, 0);
+}
+
+int message_read(int id, char* buffer){
+	return int80(23, id, buffer, 0);
 }

@@ -109,29 +109,29 @@ int sysSetSem(uint64_t id, uint64_t value, uint64_t rcx){
 	return setValue(id, value);
 }
 
-int sysUnblockProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//unblock();
+int sysInitMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
+	return createMessage(name, messageSize);
 }
 
 int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
 	//block();
 }
 
-int sysCreateMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
-	return createMessage(name, messageSize);
+int sysOpenMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
+	return openMessage(name);
 }
 
-int sysDeleteMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
-	return closeMessage(name);
+int sysDeleteMsg(uint64_t id, uint64_t rdx, uint64_t rcx){
+	return closeMessage(id);
 }
 
-int sysWriteMsg(uint64_t name, uint64_t content, uint64_t rcx){
-	writeMessage(name, content);
+int sysWriteMsg(uint64_t id, uint64_t content, uint64_t rcx){
+	writeMessage(id, content);
 	return SUCCESS;
 }
 
-int sysReadMsg(uint64_t name, uint64_t buffer, uint64_t rcx){
-	readMessage(name, buffer);
+int sysReadMsg(uint64_t id, uint64_t buffer, uint64_t rcx){
+	readMessage(id, buffer);
 	return SUCCESS;
 }
 
@@ -178,13 +178,13 @@ void sysCallsSetup(){
 	sysCalls[11] = &sysKillProcess;
 	sysCalls[12] = &sysListProcesses;
 	sysCalls[13] = &sysYieldProcess;
-	sysCalls[14] = &sysUnblockProcess;
+	sysCalls[14] = &sysInitMsg;
 	sysCalls[15] = &sysSetSem;
 	sysCalls[16] = &sysOpenSem;
 	sysCalls[17] = &sysCloseSem;
 	sysCalls[18] = &sysUpSem;
 	sysCalls[19] = &sysDownSem;
-	sysCalls[20] = &sysCreateMsg;
+	sysCalls[20] = &sysOpenMsg;
 	sysCalls[21] = &sysDeleteMsg;
 	sysCalls[22] = &sysWriteMsg;
 	sysCalls[23] = &sysReadMsg;
