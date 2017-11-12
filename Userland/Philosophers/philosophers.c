@@ -24,7 +24,7 @@ State state[PHILOSOPHER_COUNT];
 
 int mutex;
 int semaphores[PHILOSOPHER_COUNT];
-//pthread_t philosopherThread[PHILOSOPHER_COUNT];
+//int philosopherThread[PHILOSOPHER_COUNT];
 int philosopherId[PHILOSOPHER_COUNT];
 
 //GUI
@@ -115,7 +115,7 @@ int main(int argc, char ** argv) {
 	for (int i = 0; i < PHILOSOPHER_COUNT; i++) {
 		philosopherId[i] = i;
 		state[i] = Thinking;
-		//pthread_create(&philosopherThread[i], &attr, philosopher, &philosopherId[i]);
+		//pthread_create(philosopherThread[i], philosopher, philosopherId[i]);
 	}
 
 	printf("running\n");

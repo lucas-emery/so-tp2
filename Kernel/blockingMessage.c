@@ -18,7 +18,7 @@ void initMessages(){
 
 int createMessage(char* name, int messageSize){
 	messageADT newMessage = malloc(sizeof(messageCDT));
-	newMessage->name = name;
+	strcpy(newMessage->name, name);
 	newMessage->id = id;
 	newMessage->messageSize = messageSize;
 	id++;
