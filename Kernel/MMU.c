@@ -60,6 +60,8 @@ typedef int (*EntryPoint)(int argc, char *argv[]);
 
 char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao","ps", "ls", "philosophers","multi","sem",0};
 void ** moduleAddresses;
+uint32_t moduleCount = AVOID_BSS;
+
 static context_t * context = AVOID_BSS;
 static context_t * kernelContext = AVOID_BSS;
 static context_t * processContext = AVOID_BSS;
