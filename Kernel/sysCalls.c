@@ -153,6 +153,11 @@ int sysExit(uint64_t value, uint64_t rdx, uint64_t rcx){
 	return 0;
 }
 
+int sysExitThread(uint64_t rsi, uint64_t rdx, uint64_t rcx){
+	//killThread();
+	return 0;
+}
+
 void sysCallsSetup(){
 	sysCalls[0] = &sysRead;
 	sysCalls[1] = &sysWrite;
@@ -179,4 +184,5 @@ void sysCallsSetup(){
 	sysCalls[22] = &sysWriteMsg;
 	sysCalls[23] = &sysReadMsg;
 	sysCalls[24] = &sysExit;
+	sysCalls[25] = &sysExitThread;
 }
