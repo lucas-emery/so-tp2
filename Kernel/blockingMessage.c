@@ -11,6 +11,8 @@ typedef struct messageCDT{
 static int id = 0;
 static int messagesCount = 0;
 static messageADT* messages;
+static messageOperation messageOperations[MESSAGE_OPERATIONS];
+static int lock = 0;
 
 void initMessages(){
 	messages = malloc(sizeof(messageADT));
@@ -31,7 +33,7 @@ int createMessage(char* name, int messageSize){
 	return newMessage->id;
 }
 
-int openMessage(char* name){
+int openMessage(char* name, int arg2){
 	for (int i = 0; i < messagesCount; ++i){
 		if(strcmp(messages[i]->name, name) == 0)
 			return messages[i]->id;
@@ -39,7 +41,7 @@ int openMessage(char* name){
 	return -1;
 }
 
-void readMessage(int id, char* buffer){
+int readMessage(char* buffer, int id){
 	for (int i = 0; i < messagesCount; ++i){
 		if(messages[i]->id == id){
 			if(messages[i]->contentCount == 0)
@@ -50,11 +52,13 @@ void readMessage(int id, char* buffer){
 				messages[i]->contentCount = 0;
 				messages[i]->buffer = realloc(messages[i]->buffer, sizeof(char));
 			}
+			return SUCCESS;
 		}
 	}
+	return FAIL;
 }
 
-void writeMessage(int id, char* content){
+int writeMessage(char* content, int id){
 	for (int i = 0; i < messagesCount; ++i){
 		if(messages[i]->id == id){
 			if(messages[i]->contentCount == MAX_SIZE_BUFFER)
@@ -65,11 +69,13 @@ void writeMessage(int id, char* content){
 				messages[i]->buffer = realloc(messages[i]->buffer, messages[i]->contentCount * messages[i]->messageSize);
 				strcat(messages[i]->buffer, content);
 			}
+			return SUCCESS;
 		}
 	}
+	return FAIL;
 }
 
-int closeMessage(int id){
+int closeMessage(char*arg1, int id){
 	for (int i = 0; i < messagesCount; ++i){
 		if(messages[i]->id == id){
 			destroyMsg(messages[i]->id); //remove queue
@@ -81,4 +87,22 @@ int closeMessage(int id){
 		}
 	}
 	return FAIL;
+}
+
+int executeMessage(int operation, char* arg1, int arg2){
+	if(operation < 0 || operation > MESSAGE_OPERATIONS)
+		return -1;
+	int ret;
+	testAndSet(&lock);
+	ret = (messageOperations[operation])(arg1, arg2);
+	lock = FALSE;
+	return ret;
+}
+
+void setupMessages(){
+	messageOperations[OPEN] = &openMessage;
+	messageOperations[CLOSE] = &closeMessage;
+	messageOperations[INIT] = &createMessage;
+	messageOperations[READ] = &readMessage;
+	messageOperations[WRITE] = &writeMessage;
 }

@@ -114,6 +114,7 @@ void setupIDT() {
 	sysCallsSetup();
 	setupRTC();
 	setupSemaphores();
+	setupMessages();
 
 	setPicMaster(0xF8);
 	setPicSlave(0xEF);
