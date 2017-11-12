@@ -147,7 +147,9 @@ int sysExit(uint64_t value, uint64_t rdx, uint64_t rcx){
 	removePCB(getCurrentProcess());
 	print("Process ended with return value: ");
 	printDec(value);
-	schedule();
+	newLine();
+	sti();
+	while(1);
 	return 0;
 }
 
