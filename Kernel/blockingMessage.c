@@ -33,12 +33,12 @@ int createMessage(char* name, int messageSize){
 
 void readMessage(char* name, char* buffer){
 	for (int i = 0; i < messagesCount; ++i){
-		if(messages[i]->name == name){
+		if(strcmp(messages[i]->name, name)){
 			if(messages[i]->contentCount == 0)
 				msgBlock(id, READ, FALSE);
 			else{
 				msgUnblock(messages[i]->id, WRITE);
-				buffer = messages[i]->buffer;
+				strcpy(buffer, messages[i]->buffer);
 				messages[i]->contentCount = 0;
 				messages[i]->buffer = realloc(messages[i]->buffer, sizeof(char));
 			}
@@ -48,7 +48,7 @@ void readMessage(char* name, char* buffer){
 
 void writeMessage(char* name, char* content){
 	for (int i = 0; i < messagesCount; ++i){
-		if(messages[i]->name == name){
+		if(strcmp(messages[i]->name, name)){
 			if(messages[i]->contentCount == MAX_SIZE_BUFFER)
 				msgBlock(messages[i]->id, WRITE, FALSE);
 			else{
@@ -63,7 +63,7 @@ void writeMessage(char* name, char* content){
 
 int closeMessage(char* name){
 	for (int i = 0; i < messagesCount; ++i){
-		if(messages[i]->name == name){
+		if(strcmp(messages[i]->name, name)){
 			destroyMsg(messages[i]->id); //remove queue
 			free(messages[i]);
 			for(int j = i; j < messagesCount-1; j++)
