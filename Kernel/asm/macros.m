@@ -49,12 +49,16 @@
 %macro irqHandler 1
 	pushaq
 
+	call kernelMode
+
 	mov rdi, %1
 	call irqDispatcher
 
 	call sendEOI
 	;mov al, 20h ; EOI
 	;out 20h, al;
+
+	call userMode
 
 	popaq
 
