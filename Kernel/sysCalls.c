@@ -57,13 +57,18 @@ int sysExec(uint64_t filename, uint64_t argc, uint64_t argv) {
 	int i = 0;
 	while(moduleNames[i] != 0){
 		if(strcmp(filename, moduleNames[i]) == 0) {
-			if(argc > 0 && ((char**)argv)[argc-1][0] == '&') {
+			if(argc == 0) {
+				return createProcess(i, argc, argv);
+			}
+			else if(strcmp(((char**)argv)[argc-1], "&") == 0) {
+				return createProcess(i, argc-1, argv);
+			}
+			else {
 				int pid = createProcess(i, argc-1, argv);
 				setFocusedPID(pid);
 				exitCurrentProcess(0);
 				return pid;
 			}
-			return createProcess(i, argc, argv);
 		}
 		i++;
 	}
