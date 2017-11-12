@@ -33,7 +33,7 @@ void parseParams(char * command, int * argc, char *** argv) {
     if(command[i] != ' ' && command[i] != 0) {
       buffer[j] = command[i];
       j++;
-    } else {
+    } else if(j != 0) {
       if(size - count == 0) {
         size += STEP;
         (*argv) = (char **)malloc(sizeof(void*)*size);
