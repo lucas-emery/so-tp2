@@ -59,7 +59,7 @@ extern void flushPaging();
 typedef int (*EntryPoint)(int argc, char *argv[]);
 
 char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao","ps", "ls", "philosophers","multi","sem",0};
-void ** moduleAddresses;
+void ** moduleAddresses = AVOID_BSS;
 uint32_t moduleCount = AVOID_BSS;
 
 static context_t * context = AVOID_BSS;
@@ -67,31 +67,11 @@ static context_t * kernelContext = AVOID_BSS;
 static context_t * processContext = AVOID_BSS;
 static context_t * sharedContext = AVOID_BSS;
 
-void copyAndExecuteDefaultModule(){
-	memcpy(EXEC_MEM_ADDR, moduleAddresses[0], PAGESIZE);
-  sti();
-	((EntryPoint)EXEC_MEM_ADDR)(0,0);
-}
-
-void copyAndExecuteModule(int moduleIndex, int argc, char *argv[]){
-	memcpy(EXEC_MEM_ADDR, moduleAddresses[moduleIndex], PAGESIZE);
-	sti();
-	((EntryPoint)EXEC_MEM_ADDR)(argc, argv);
- 	copyAndExecuteDefaultModule();
-}
 
 void * getFreePage() {
 	static uint64_t last = EXEC_MEM_ADDR;
 	last += PAGESIZE;
 	return (void *)last;
-}
-
-void * getStackBase()
-{
-	return (void*)(
-		MAPPEDMEMORY						//Stack starts at the end of the virtual memory
-		- sizeof(uint64_t)      //Begin at the top of the stack
-	);
 }
 
 context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, uint64_t heapSize) { //TODO: Support many heap pages
@@ -190,7 +170,7 @@ void userMode() {
 }
 
 void sharedMode() {
-	context = sharedContext;
+	context = sharedContext; //Just affects the heap
 }
 
 void setContext(context_t * newContext) {
@@ -204,7 +184,7 @@ void setContext(context_t * newContext) {
 }
 
 void saveContext() {
-	memcpy(processContext->interruptContext, CS_STACK_BOTTOM - CS_STACK_SIZE, CS_STACK_SIZE); //TODO: Is it set the first time?
+	memcpy(processContext->interruptContext, CS_STACK_BOTTOM - CS_STACK_SIZE, CS_STACK_SIZE);
 }
 
 void loadContext() {
@@ -238,17 +218,6 @@ void free(void * ptr) {
 
 }
 
-//LEGACY
-void setKernelPresent(int present){
-	uint64_t *PD = 0x10000;
-	uint64_t entry= *PD;
-	if(present)
-		*PD = entry | 0x8F;
-	else
-		*PD = entry & ~0x1;
-}
-
-//TODO: Refactor
 void changePDEPresent(int entry, int present){
 	uint64_t PD = PD_ADDR;
 
@@ -279,11 +248,10 @@ void changePDEPrivilege(int entry, int privilege) {
 		*((uint64_t*)PD) = PDE | 0x4;
 }
 
-//TODO: Refactor
+
 void changePDE(int entry, uint64_t physAddr, int present){
 	if(physAddr & 0x001FFFFF != 0)
 		return;
-
 
 	uint64_t PD = PD_ADDR;
 
@@ -292,11 +260,10 @@ void changePDE(int entry, uint64_t physAddr, int present){
 		--entry;
 	}
 
-
 	if(present)
 		*((uint64_t*)PD) = (uint64_t)physAddr | 0x8F;
 	else
-		*((uint64_t*)PD) = (uint64_t)physAddr & ~(uint64_t)0x1;
+		*((uint64_t*)PD) = ((uint64_t)physAddr | 0x8F) & ~(uint64_t)0x1;
 }
 
 void pageFaultHandler(){
@@ -330,24 +297,13 @@ void * initializeKernelBinary()
 {
 	ncPrint("Initializing Kernel...\n");
 
-	int heapPage = KERNEL_HEAP/PAGESIZE;				//TODO sacar esto
-	uint64_t heapPhyAddress = (uint64_t)getFreePage();
-	changePDE(heapPage, heapPhyAddress, PRESENT); //Initialize Heap
-
 	context_t tempContext;
 	tempContext.heapBase = KERNEL_HEAP;
 	tempContext.heapSize = EMPTY;
 	context = &tempContext; //So module loader has a working heap
 
-	void ** modules = loadModules(&endOfKernelBinary);
+	moduleAddresses = loadModules(&endOfKernelBinary);
 	clearBSS(&bss, &endOfKernel - &bss);
-	moduleAddresses = modules; //AFTER BSS CLEAR TODO: Use avoid bss
-
-	//changePDEPresent(40, NOT_PRESENT); //Just for PageFault Testing
-
-	//int stackPage = KERNEL_STACK / PAGESIZE;
-	//uint64_t stackPhyAddress = (uint64_t)getFreePage();
-	//changePDE(stackPage, stackPhyAddress, PRESENT); // Initialize Stack
 
 	initializeKernelContext(tempContext.heapSize);
 	processContext = NULL;
@@ -401,11 +357,7 @@ uint64_t create_lower_system_descriptor(uint64_t base, uint32_t limit, uint16_t 
 
 void setupGDT(){
 	uint64_t * GDT = GDT_ADDR;
-	/*
-	GDT[USER_CS >> 3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
-	GDT[TR >> 3] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x0089);
-	GDT[(TR >> 3) + 1] = create_upper_system_descriptor(TSS_ADDR);
-	*/
+
 	GDT[3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
 	GDT[4] = create_descriptor(0x0,0xFFFFFFFF,0x20F2);
 	GDT[5] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x2089);

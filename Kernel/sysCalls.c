@@ -64,7 +64,7 @@ int sysExec(uint64_t filename, uint64_t argc, uint64_t argv) {
 				return createProcess(i, argc-1, argv);
 			}
 			else {
-				int pid = createProcess(i, argc-1, argv);
+				int pid = createProcess(i, argc, argv);
 				setFocusedPID(pid);
 				exitCurrentProcess(0);
 				return pid;
