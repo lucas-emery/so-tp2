@@ -66,7 +66,10 @@ int80Handler:
 
 	call kernelMode
 	call sysCallHandler
+	
+	push rax
 	call userMode
+	pop rax
 
 	popaq
 	iretq
