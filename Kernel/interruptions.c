@@ -34,32 +34,11 @@ void screenTickHandler() {
 }
 
 void timerTickHandler(uint64_t rsp) {
-	// print("rsp");
-	// printHex(rsp);
-	//uint64_t * reg = rsp;
-	// while(reg <= CONTEXT_SWITCH_STACKBASE) {
-	// 	newLine();
-	// 	printHex(*reg);
-	// 	reg++;
-	// }
-	// while(1);
 	kernelMode();
-	//printHex(rsp);
-	//print("\n");
-	//printHex(*((uint64_t *)(rsp + (8*15))));
-	//print("\n");
-	//screenTickHandler();
+
 	schedule();
-	userMode(); //Puedo llegar a querer salir en kernel mode?
-	// reg = rsp;
-	// if(pid == 1) {
-	// 	while(reg <= CONTEXT_SWITCH_STACKBASE) {
-	// 		newLine();
-	// 		printHex(*reg);
-	// 		reg++;
-	// 	}
-	// 	while(1);
-	// }
+
+	userMode();
 }
 
 void irqDispatcher(int irq) {
