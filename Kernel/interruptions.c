@@ -50,15 +50,16 @@ void timerTickHandler(uint64_t rsp) {
 	//print("\n");
 	//screenTickHandler();
 	schedule();
-	updateCR3();
 	userMode(); //Puedo llegar a querer salir en kernel mode?
 	// reg = rsp;
-	// while(reg <= CONTEXT_SWITCH_STACKBASE) {
-	// 	newLine();
-	// 	printHex(*reg);
-	// 	reg++;
+	// if(pid == 1) {
+	// 	while(reg <= CONTEXT_SWITCH_STACKBASE) {
+	// 		newLine();
+	// 		printHex(*reg);
+	// 		reg++;
+	// 	}
+	// 	while(1);
 	// }
-	// while(1);
 }
 
 void irqDispatcher(int irq) {

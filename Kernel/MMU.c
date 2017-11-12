@@ -152,6 +152,7 @@ void setContext(context_t * newContext) {
 	processContext = newContext;
 
 	loadContext();
+	updateCR3();
 }
 
 void saveContext() {
