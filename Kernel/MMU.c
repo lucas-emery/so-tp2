@@ -11,7 +11,7 @@
 #define TSS_LIMIT 0x1000
 #define KERNEL_CS 0x8
 #define USER_CS 0x18
-#define TR 0x20
+#define TR 0x28
 #define PD_ADDR 0x10000
 #define PAGESIZE 0x200000
 #define KERNEL_HEAP 0x200000
@@ -35,7 +35,7 @@
 #define DATA_PAGE_IDX 2
 #define EMPTY 0
 #define NULL 0
-#define CS_STACK_SIZE (20 * 8)
+#define CS_STACK_SIZE (21 * 8)
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -324,10 +324,11 @@ void setupGDT(){
 	GDT[(TR >> 3) + 1] = create_upper_system_descriptor(TSS_ADDR);
 	*/
 	GDT[3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
-	GDT[4] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x2089);
-	GDT[5] = create_upper_system_descriptor(TSS_ADDR);
+	GDT[4] = create_descriptor(0x0,0xFFFFFFFF,0x20F2);
+	GDT[5] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x2089);
+	GDT[6] = create_upper_system_descriptor(TSS_ADDR);
 
-	loadGDTR(GDT_ADDR, 6 * sizeof(uint64_t));
+	loadGDTR(GDT_ADDR, 7 * sizeof(uint64_t));
 }
 
 void setupTSS() {

@@ -78,7 +78,7 @@ buildStack: ;Params argc, argv, rip, rsp(Process) - Return: rsp(Kernel)
   ;For iretq
   ;xor r15, r15
   ;mov r15, ss
-  push 0x0  ;SS
+  push 0x23  ;SS
   push rcx  ;RSP
 
   pushfq
@@ -88,12 +88,14 @@ buildStack: ;Params argc, argv, rip, rsp(Process) - Return: rsp(Kernel)
 
   ;xor r15, r15
   ;mov r15, cs
-  push 0x8 ;USER_CS
+  push 0x1B ;USER_CS
   push rdx  ;RIP
 
   ;For TTHandler
   push 0x0  ;Fake rax
   pushaq    ;argc and argv are already in the correct registers
+
+  push 0x23 ;DS
 
   mov rax, rsp
 

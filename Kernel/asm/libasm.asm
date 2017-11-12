@@ -20,7 +20,7 @@ dispatch:
 	mov QWORD [rsp + 8], 0x0 ;no se cuales son los flags que corresponden para un proceso nuevo
 	pushaq
 
-.L1
+.L1:
 	popaq
 	iretq
 
@@ -83,7 +83,7 @@ testAndSet:
 		test rax, rax
 		jnz .spin
 
-		lock cmpxchg rdx, rdi 
+		lock cmpxchg rdx, rdi
 
 		test rax, rax
 		jnz .spin

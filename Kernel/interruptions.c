@@ -33,11 +33,10 @@ void screenTickHandler() {
 	}
 }
 
-void timerTickHandler(uint64_t *rsp) {
+void timerTickHandler(uint64_t rsp) {
 	// print("rsp");
 	// printHex(rsp);
-	uint64_t *reg = rsp;
-	//printHex(reg);
+	//uint64_t * reg = rsp;
 	// while(reg <= CONTEXT_SWITCH_STACKBASE) {
 	// 	newLine();
 	// 	printHex(*reg);
@@ -59,7 +58,7 @@ void timerTickHandler(uint64_t *rsp) {
 	// 	printHex(*reg);
 	// 	reg++;
 	// }
-	//while(1);
+	// while(1);
 }
 
 void irqDispatcher(int irq) {
@@ -85,14 +84,25 @@ void iSetHandler(int index, uint8_t ist, uint64_t handler) {
 	IDT[index].offset_h = (uint32_t) (handler >> 32) & 0xFFFFFFFF;
 
 	IDT[index].selector = 0x08;
-	IDT[index].attrs = 0x8E;
+	IDT[index].attrs = 0xEE;
 	IDT[index].ist = ist;
 
 	IDT[index].zero_h = 0;
 
 }
 
+void debug(){
+	uint64_t * reg = getStackPtr();
+	while(reg <= CONTEXT_SWITCH_STACKBASE) {
+		newLine();
+		printHex(*reg);
+		reg++;
+	}
+	while(1);
+}
+
 void setupIDT() {
+	//iSetHandler(0x0D, 0, (uint64_t) &debug);
 	//iSetHandler(0x0E, 0, (uint64_t) &PFHandler);
 	iSetHandler(0x20, 2, (uint64_t) &TTHandler);
 	iSetHandler(0x21, 2, (uint64_t) &irq1Handler);

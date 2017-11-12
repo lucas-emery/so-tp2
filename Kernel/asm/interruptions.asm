@@ -26,12 +26,23 @@ section .text
 TTHandler:
 	push rax
 	pushaq
+	xor rax, rax
+	mov rax, ds
+	push rax
+
+
+
 	mov rdi, rsp
 	call timerTickHandler
 
 	mov rdi, 0x20
 	call sendEOI
 
+	pop rax
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
 	popaq
 	pop rax
 	iretq
@@ -56,7 +67,7 @@ int80Handler:
 	call kernelMode
 	call sysCallHandler
 	call userMode
-	
+
 	popaq
 	iretq
 
