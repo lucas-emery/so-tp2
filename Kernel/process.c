@@ -13,7 +13,7 @@ int createProcess(int moduleIndex, int argc, char * argv[]){
 	return newProcessID;
 }
 
-void exitProcess(int pid, int value)
+void exitProcess(int pid, int value) {
 	removePCB(pid);
 	if(pid == getFocusedPID()) {
 		setFocusedPID(createProcess(0,0,0));
