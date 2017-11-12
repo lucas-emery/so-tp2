@@ -301,7 +301,7 @@ void pageFaultHandler(){ //TODO
 	//Expand stack???
 	print("PAGEFAULT");
 	newLine();
-	copyAndExecuteDefaultModule();
+	exitCurrentProcess(0xE);
 	//hang();
 }
 
