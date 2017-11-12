@@ -66,8 +66,8 @@ static void block(int i, queueADT * queueArray, int blocking){
   if(queueArray == NULL)
     return;
   current->thread->state = BLOCKED;
-  saveContext();
   enqueue(queueArray[i],current);
+	intTT();
 }
 
 static uint8_t unblock(int i, queueADT * queueArray){

@@ -70,11 +70,7 @@ int semWait(char* name, int id){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value--;
 			if(semaphores[i]->value < 0){
-				semBlock(semaphores[i]->id,0);/*
-				sti();
-				while(1){
-					printDec(1);
-				}*/
+				semBlock(semaphores[i]->id,0);
 			}
 			return SUCCESS;
 		}

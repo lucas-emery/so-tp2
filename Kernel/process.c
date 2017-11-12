@@ -1,6 +1,7 @@
 #include <process.h>
 
 extern char* moduleNames[];
+int exitValue;
 
 int createProcess(int moduleIndex, int argc, char * argv[]){
 

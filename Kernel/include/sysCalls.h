@@ -13,6 +13,7 @@
 
 #define SYSCALLS 30
 
+extern int exitValue;
 extern char* moduleNames[];
 
 typedef int (*sys)(uint64_t rsi, uint64_t rdx, uint64_t rcx);

@@ -8,6 +8,14 @@ int pthread_create(void *(*startRoutine)(void*), void * arg){
 	return int80(10, startRoutine, arg, 0);
 }
 
+int getPid(){
+	return int80(26,0,0,0);
+}
+
+int getVar(char* name){
+	return int80(27,name,0,0);
+}
+
 void kill(int pid){
 	int80(11,pid,0,0);
 }

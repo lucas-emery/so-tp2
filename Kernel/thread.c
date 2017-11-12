@@ -18,6 +18,7 @@ tcbADT createTCB(int privilege, void * startRoutine, void * arg){
 	newTCB->pid = getCurrentProcess();
 	newTCB->context = createThreadContext(getContextOfSibling(newTCB->pid), startRoutine, arg); //si marti devuelve null explota todo
 	newTCB->state = NEW;
+	addTCB(newTCB);
 	addThread(newTCB);
 	return newTCB;
 }

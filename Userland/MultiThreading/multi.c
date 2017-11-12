@@ -3,29 +3,25 @@
 
 int semId;
 
-int doIt1(){
-  sem_wait(semId);
+int doIt(int num){
+  int timeout = 10000000;
   while(1){
-    printf("%d\n",2);
+    if(timeout == 0){
+      printf("%d",num);
+      timeout=10000000;
+    }
+    timeout--;
   }
+  pthread_exit();
   return 0;
 }
 
-int doIt2(){
-  while(1){
-    sem_wait(semId);
-    printf("%d\n",2);
-    sem_post(semId);
-  }
-  return 0;
-}
 
 int main(int argc, char *argv[]) {
   semId = sem_open("topkek", 0);
-  pthread_create(doIt1,0);
-  //pthread_create(doIt2,0);
-
+  pthread_create(doIt,0);
+  sem_wait(semId);
+  pthread_create(doIt,1);
   while(1);
-  sem_close(semId);
   return 0;
 }

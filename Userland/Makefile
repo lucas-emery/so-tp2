@@ -2,7 +2,7 @@ include Makefile.inc
 
 SAMPLE_DATA=0001-sampleDataModule.bin
 
-all: libc sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls philosophers multi sem
+all: libc sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls philosophers multi sem echo
 
 libc:
 	cd Libc; make
@@ -21,6 +21,9 @@ shell:
 
 multi:
 	cd MultiThreading; make
+
+echo:
+	cd Echo; make
 
 hello:
 	cd Hello; make

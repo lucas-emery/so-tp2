@@ -1,5 +1,4 @@
 GLOBAL int80
-GLOBAL movr14
 
 %macro pushaq 0
 	push rbx
@@ -36,10 +35,6 @@ GLOBAL movr14
 %endmacro
 
 section .text
-
-movr14:
-	mov rdi, r14
-	ret
 
 int80:
 	pushaq

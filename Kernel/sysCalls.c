@@ -144,17 +144,24 @@ int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
 
 int sysExit(uint64_t value, uint64_t rdx, uint64_t rcx){
 	removePCB(getCurrentProcess());
-	print("Process ended with return value: ");
-	printDec(value);
-	newLine();
-	sti();
-	while(1);
+	exitValue = value;
+	intTT();
 	return 0;
 }
 
 int sysExitThread(uint64_t rsi, uint64_t rdx, uint64_t rcx){
 	//killThread();
 	return 0;
+}
+
+int sysGetPid(uint64_t rsi, uint64_t rdx, uint64_t rcx){
+	return getCurrentProcess();
+}
+
+int sysGetVar(uint64_t name, uint64_t rdx, uint64_t rcx){
+	if(strcmp(name,"$?") == 0)
+		return exitValue;
+	return -1;
 }
 
 void sysCallsSetup(){
@@ -184,4 +191,6 @@ void sysCallsSetup(){
 	sysCalls[23] = &sysReadMsg;
 	sysCalls[24] = &sysExit;
 	sysCalls[25] = &sysExitThread;
+	sysCalls[26] = &sysGetPid;
+	sysCalls[27] = &sysGetVar;
 }

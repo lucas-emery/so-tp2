@@ -9,6 +9,7 @@ GLOBAL setPicMaster
 GLOBAL setPicSlave
 GLOBAL int80Handler
 GLOBAL int80
+GLOBAL intTT
 
 %include "./asm/macros.m"
 
@@ -22,6 +23,10 @@ EXTERN kernelMode
 EXTERN userMode
 
 section .text
+
+intTT:
+	int 0x20
+	ret
 
 TTHandler:
 	push rax
