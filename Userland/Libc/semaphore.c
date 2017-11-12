@@ -1,7 +1,11 @@
 #include <semaphore.h>
 
-int sem_open(char* name, int value){
-	return int80(16, name, value, 0);
+int sem_set(int id, int value){
+	return int80(15, id, value, 0);
+}
+
+int sem_open(char* name){
+	return int80(16, name, 0, 0);
 }
 
 void sem_close(int id){

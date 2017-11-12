@@ -22,6 +22,15 @@ static int exists(char* name){
 	return FALSE;
 }
 
+int setValue(int id, int value){
+	for (int i = 0; i < semCount; ++i){
+		if(semaphores[i]->id == id)
+			semaphores[i]->value = value;
+			return value;
+	}
+	return -1;
+}
+
 int semOpen(char* name, int value){
 	for (int i = 0; i < semCount; ++i){
 		if(strcmp(semaphores[i]->name,name) == 0)
@@ -30,7 +39,7 @@ int semOpen(char* name, int value){
 	sem_t newSem = malloc(sizeof(sem_tCDT));
 	newSem->name = malloc(strlen(name)+1);
 	strcpy(newSem->name,name);
-	newSem->value = value;
+	newSem->value = 0;
 	newSem->id = id;
 	id++;
 	semCount++;

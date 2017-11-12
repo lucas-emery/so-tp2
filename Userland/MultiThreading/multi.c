@@ -18,7 +18,8 @@ int doIt(int num){
 
 
 int main(int argc, char *argv[]) {
-  semId = sem_open("topkek", 0);
+  semId = sem_open("topkek");
+  sem_set(semId,0);
   pthread_create(doIt,0);
   sem_wait(semId);
   pthread_create(doIt,1);

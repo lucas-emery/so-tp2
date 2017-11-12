@@ -39,7 +39,7 @@ int forkState[PHILOSOPHER_COUNT];
 void * philosopher(void * id) {
 	while(1) {
 		//Think
-		//sleep(10);	
+		//sleep(10);
 		//sleep(randRange(5, 10));
 
 		takeForks(*(int*)id);
@@ -100,18 +100,20 @@ void test(int id) {
 
 int main(int argc, char ** argv) {
 	//Setup
-	mutex = sem_open("philosophers_mutex", 0);
+	return 0; /*
+	mutex = sem_open("philosophers_mutex");
+	sem_set(mutex,0);
 	char* semaphoreName = "philosopher";
 
 	for (int i = 0; i < PHILOSOPHER_COUNT; i++) {
 		char* number = malloc(10);
 		itoa(i,number,10);
 		semaphoreName = strcat(semaphoreName, number);
-		sem_open(semaphoreName, -1);//Philosophers start not having ownership of the forks		
+		sem_open(semaphoreName, -1);//Philosophers start not having ownership of the forks
 		semaphoreName = "philosopher";
 		free(number);
 	}
-	
+
 	for (int i = 0; i < PHILOSOPHER_COUNT; i++) {
 		philosopherId[i] = i;
 		state[i] = Thinking;
@@ -121,7 +123,7 @@ int main(int argc, char ** argv) {
 	printf("running\n");
 	getchar();
 
-	//pthread_exit(NULL);
+	//pthread_exit(NULL);*/
 }
 
 int left(int i) {

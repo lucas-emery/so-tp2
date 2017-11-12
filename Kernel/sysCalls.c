@@ -94,7 +94,6 @@ int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
 }
 
 int sysPthread(uint64_t startRoutine, uint64_t arg, uint64_t rcx){
-
 	return createThread(startRoutine, arg); //Crea una shell sin args
 }
 
@@ -106,8 +105,8 @@ int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
 	processesInfo(buffer);
 }
 
-int sysBlockProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//block();
+int sysSetSem(uint64_t id, uint64_t value, uint64_t rcx){
+	return setValue(id, value);
 }
 
 int sysUnblockProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
@@ -150,7 +149,7 @@ int sysExit(uint64_t value, uint64_t rdx, uint64_t rcx){
 }
 
 int sysExitThread(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//killThread();
+	killThread();
 	return 0;
 }
 
@@ -178,9 +177,9 @@ void sysCallsSetup(){
 	sysCalls[10] = &sysPthread;
 	sysCalls[11] = &sysKillProcess;
 	sysCalls[12] = &sysListProcesses;
-	sysCalls[13] = &sysBlockProcess;
+	sysCalls[13] = &sysYieldProcess;
 	sysCalls[14] = &sysUnblockProcess;
-	sysCalls[15] = &sysYieldProcess;
+	sysCalls[15] = &sysSetSem;
 	sysCalls[16] = &sysOpenSem;
 	sysCalls[17] = &sysCloseSem;
 	sysCalls[18] = &sysUpSem;
