@@ -9,7 +9,8 @@ int pthread_create(void *(*startRoutine)(void*), void * arg){
 }
 
 void exit(int value){
-	uint64_t ret = value;
+	uint64_t ret = 0;
+	ret += value;
 	int80(24, ret,0,0);
 }
 

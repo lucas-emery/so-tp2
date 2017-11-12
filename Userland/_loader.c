@@ -14,7 +14,9 @@ int _start(int argc, char *argv[]) {
 	//Clean BSS
 	memset(&bss, 0, &endOfBinary - &bss);
 
-	exit(main(argc, argv));
+	//return main(argc,argv);
+	int ret = main(argc,argv);
+	exit(ret);
 	return  0;
 }
 

@@ -143,13 +143,12 @@ int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
 	return sysCalls[rdi](rsi, rdx, rcx);
 }
 
-int sysExit(uint64_t value){
+int sysExit(uint64_t value, uint64_t rdx, uint64_t rcx){
 	removePCB(getCurrentProcess());
-	print("Process killed with return value: ");
+	print("Process ended with return value: ");
 	printDec(value);
-	print("\n");
-	//schedule();
-	return 1;
+	schedule();
+	return 0;
 }
 
 void sysCallsSetup(){

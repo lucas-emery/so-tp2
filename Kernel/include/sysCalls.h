@@ -40,6 +40,7 @@ int sysCreateMsg(uint64_t name, uint64_t messageSize, uint64_t rcx);
 int sysDeleteMsg(uint64_t name, uint64_t rdx, uint64_t rcx);
 int sysWriteMsg(uint64_t name, uint64_t content, uint64_t rcx);
 int sysReadMsg(uint64_t name, uint64_t buffer, uint64_t rcx);
+int sysExit(uint64_t value, uint64_t rdx, uint64_t rcx);
 void sysCallsSetup();
 
 #endif

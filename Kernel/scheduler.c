@@ -11,11 +11,8 @@ uint8_t initScheduler(){
   RRqueue = initQueue();
   return RRqueue != NULL;
 }
-int check = 0; 
+
 uint8_t addThread(tcbADT t){
-  //printHex(t->tid);
-  if(t->tid == 1)
-    check=1;
   if(t == NULL)
     return 0;
   t->state = NEW;
@@ -33,12 +30,10 @@ int getCurrentProcess(){
 }
 
 void schedule(){
-
   if(current != NULL && current->thread->state != BLOCKED && current->thread->state != DEAD){
      current->thread->state = READY;
      enqueue(RRqueue, current);
   }
-
   current = dequeue(RRqueue);
   if(current->thread->state == DEAD){
     schedule();
