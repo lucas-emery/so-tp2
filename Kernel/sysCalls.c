@@ -74,23 +74,19 @@ int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
 }
 
 int sysOpenSem(uint64_t name, uint64_t value, uint64_t id){
-	*((uint8_t *)id) = execute(OPEN, (char*) name, (int) value);
-	return 0;
+	return execute(OPEN, (char*) name, (int) value);
 }
 
 int sysCloseSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	execute(CLOSE, NULL, (int) id);
-	return 0;
+	return execute(CLOSE, NULL, (int) id);
 }
 
 int sysUpSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	execute(POST, NULL, (int) id);
-	return 0;
+	return execute(POST, NULL, (int) id);
 }
 
 int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	execute(WAIT, NULL, (int) id);
-	return 0;
+	return execute(WAIT, NULL, (int) id);
 }
 
 int sysPthread(uint64_t startRoutine, uint64_t arg, uint64_t rcx){

@@ -23,10 +23,13 @@ static int exists(char* name){
 }
 
 int semOpen(char* name, int value){
-	if(exists(name))
-		return NULL;
+	for (int i = 0; i < semCount; ++i){
+		if(strcmp(semaphores[i]->name,name) == 0)
+			return semaphores[i]->id;
+	}
 	sem_t newSem = malloc(sizeof(sem_tCDT));
-	newSem->name = name;
+	newSem->name = malloc(strlen(name)+1);
+	strcpy(newSem->name,name);
 	newSem->value = value;
 	newSem->id = id;
 	id++;
@@ -55,6 +58,7 @@ int semPost(char* name, int id){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value++;
+			semUnblock(id);
 			return SUCCESS;
 		}
 	}
@@ -64,24 +68,28 @@ int semPost(char* name, int id){
 int semWait(char* name, int id){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
-			if(semaphores[i]->value <= 0){
-				//semBlock(semaphores[i]->id);
-				semaphores[i]->value = -1;
+			semaphores[i]->value--;
+			if(semaphores[i]->value < 0){
+				semBlock(semaphores[i]->id,0);/*
+				sti();
+				while(1){
+					printDec(1);
+				}*/
 			}
-			else
-				semaphores[i]->value--;
 			return SUCCESS;
 		}
 	}
 	return FAIL;
 }
 
-void execute(int operation, char* name, int id){
+int execute(int operation, char* name, int id){
 	if(operation < 0 || operation > 4)
 		return;
-	testAndSet(&lock);
-	(semOperations[operation])(name, id);
+	int ret;
+	//testAndSet(&lock);
+	ret = (semOperations[operation])(name, id);
 	lock = FALSE;
+	return ret;
 }
 
 

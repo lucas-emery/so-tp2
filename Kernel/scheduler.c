@@ -25,6 +25,12 @@ uint8_t addThread(tcbADT t){
   return enqueue(RRqueue,new);
 }
 
+void killThread(){
+  current->thread->state = DEAD;
+  sti();
+  while(1);
+}
+
 int getCurrentProcess(){
   return current->thread->pid;
 }
@@ -34,11 +40,14 @@ void schedule(){
      current->thread->state = READY;
      enqueue(RRqueue, current);
   }
+
   current = dequeue(RRqueue);
+
   if(current->thread->state == DEAD){
     schedule();
     return;
   }
+
   setContext(current->thread->context);
   current->thread->state = RUNNING;
 }
@@ -57,15 +66,16 @@ static void block(int i, queueADT * queueArray, int blocking){
   if(queueArray == NULL)
     return;
   current->thread->state = BLOCKED;
-  if(enqueue(queueArray[i],current) == FAIL)
-    return;
-  return; //yield.
+  saveContext();
+  enqueue(queueArray[i],current);
 }
 
 static uint8_t unblock(int i, queueADT * queueArray){
   if(queueArray[i] == NULL)
     return FAIL;
   qnode * node = dequeue(queueArray[i]);
+  if(node == NULL)
+    return FAIL;
   node->thread->state = READY;
   return enqueue(RRqueue,node);
 }
