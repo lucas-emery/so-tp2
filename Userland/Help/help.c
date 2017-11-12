@@ -8,7 +8,7 @@ date: Prints out the current date\n\
 clear: Wipes out the screen\n\
 hello: Prints arguments\n\
 sampleCodeModule: A sample module\n\
-ps: Prints out processes information";
+ps: Prints out processes information\n";
 
 int main(int argc, char *argv[]) {
 	printf(man);

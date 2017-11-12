@@ -4,12 +4,18 @@ GLOBAL writePort
 GLOBAL hang
 GLOBAL dispatch
 GLOBAL testAndSet
+GLOBAL updateCR3
 
 %include "./asm/macros.m"
 
 
 
 section .text
+
+updateCR3:
+	mov rax, cr3
+	mov cr3, rax
+	ret
 
 dispatch:
 	mov rsp, rdi

@@ -14,12 +14,11 @@ int _start(int argc, char *argv[]) {
 	//Clean BSS
 	memset(&bss, 0, &endOfBinary - &bss);
 
-	return main(argc,argv);
-	/*
+	//return main(argc,argv);
+
 	int ret = main(argc,argv);
 	exit(ret);
 	return  ret;
-	*/
 }
 
 
