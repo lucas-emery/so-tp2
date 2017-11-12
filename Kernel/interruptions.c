@@ -104,7 +104,7 @@ void debug(){
 
 void setupIDT() {
 	//iSetHandler(0x0D, 0, (uint64_t) &debug);
-	//iSetHandler(0x0E, 0, (uint64_t) &PFHandler);
+	iSetHandler(0x0E, 0, (uint64_t) &PFHandler);
 	iSetHandler(0x20, 2, (uint64_t) &TTHandler);
 	iSetHandler(0x21, 2, (uint64_t) &irq1Handler);
 	iSetHandler(0x2C, 2, (uint64_t) &irq12Handler);

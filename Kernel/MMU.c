@@ -299,7 +299,7 @@ void changePDE(int entry, uint64_t physAddr, int present){
 
 void pageFaultHandler(){
 	kernelMode();
-	print("PAGEFAULT");
+	print("ACCESS DENIED");
 	newLine();
 	exitCurrentProcess(0xE);
 	while(1);
