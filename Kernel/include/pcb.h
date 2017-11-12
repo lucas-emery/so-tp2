@@ -9,6 +9,7 @@
 #define BLOCKED 1
 #define READY 2
 #define NEW 3
+#define DEAD 4
 
 typedef struct pcbCDT* pcbADT;
 

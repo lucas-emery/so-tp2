@@ -33,10 +33,11 @@ void screenTickHandler() {
 	}
 }
 
-void timerTickHandler(uint64_t rsp) {
+void timerTickHandler(uint64_t *rsp) {
 	// print("rsp");
 	// printHex(rsp);
-	uint64_t * reg = rsp;
+	uint64_t *reg = rsp;
+	//printHex(reg);
 	// while(reg <= CONTEXT_SWITCH_STACKBASE) {
 	// 	newLine();
 	// 	printHex(*reg);

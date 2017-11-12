@@ -143,6 +143,15 @@ int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
 	return sysCalls[rdi](rsi, rdx, rcx);
 }
 
+int sysExit(uint64_t value){
+	removePCB(getCurrentProcess());
+	print("Process killed with return value: ");
+	printDec(value);
+	print("\n");
+	//schedule();
+	return 1;
+}
+
 void sysCallsSetup(){
 	sysCalls[0] = &sysRead;
 	sysCalls[1] = &sysWrite;
@@ -168,4 +177,5 @@ void sysCallsSetup(){
 	sysCalls[21] = &sysDeleteMsg;
 	sysCalls[22] = &sysWriteMsg;
 	sysCalls[23] = &sysReadMsg;
+	sysCalls[24] = &sysExit;
 }

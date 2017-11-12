@@ -88,7 +88,7 @@ buildStack: ;Params argc, argv, rip, rsp(Process) - Return: rsp(Kernel)
 
   ;xor r15, r15
   ;mov r15, cs
-  push 0x18 ;USER_CS
+  push 0x8 ;USER_CS
   push rdx  ;RIP
 
   ;For TTHandler

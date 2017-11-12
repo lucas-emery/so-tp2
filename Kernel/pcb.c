@@ -39,6 +39,9 @@ int addPCB(char * name, int privilege){
 int removePCB(int id){
 	for (int i = 0; i < tableSize; i++){
 		if(pcbTable[i]->pid == id){
+			pcbADT pcb = pcbTable[i];
+			for(int j = 0; j < pcb->threadCount; j++)
+				pcb->threads[j]->state = DEAD;
 			free(pcbTable[i]);
 			for(int j = i; j < tableSize-1; j++)
 				pcbTable[j] = pcbTable[j+1];

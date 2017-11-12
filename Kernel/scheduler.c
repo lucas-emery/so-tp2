@@ -3,17 +3,19 @@
 
 
 
-queueADT RRqueue;
-queueADT * semQueues, * rMsgQueues, * wMsgQueues;
-uint8_t semCount = 0;
-qnode * current = NULL;
+static queueADT RRqueue;
+static queueADT * semQueues, * rMsgQueues, * wMsgQueues;
+static qnode * current = NULL;
 
 uint8_t initScheduler(){
   RRqueue = initQueue();
   return RRqueue != NULL;
 }
-
+int check = 0; 
 uint8_t addThread(tcbADT t){
+  //printHex(t->tid);
+  if(t->tid == 1)
+    check=1;
   if(t == NULL)
     return 0;
   t->state = NEW;
@@ -31,12 +33,17 @@ int getCurrentProcess(){
 }
 
 void schedule(){
-  if(current != NULL && current->thread->state != BLOCKED){
+
+  if(current != NULL && current->thread->state != BLOCKED && current->thread->state != DEAD){
      current->thread->state = READY;
      enqueue(RRqueue, current);
   }
-  printHex(current->thread->tid);
+
   current = dequeue(RRqueue);
+  if(current->thread->state == DEAD){
+    schedule();
+    return;
+  }
   setContext(current->thread->context);
   current->thread->state = RUNNING;
 }
@@ -104,6 +111,15 @@ uint8_t semUnblock(int semId){
   return unblock(semId,semQueues);
 }
 
+void printQueue(queueADT q){
+  qnode * current = q->back;
+  while(current != NULL){
+    printHex(current->thread->tid);
+    current = current->prev;
+  }
+}
+
+
 static queueADT initQueue(){
   queueADT ret = (queueADT) malloc(sizeof(queueCDT));
   if(ret == NULL)
@@ -122,11 +138,11 @@ static int isEmpty(queueADT q){
 static uint8_t enqueue(queueADT q, qnode* node){
   if(q == NULL || node == NULL)
     return FAIL;
-  node->next = NULL;
-  node->prev = q->back;
+  node->next = q->back;
+  node->prev = NULL;
 
   if(q->back)
-    q->back->next = node;
+    q->back->prev = node;
 
   q->back = node;
 
@@ -139,10 +155,13 @@ static uint8_t enqueue(queueADT q, qnode* node){
 static qnode* dequeue(queueADT q){
   if(isEmpty(q))
     return NULL;
-  qnode *next;
-  next = q->front->next;
   qnode * aux = q->front;
-  free(q->front);
-  q->front = next;
+  aux->next = NULL;
+  q->front = aux->prev;
+  aux->prev = NULL;
+  if(q->front != NULL)
+    q->front->next = NULL;
+  else
+    q->back = NULL;
   return aux;
 }

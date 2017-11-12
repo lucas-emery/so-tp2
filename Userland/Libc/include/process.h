@@ -11,6 +11,7 @@ int pthread_create(void *(*startRoutine)(void*), void * arg);
 void kill(int pid);
 void block(int pid);
 void unblock(int pid);
+void exit(int value);
 void yield();
 
 #endif

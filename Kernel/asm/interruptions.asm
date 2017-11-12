@@ -18,6 +18,8 @@ EXTERN sendEOI
 EXTERN pageFaultHandler
 EXTERN runModule
 EXTERN timerTickHandler
+EXTERN kernelMode
+EXTERN userMode
 
 section .text
 
@@ -51,8 +53,10 @@ PFHandler:
 int80Handler:
 	pushaq
 
+	call kernelMode
 	call sysCallHandler
-
+	call userMode
+	
 	popaq
 	iretq
 

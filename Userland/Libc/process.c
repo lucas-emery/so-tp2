@@ -8,6 +8,11 @@ int pthread_create(void *(*startRoutine)(void*), void * arg){
 	return int80(10, startRoutine, arg, 0);
 }
 
+void exit(int value){
+	uint64_t ret = value;
+	int80(24, ret,0,0);
+}
+
 void kill(int pid){
 	int80(11,pid,0,0);
 }
