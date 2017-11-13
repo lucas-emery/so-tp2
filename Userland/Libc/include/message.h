@@ -9,6 +9,6 @@ int message_init(char* name, int messageSize);
 int message_open(char* name);
 int message_close(int id);
 int message_write(int id, char* content);
-char* message_read(int id, char* buffer);
+int message_read(int id, char* buffer);
 
 #endif
