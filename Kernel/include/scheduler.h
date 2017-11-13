@@ -1,10 +1,6 @@
 #ifndef SCHED_H
 #define SCHED_H
 
-#define SUCCESS 0
-#define FAIL 1
-#define READ 0
-#define WRITE 1
 #define BLOCK 0
 #define UNBLOCK 1
 #define SEM 3

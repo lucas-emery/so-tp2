@@ -137,7 +137,7 @@ int sysWriteMsg(uint64_t id, uint64_t content, uint64_t rcx){
 }
 
 int sysReadMsg(uint64_t id, uint64_t buffer, uint64_t rcx){
-	readMessage(id, buffer);
+	readMessage(id, (char*)buffer);
 	return SUCCESS;
 }
 

@@ -58,6 +58,7 @@ static uint8_t open(int i, queueADT ** array){
   if(*array == NULL)
     return FAIL;
   *array[i] = initQueue();
+  printHex(*array[i]);
   if(*array[i] == NULL)
     return FAIL;
   return SUCCESS;
@@ -67,7 +68,6 @@ queueADT getQueue(int i, int type){
   switch(type){
     case STDIN:
       return stdinQueue;
-      break;
     case SEM:
       return semQueues[i];
     case READ:
@@ -93,7 +93,7 @@ uint8_t unblock(int i, int type){
 }
 
 uint8_t initMsg(int msgId){
-  return open(msgId,&rMsgQueues) && open(msgId, &wMsgQueues);
+  return !open(msgId,&rMsgQueues) && !open(msgId, &wMsgQueues);
 }
 
 void destroyMsg(int msgId){
@@ -145,8 +145,9 @@ uint8_t enqueue(queueADT q, qnode* node){
 }
 
 qnode* dequeue(queueADT q){
-  if(isEmpty(q))
+  if(isEmpty(q)){
     return NULL;
+  }
   qnode * aux = q->front;
   aux->next = NULL;
   q->front = aux->prev;

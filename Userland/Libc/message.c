@@ -16,6 +16,7 @@ int message_write(int id, char* content){
 	return int80(22, id, content, 0);
 }
 
-int message_read(int id, char* buffer){
-	return int80(23, id, buffer, 0);
+char* message_read(int id, char* buffer){
+	int80(23, id, buffer, 0);
+	return buffer;
 }

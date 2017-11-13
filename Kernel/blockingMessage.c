@@ -45,10 +45,10 @@ void readMessage(int id, char* buffer){
 			if(messages[i]->contentCount == 0)
 				block(id, READ);
 			else{
-				unblock(messages[i]->id, WRITE);
 				strcpy(buffer, messages[i]->buffer);
 				messages[i]->contentCount = 0;
 				messages[i]->buffer = realloc(messages[i]->buffer, sizeof(char));
+				unblock(messages[i]->id, WRITE);
 			}
 		}
 	}
@@ -60,10 +60,10 @@ void writeMessage(int id, char* content){
 			if(messages[i]->contentCount == MAX_SIZE_BUFFER)
 				block(messages[i]->id, WRITE);
 			else{
-				unblock(messages[i]->id, READ);
 				messages[i]->contentCount++;
 				messages[i]->buffer = realloc(messages[i]->buffer, messages[i]->contentCount * messages[i]->messageSize);
 				strcat(messages[i]->buffer, content);
+				unblock(messages[i]->id, READ);
 			}
 		}
 	}
