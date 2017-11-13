@@ -46,7 +46,7 @@ void schedule(){
   }
 
   current = dequeue(RRqueue);
-  
+
   if(current == NULL){
     current = idle;
   }

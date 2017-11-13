@@ -8,7 +8,7 @@
 
 #define MESSAGE_OPERATIONS 5
 
-#define MAX_SIZE_BUFFER 50 //it's not the actual size of the buffer but the amount of times write() was executed
+#define MAX_SIZE_BUFFER 10 //it's not the actual size of the buffer but the amount of times write() was executed
 
 typedef struct messageCDT* messageADT;
 typedef int (*messageOperation)(char*, int);
