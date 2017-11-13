@@ -30,7 +30,8 @@ int printf(const char* format, ...) {
 	va_list args;
 	va_start(args, format);
 	int num, length;
-	char number[12];
+	uint64_t longNum;
+	char number[28];
 	char ch;
 	char* string;
 
@@ -45,6 +46,11 @@ int printf(const char* format, ...) {
 				case 'x':
 					num = va_arg(args, int);
 					length = itoa(num, number, 16);
+					write(1, number,length);
+					break;
+				case 'l':
+					longNum = va_arg(args, uint64_t);
+					length = itoa(longNum, number, 16);
 					write(1, number,length);
 					break;
 				case 'c':

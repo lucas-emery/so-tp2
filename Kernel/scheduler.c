@@ -3,13 +3,14 @@
 
 
 
-static queueADT RRqueue;
+static queueADT RRqueue, stdinQueue;
 static queueADT * semQueues, * rMsgQueues, * wMsgQueues;
 static qnode * current = NULL;
 
 uint8_t initScheduler(){
   RRqueue = initQueue();
-  return RRqueue != NULL;
+  stdinQueue = initQueue();
+  return (RRqueue == NULL) + (stdinQueue == NULL);
 }
 
 uint8_t addThread(tcbADT t){
@@ -28,7 +29,7 @@ uint8_t addThread(tcbADT t){
 void killThread(){
   current->thread->state = DEAD;
   sti();
-  while(1);
+  intTT();
 }
 
 int getCurrentProcess(){
@@ -57,23 +58,34 @@ static uint8_t open(int i, queueADT ** array){
   if(*array == NULL)
     return FAIL;
   *array[i] = initQueue();
+  printHex(*array[i]);
   if(*array[i] == NULL)
     return FAIL;
   return SUCCESS;
 }
 
-static void block(int i, queueADT * queueArray, int blocking){
-  if(queueArray == NULL)
-    return;
+queueADT getQueue(int i, int type){
+  switch(type){
+    case STDIN:
+      return stdinQueue;
+    case SEM:
+      return semQueues[i];
+    case READ:
+      return rMsgQueues[i];
+    case WRITE:
+      return wMsgQueues[i];
+  }
+  return NULL;
+}
+
+void block(int i, int type){
   current->thread->state = BLOCKED;
-  enqueue(queueArray[i],current);
+  enqueue(getQueue(i,type),current);
 	intTT();
 }
 
-static uint8_t unblock(int i, queueADT * queueArray){
-  if(queueArray[i] == NULL)
-    return FAIL;
-  qnode * node = dequeue(queueArray[i]);
+uint8_t unblock(int i, int type){
+  qnode * node = dequeue(getQueue(i,type));
   if(node == NULL)
     return FAIL;
   node->thread->state = READY;
@@ -81,7 +93,7 @@ static uint8_t unblock(int i, queueADT * queueArray){
 }
 
 uint8_t initMsg(int msgId){
-  return open(msgId,&rMsgQueues) && open(msgId, &wMsgQueues);
+  return !open(msgId,&rMsgQueues) && !open(msgId, &wMsgQueues);
 }
 
 void destroyMsg(int msgId){
@@ -89,14 +101,6 @@ void destroyMsg(int msgId){
   rMsgQueues[msgId] = NULL;
   free(wMsgQueues[msgId]);
   wMsgQueues[msgId] = NULL;
-}
-
-void msgBlock(int msgId,int type, int blocking){
-  block(msgId, type==READ?rMsgQueues:wMsgQueues, blocking);
-}
-
-uint8_t msgUnblock(int msgId, int type){
-  return unblock(msgId, type==READ?rMsgQueues:wMsgQueues);
 }
 
 uint8_t initSem(int semId){
@@ -108,24 +112,7 @@ void destroySem(int semId){
   semQueues[semId] = NULL;
 }
 
-void semBlock(int semId,int blocking){
-  block(semId, semQueues, blocking);
-}
-
-uint8_t semUnblock(int semId){
-  return unblock(semId,semQueues);
-}
-
-void printQueue(queueADT q){
-  qnode * current = q->back;
-  while(current != NULL){
-    printHex(current->thread->tid);
-    current = current->prev;
-  }
-}
-
-
-static queueADT initQueue(){
+queueADT initQueue(){
   queueADT ret = (queueADT) malloc(sizeof(queueCDT));
   if(ret == NULL)
     return NULL;
@@ -134,13 +121,13 @@ static queueADT initQueue(){
   return ret;
 }
 
-static int isEmpty(queueADT q){
+int isEmpty(queueADT q){
   if(q == NULL)
     return 1;
   return q->front == NULL;
 }
 
-static uint8_t enqueue(queueADT q, qnode* node){
+uint8_t enqueue(queueADT q, qnode* node){
   if(q == NULL || node == NULL)
     return FAIL;
   node->next = q->back;
@@ -157,9 +144,10 @@ static uint8_t enqueue(queueADT q, qnode* node){
   return SUCCESS;
 }
 
-static qnode* dequeue(queueADT q){
-  if(isEmpty(q))
+qnode* dequeue(queueADT q){
+  if(isEmpty(q)){
     return NULL;
+  }
   qnode * aux = q->front;
   aux->next = NULL;
   q->front = aux->prev;

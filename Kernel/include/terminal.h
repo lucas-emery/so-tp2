@@ -45,5 +45,7 @@ char readBuffer();
 void keyboardLeft();
 void keyboardRight();
 void setEcho(uint8_t boolean);
+int getFocusedPID();
+void setFocusedPID(int pid);
 
 #endif

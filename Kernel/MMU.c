@@ -297,12 +297,12 @@ void changePDE(int entry, uint64_t physAddr, int present){
 		*((uint64_t*)PD) = (uint64_t)physAddr & ~(uint64_t)0x1;
 }
 
-void pageFaultHandler(){ //TODO
-	//Expand stack???
+void pageFaultHandler(){
+	kernelMode();
 	print("PAGEFAULT");
 	newLine();
-	copyAndExecuteDefaultModule();
-	//hang();
+	exitCurrentProcess(0xE);
+	while(1);
 }
 
 void clearBSS(void * bssAddress, uint64_t bssSize)

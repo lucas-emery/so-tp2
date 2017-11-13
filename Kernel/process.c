@@ -1,23 +1,43 @@
 #include <process.h>
+#include <terminal.h>
 
 extern char* moduleNames[];
 int exitValue;
 
 int createProcess(int moduleIndex, int argc, char * argv[]){
-
-
+	print("adding pcb ");
 	int newProcessID = addPCB(moduleNames[moduleIndex], 3); // default privilege 3
-
-	//printDec(moduleIndex);
-	//printHex(newProcessID);
+	printDec(newProcessID);
+	print(" creating thread ");
 
 	tcbADT newProcessThread = createFirstTCB(3, newProcessID, moduleIndex, argc, argv); // default privilege 3
+	print("addingtcb ");
+
 	addTCB(newProcessThread);
-
-
-	//printDec(removePCB(newProcessID));
+	print("finished");
+	newLine();
 
 	return newProcessID;
+}
+
+void exitProcess(int pid, int value) {
+	newLine();
+	printDec(pid);
+	newLine();
+	printDec(getFocusedPID());
+	newLine();
+
+	removePCB(pid);
+	if(pid == getFocusedPID()) {
+		setFocusedPID(createProcess(0,0,0));
+	}
+	printDec(getFocusedPID());
+	exitValue = value;
+	intTT();
+}
+
+void exitCurrentProcess(int value) {
+	exitProcess(getCurrentProcess(), value);
 }
 
 // int createProcess(char * processInfo){

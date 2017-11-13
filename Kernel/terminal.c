@@ -2,6 +2,7 @@
 #include <lib.h>
 #include <video.h>
 
+static int focusedPID;
 
 static video_row videoBuffer[HEIGHT];
 static char kbBuffer[BUFFER_SIZE];
@@ -25,6 +26,15 @@ static uint8_t toX = 0;
 static uint8_t toY = 0;
 
 static char buffer[64];
+
+
+int getFocusedPID() {
+	return focusedPID;
+}
+
+void setFocusedPID(int pid) {
+	focusedPID = pid;
+}
 
 //==============================================================================
 //  VIDEO

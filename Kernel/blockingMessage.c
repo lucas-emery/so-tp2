@@ -43,12 +43,12 @@ void readMessage(int id, char* buffer){
 	for (int i = 0; i < messagesCount; ++i){
 		if(messages[i]->id == id){
 			if(messages[i]->contentCount == 0)
-				msgBlock(id, READ, FALSE);
+				block(id, READ);
 			else{
-				msgUnblock(messages[i]->id, WRITE);
 				strcpy(buffer, messages[i]->buffer);
 				messages[i]->contentCount = 0;
 				messages[i]->buffer = realloc(messages[i]->buffer, sizeof(char));
+				unblock(messages[i]->id, WRITE);
 			}
 		}
 	}
@@ -58,12 +58,12 @@ void writeMessage(int id, char* content){
 	for (int i = 0; i < messagesCount; ++i){
 		if(messages[i]->id == id){
 			if(messages[i]->contentCount == MAX_SIZE_BUFFER)
-				msgBlock(messages[i]->id, WRITE, FALSE);
+				block(messages[i]->id, WRITE);
 			else{
-				msgUnblock(messages[i]->id, READ);
 				messages[i]->contentCount++;
 				messages[i]->buffer = realloc(messages[i]->buffer, messages[i]->contentCount * messages[i]->messageSize);
 				strcat(messages[i]->buffer, content);
+				unblock(messages[i]->id, READ);
 			}
 		}
 	}

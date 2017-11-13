@@ -57,6 +57,12 @@ int sysExec(uint64_t filename, uint64_t argc, uint64_t argv) {
 	int i = 0;
 	while(moduleNames[i] != 0){
 		if(strcmp(filename, moduleNames[i]) == 0) {
+			if(argc > 0 && ((char**)argv)[argc-1][0] == '&') {
+				int pid = createProcess(i, argc-1, argv);
+				setFocusedPID(pid);
+				exitCurrentProcess(0);
+				return pid;
+			}
 			return createProcess(i, argc, argv);
 		}
 		i++;
@@ -131,7 +137,7 @@ int sysWriteMsg(uint64_t id, uint64_t content, uint64_t rcx){
 }
 
 int sysReadMsg(uint64_t id, uint64_t buffer, uint64_t rcx){
-	readMessage(id, buffer);
+	readMessage(id, (char*)buffer);
 	return SUCCESS;
 }
 
@@ -142,9 +148,7 @@ int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
 }
 
 int sysExit(uint64_t value, uint64_t rdx, uint64_t rcx){
-	removePCB(getCurrentProcess());
-	exitValue = value;
-	intTT();
+	exitCurrentProcess(value);
 	return 0;
 }
 
