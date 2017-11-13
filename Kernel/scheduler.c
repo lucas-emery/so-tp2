@@ -7,7 +7,7 @@ static queueADT RRqueue, stdinQueue;
 static queueADT * semQueues, * rMsgQueues, * wMsgQueues, *keyQueues;
 static qnode * idle, * current = NULL;
 int keys[KEYS] = {0};
-extern int moduleCount;
+extern uint32_t moduleCount;
 
 
 uint8_t initScheduler(){

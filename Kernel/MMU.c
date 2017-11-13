@@ -128,14 +128,7 @@ void restoreProcessData() {
 uint64_t copyModule(int moduleIndex) {
 	uint64_t dataPageAddress = getFreePage();
 	changeDataPage(dataPageAddress);
-	printHex(moduleIndex);
-	print(" MA ");
-	printHex(moduleAddresses[moduleIndex]);
-	print(" PA ");
-	printHex(dataPageAddress);
-	newLine();
-	//while(1);
-	memcpy((void *)dataPageAddress, moduleAddresses[moduleIndex], PAGESIZE);
+	memcpy((void *)EXEC_MEM_ADDR, moduleAddresses[moduleIndex], PAGESIZE);
 	restoreProcessData();
 	return dataPageAddress;
 }
@@ -282,12 +275,6 @@ void changePDE(int entry, uint64_t physAddr, int present){
 
 void pageFaultHandler(){
 	kernelMode();
-	uint64_t * PD = 0x10000;
-	for(int i = 0; i < 20; i++) {
-		printHex(PD[i]);
-		newLine();
-	}
-	while(1);
 	print("ACCESS DENIED");
 	newLine();
 	exitCurrentProcess(0xE);
