@@ -1,9 +1,5 @@
-/* sampleCodeModule.c */
+#include <stdio.h>
 
-char * v = (char*)0xB8000 + 79 * 2;
-
-int main(int argc, char *argv[]) {
-	while(1){
-	
-	}
+int main(){
+	printf("Hola mundo");
 }

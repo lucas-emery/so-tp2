@@ -2,6 +2,11 @@
 #include <interruptions.h>
 
 #define AVOID_BSS 1
+#define	CONTEXT_SWITCH_STACK 0x600000
+#define PAGESIZE 0x200000
+#define	CONTEXT_SWITCH_STACKBASE (CONTEXT_SWITCH_STACK + PAGESIZE - sizeof(uint64_t))
+
+extern uint64_t getStackPtr();
 
 typedef struct {
 	uint16_t offset_l; //bit 0..15
@@ -29,15 +34,11 @@ void screenTickHandler() {
 }
 
 void timerTickHandler(uint64_t rsp) {
-	//kernelMode();
-	// printHex(rsp);
-	// print("\n");
-	// printHex(*((uint64_t *)(rsp + (8*15))));
-	// print("\n");
-	screenTickHandler();
-	//schedule();
+	kernelMode();
 
-	//userMode(); //Puedo llegar a querer salir en kernel mode?
+	schedule();
+
+	userMode();
 }
 
 void irqDispatcher(int irq) {
@@ -63,26 +64,37 @@ void iSetHandler(int index, uint8_t ist, uint64_t handler) {
 	IDT[index].offset_h = (uint32_t) (handler >> 32) & 0xFFFFFFFF;
 
 	IDT[index].selector = 0x08;
-	IDT[index].attrs = 0x8E;
+	IDT[index].attrs = 0xEE;
 	IDT[index].ist = ist;
 
 	IDT[index].zero_h = 0;
 
 }
 
+void debug(){
+	uint64_t * reg = getStackPtr();
+	while(reg <= CONTEXT_SWITCH_STACKBASE) {
+		newLine();
+		printHex(*reg);
+		reg++;
+	}
+	while(1);
+}
+
 void setupIDT() {
-	//iSetHandler(0x0E, 0, (uint64_t) &PFHandler);
-	iSetHandler(0x20, 0, (uint64_t) &TTHandler);
-	iSetHandler(0x21, 0, (uint64_t) &irq1Handler);
-	iSetHandler(0x2C, 0, (uint64_t) &irq12Handler);
+	//iSetHandler(0x0D, 0, (uint64_t) &debug);
+	iSetHandler(0x0E, 0, (uint64_t) &PFHandler);
+	iSetHandler(0x20, 2, (uint64_t) &TTHandler);
+	iSetHandler(0x21, 2, (uint64_t) &irq1Handler);
+	iSetHandler(0x2C, 2, (uint64_t) &irq12Handler);
 	iSetHandler(0x80, 1, (uint64_t) &int80Handler);
 
 	initializeMouse();
 	sysCallsSetup();
 	setupRTC();
 	setupSemaphores();
+	setupMessages();
 
 	setPicMaster(0xF8);
 	setPicSlave(0xEF);
-	sti();
 }

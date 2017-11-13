@@ -2,6 +2,11 @@
 #define _KEYBOARD_H_
 
 #include <stdint.h>
+#include <terminal.h>
+#include <lib.h>
+#include <scanCodes.h>
+#include <MMU.h>
+#include <process.h>
 
 #ifndef TRUE
 #define TRUE 1
@@ -31,6 +36,8 @@
 #define CURSOR_RIGHT		0x4D
 #define CTRL_RELEASE		0x9D
 #define CTRL_PRESS			0x1D
+
+extern void sendEOI(int);
 
 void keyboardHandler();
 void parseScanCode(uint8_t scanCode);

@@ -8,17 +8,21 @@
 static void loadModule(uint8_t ** module, void * targetModuleAddress);
 static uint32_t readUint32(uint8_t ** address);
 
+extern uint32_t moduleCount;
+
 void ** loadModules(void * payloadStart){
 	int i;
-	void * moduleAddress;
+	uint64_t moduleAddress = ROM;
 	uint8_t * currentModule = (uint8_t*)payloadStart;
-	uint32_t moduleCount = readUint32(&currentModule);
+	moduleCount = readUint32(&currentModule);
 	void ** moduleAddresses = malloc(moduleCount * sizeof(void *));
 
 	for (i = 0; i < moduleCount; i++) {
-		moduleAddress = getFreePage();
-		loadModule(&currentModule, moduleAddress);
-		moduleAddresses[i] = moduleAddress;
+		changePDE(moduleAddress / PAGESIZE, getFreePage(), PRESENT);
+		flushPaging();
+		loadModule(&currentModule, (void*)moduleAddress);
+		moduleAddresses[i] = (void*)moduleAddress;
+		moduleAddress += PAGESIZE;
 	}
 
 	return moduleAddresses;

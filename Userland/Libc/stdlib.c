@@ -4,22 +4,22 @@ static unsigned long int next = 1;
 
 void * malloc(unsigned int size) {
 	void * address;
-	int80(8,&address,size,0);
+	int80(8,(uint64_t) &address, (uint64_t) size,0);
 	return address;
 }
 
 void free(void *ptr) {
 
-} 
+}
 
 //Adapted from naiveterminal.c
-int itoa(int value, char * buffer, int base) {
+int itoa(uint64_t value, char * buffer, int base) {
 	char *p = buffer;
 	char *p1, *p2;
 	int digits = 0;
 
 	if(value < 0 && base == 10) {
-		value = -value; 
+		value = -value;
 		*p++ = '-';
 		digits++;
 	}
@@ -52,11 +52,11 @@ int itoa(int value, char * buffer, int base) {
 }
 
 int isAlpha(char c) {
-	return (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z');
+	return ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'));
 }
 
 int isDigit(char c) {
-	return (c >= '0' && c <= '9'); 
+	return (c >= '0' && c <= '9');
 }
 
 int rand(){

@@ -2,6 +2,7 @@
 #include <lib.h>
 #include <video.h>
 
+static int focusedPID;
 
 static video_row videoBuffer[HEIGHT];
 static char kbBuffer[BUFFER_SIZE];
@@ -25,6 +26,15 @@ static uint8_t toX = 0;
 static uint8_t toY = 0;
 
 static char buffer[64];
+
+
+int getFocusedPID() {
+	return focusedPID;
+}
+
+void setFocusedPID(int pid) {
+	focusedPID = pid;
+}
 
 //==============================================================================
 //  VIDEO
@@ -411,8 +421,10 @@ void writeBuffer(char ch) {
 			writeIndex = startIndex = endIndex;
 			if(echo)
 				printc(ch);
+			unblock(0,STDIN);
 			break;
 		default:
+			unblock((int) ch, KEY);
 			if(size < BUFFER_SIZE-1) {					//Dejar un espacio para \n
 				shiftRight();
 				kbBuffer[writeIndex] = ch;
@@ -423,9 +435,9 @@ void writeBuffer(char ch) {
 				if(endIndex == BUFFER_SIZE)
 					endIndex = 0;
 				size++;
+				if(echo)
+					printc(ch);
 			}
-			if(echo)
-				printc(ch);
 			break;
 	}
 }

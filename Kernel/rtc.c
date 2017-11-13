@@ -35,30 +35,30 @@ uint8_t getTime(uint8_t value) {
 }
 
 void recalculate(int * hours, int * day, int * month, int * year) {
-  *hours += timeZone;
+  *(hours) += timeZone;
 
   if(*hours < 0) {
-    *hours += 24;
-    *day--;
+    *(hours) += 24;
+    *(day) -= 1;
     if(*day < 0) {
-      *month--;
+      *(month) -= 1;
       *day = days(*month);
     }
     if(*month < 0) {
       *month = 12;
-      *year--;
+      *(year) -= 1;
     }
   }
   else if(*hours > 24){
     *hours = *hours % 24;
-    *day++;
+    *(day) += 1;
     if(*day > days(*month)){
-      *month++;
+      *(month) += 1;
       *day = 1;
     }
     if(*month > 12) {
       *month = 1;
-      *year++;
+      *(year) += 1;
     }
   }
 }

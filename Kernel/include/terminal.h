@@ -2,6 +2,7 @@
 #define TERMINAL_H
 
 #include <stdint.h>
+#include <scheduler.h>
 
 #define WIDTH 80
 #define HEIGHT 25
@@ -45,5 +46,7 @@ char readBuffer();
 void keyboardLeft();
 void keyboardRight();
 void setEcho(uint8_t boolean);
+int getFocusedPID();
+void setFocusedPID(int pid);
 
 #endif

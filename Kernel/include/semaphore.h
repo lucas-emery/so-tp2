@@ -3,29 +3,23 @@
 
 #include <lib.h>
 #include <MMU.h>
+#include <scheduler.h>
 
-#define SEM_OPERATIONS 4
-#define OPEN 0
-#define CLOSE 1
-#define POST 2
-#define WAIT 3
+#define SEM_OPERATIONS 5
 
-typedef struct sem_tCDT{
-	int value;
-	char* name;
-	int id;
-};
+typedef struct semCDT* semADT;
 
-typedef struct sem_tCDT* sem_t;
-
-typedef int (*semOperation)(char*, int);
+typedef int (*semOperation)(char*, int, int);
 
 extern int testAndSet(uint64_t lock);
 
-int semOpen(char* name, int value);
-int semClose(char*, int id);
-int semPost(char*, int id);
-int semWait(char*, int id);
+void semString(char* buffer);
+int setValue(char* arg1, int id, int value);
+int semOpen(char* name, int arg2, int arg3);
+int semClose(char* arg1, int id, int arg3);
+int semPost(char* arg1, int id, int arg3);
+int semWait(char* arg1, int id, int arg3);
+int executeSemaphore(int operation, char* arg1, int arg2, int arg3);
 void setupSemaphores();
 
 #endif

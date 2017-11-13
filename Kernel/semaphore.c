@@ -1,87 +1,110 @@
 #include <semaphore.h>
 
-static sem_t* semaphores;
+typedef struct semCDT{
+	int value;
+	char* name;
+	int id;
+} semCDT;
+
+static semADT* semaphores;
 static int semCount = 0;
 static int id = 0;
 static semOperation semOperations[SEM_OPERATIONS];
-volatile int lock = 0;
+static int lock = 0;
 
-static int exists(char* name);
-
-static int exists(char* name){
-	for (int i = 0; i < semCount; ++i){
-		if(semaphores[i]->name == name)
-			return TRUE;
+void semString(char * buffer){
+	strcat(buffer, "Semaphores: ");
+	char aux[10];
+	for(int i = 0 ; i < semCount ; i++){
+		strcat(buffer, semaphores[i]->name);
+		strcat(buffer, "(");
+		uintToBase(semaphores[i]->value,aux,10);
+		strcat(aux,")");
+		strcat(buffer, aux);
+		if(i != semCount -1)
+			strcat(buffer, ", ");
 	}
-	return FALSE;
 }
 
-int semOpen(char* name, int value){
-	if(exists(name))
-		return NULL;
-	sem_t newSem;
-	newSem->name = name;
-	newSem->value = value;
+int setValue(char* arg1, int id, int value){
+	for (int i = 0; i < semCount; i++){
+		if(semaphores[i]->id == id)
+			semaphores[i]->value = value;
+			return value;
+	}
+	return -1;
+}
+
+int semOpen(char* name, int arg2, int arg3){
+	for (int i = 0; i < semCount; i++){
+		if(strcmp(semaphores[i]->name,name) == 0)
+			return semaphores[i]->id;
+	}
+	semADT newSem = malloc(sizeof(semCDT));
+	newSem->name = malloc(strlen(name)+1);
+	strcpy(newSem->name,name);
+	newSem->value = 0;
 	newSem->id = id;
 	id++;
 	semCount++;
-	semaphores = realloc(semaphores, semCount * sizeof(sem_t));
+	semaphores = realloc(semaphores, semCount * sizeof(semADT));
 	semaphores[semCount - 1] = newSem;
 	initSem(newSem->id);
 	return newSem->id;
 }
 
-int semClose(char* name, int id){
-	for (int i = 0; i < semCount; ++i){
+int semClose(char* arg1, int id, int arg3){
+	for (int i = 0; i < semCount; i++){
 		if(semaphores[i]->id == id){
 			destroySem(id);
 			free(semaphores[i]);
 			for(int j = i; j < semCount-1; j++)
 				semaphores[j] = semaphores[j+1];
 			semCount--;
-			return 0;
+			return SUCCESS;
 		}
 	}
-	return 1;
+	return FAIL;
 }
 
-int semPost(char* name, int id){
-	for (int i = 0; i < semCount; ++i){
+int semPost(char* arg1, int id, int arg3){
+	for (int i = 0; i < semCount; i++){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value++;
-			return 0;
+			unblock(id, SEM);
+			return SUCCESS;
 		}
 	}
-	return 1;
+	return FAIL;
 }
 
-int semWait(char* name, int id){
-	for (int i = 0; i < semCount; ++i){
+int semWait(char* arg1, int id, int arg3){
+	for (int i = 0; i < semCount; i++){
 		if(semaphores[i]->id == id){
-			if(semaphores[i]->value <= 0){
-				//semBlock(semaphores[i]->id);
-				semaphores[i]->value = -1;
+			semaphores[i]->value--;
+			if(semaphores[i]->value < 0){
+				block(id, SEM);
 			}
-			else
-				semaphores[i]->value--;
-			return 0;
+			return SUCCESS;
 		}
 	}
-	return 1;
+	return FAIL;
 }
 
-void execute(int operation, char* name, int id){
-	if(operation < 0 || operation > 4)
-		return;
+int executeSemaphore(int operation, char* arg1, int arg2, int arg3){
+	if(operation < 0 || operation > SEM_OPERATIONS)
+		return -1;
+	int ret;
 	testAndSet(&lock);
-	(semOperations[operation])(name, id);
+	ret = (semOperations[operation])(arg1, arg2, arg3);
 	lock = FALSE;
+	return ret;
 }
-
 
 void setupSemaphores(){
 	semOperations[OPEN] = &semOpen;
 	semOperations[CLOSE] = &semClose;
 	semOperations[POST] = &semPost;
 	semOperations[WAIT] = &semWait;
+	semOperations[SET] = &setValue;
 }

@@ -5,23 +5,22 @@
 #include <MMU.h>
 #include <thread.h>
 
-#define RUNNING 0
-#define BLOCKED 1
-#define READY 2
-#define NEW 3
-
 typedef struct pcbCDT* pcbADT;
 
 /*
-*Initializes the PCB table by giving it memory 
+*Initializes the PCB table by giving it memory
 */
 void setupPCB();
 
 /*
-*Creates a new PCB entry in the PCB table with the privilidge in parameter 
+*Creates a new PCB entry in the PCB table with the privilidge in parameter
 *Returns the new processes pid
 */
 int addPCB(char* name, int privilege);
+
+void addTCB(tcbADT thread);
+context_t* getContextOfSibling(int id);
+tcbADT getThreads(int id, int* count);
 
 /*
 *Removes the PCB entry correspoding to the processes id in parameter
@@ -45,5 +44,5 @@ void processesInfo(char* buffer);
 *Returns the state of the process if it was found successfully, -1 if not
 */
 int getState(int id);
- 
+
 #endif

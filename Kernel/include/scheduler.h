@@ -1,13 +1,6 @@
 #ifndef SCHED_H
 #define SCHED_H
 
-#define SUCCESS 0
-#define FAIL 1
-#define READ 0
-#define WRITE 1
-#define BLOCK 0
-#define UNBLOCK 1
-
 #include <stdint.h>
 #include <pcb.h>
 #include <MMU.h>
@@ -20,7 +13,7 @@ typedef struct{
 } threadPackCDT;
 
 typedef struct qnode{
-        void * elem;
+        tcbADT thread;
         struct qnode *next;
         struct qnode *prev;
 } qnode;
@@ -39,6 +32,7 @@ typedef queueCDT * queueADT;
  *	$ -> global variable
  *	@ -> function parameter
  */
+
 
 
 /*
@@ -80,12 +74,12 @@ uint8_t initMsg(int msgId);
 void destroyMsg(int msgId);
 
 /*
- *	If @blocking is #TRUE, it blocks all of the running process´ threads, 
+ *	If @blocking is #TRUE, it blocks all of the running process´ threads,
  *	packing and queueing them together into the corresponding msgQueue, depending on @type.
  *	Otherwise, it packs only the running thread.
  *	Paramaters: msgId, type, blocking
  */
-void msgBlock(int msgId, int type, int blocking);
+//void msgBlock(int msgId, int type, int blocking);
 
 /*
  *	Dequeues a pack of threads from the corresponding msgQueue, depending on @type,
@@ -93,7 +87,7 @@ void msgBlock(int msgId, int type, int blocking);
  *	Paramaters: msgId, type
  *	Returns #SUCCESS on success, otherwise #FAIL.
  */
-uint8_t msgUnblock(int msgId, int type);
+//uint8_t msgUnblock(int msgId, int type);
 
 /*
  * Called upon the opening of a semaphore to initialize the queue used for the event.
@@ -113,66 +107,66 @@ void destroySem(int semId);
  *	packing and queueing them together into the corresponding semQueue.
  *	Paramaters: semId, blocking
  */
-void semBlock(int semId, int blocking);
+//void semBlock(int semId, int blocking);
 
 /*
  * Dequeues a pack of threads from the corresponding semQueue, unpacking and queueing them into the $RRqueue.
  * Paramaters: semId
  * Returns #SUCCESS on success, otherwise #FAIL.
  */
-uint8_t semUnblock(int semId);
+//uint8_t semUnblock(int semId);
 
 /*
  *	Opens a queue at index @i of @array.
  *	Paramaters: i, array
  */
-static uint8_t open(int i, queueADT ** array);
+uint8_t open(int i, queueADT * array);
 
 /*
  *	Blocks $current thread and offers it to the queue at index @i of @array.
  *	If @blocking is #TRUE
  *	Paramaters: i, array, blocking
  */
-static void block(int i, queueADT * array,int blocking);
+//static void block(int i, queueADT * array,int blocking);
 
 /*
  *	Unblocks thread at end of the queue at index @i of @array and queues it at $RRqueue.
  *	Paramaters: i, array
  */
-static uint8_t unblock(int i, queueADT * array);
+//static uint8_t unblock(int i, queueADT * array);
 
 /*
  *	If @type is BLOCK, it removes all threads in @pack from the queue and sets their state to BLOCKED.
  *	If @type is UNBLOCK, it enqueues all threads in @pack
  *	Paramaters: pack, type
  */
-static void managePack(threadPackADT pack,uint8_t type);
+//static void managePack(threadPackADT pack,uint8_t type);
 
 /*
  * Create an empty queue.
  */
-static queueADT initQueue();
+queueADT initQueue();
 
 /*
  * Check if queue is empty.
  * Returns #SUCCESS if the queue is empty, and otherwise #FAIL.
  */
-static int isEmpty(queueADT);
+int isEmpty(queueADT);
 
 /*
  * Add element to queue.
  * Returns #SUCCESS on success, and otherwise #FAIL.
  */
-static uint8_t enqueue(queueADT, void*);
+uint8_t enqueue(queueADT, qnode*);
 
 /*
  * Remove last element from queue, and return it.
  */
-static void* dequeue(queueADT);
+qnode* dequeue(queueADT);
 
 /*
  * Remove element from queue, using a static recursive function
  */
-static void remove(queueADT,void*);
+void remove(queueADT,void*);
 
 #endif

@@ -34,6 +34,8 @@ GLOBAL int80
 	pop rbx
 %endmacro
 
+section .text
+
 int80:
 	pushaq
 	int 80h

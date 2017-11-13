@@ -11,6 +11,7 @@
 #include <rtc.h>
 #include <MMU.h>
 #include <semaphore.h>
+#include <message.h>
 
 #pragma pack(push)
 #pragma pack(1)

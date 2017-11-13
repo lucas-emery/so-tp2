@@ -1,9 +1,17 @@
 #include <sysCalls.h>
 
+static sys sysCalls[SYSCALLS];
+
 int sysRead(uint64_t fileDescriptor, uint64_t buffer, uint64_t size) {
 	int index = 0;
 	char c;
+	if(getCurrentProcess() != getFocusedPID())
+		return 1;
 	if(fileDescriptor == 0) {
+		if((c = readBuffer()) == NULL)
+			block(0, STDIN);
+		*((char*)buffer++)= c;
+		index++;
 		while(index++ < size)
 			*((char*)buffer++)= readBuffer();
 	}
@@ -57,9 +65,18 @@ int sysExec(uint64_t filename, uint64_t argc, uint64_t argv) {
 	int i = 0;
 	while(moduleNames[i] != 0){
 		if(strcmp(filename, moduleNames[i]) == 0) {
-			//argv = backupArguments(argc, argv);
-			copyAndExecuteModule(i, argc, argv);
-			return 0;
+			if(argc == 0) {
+				return createProcess(i, argc, argv);
+			}
+			else if(strcmp(((char**)argv)[argc-1], "&") == 0) {
+				return createProcess(i, argc-1, argv);
+			}
+			else {
+				int pid = createProcess(i, argc, argv);
+				setFocusedPID(pid);
+				exitCurrentProcess(0);
+				return pid;
+			}
 		}
 		i++;
 	}
@@ -67,63 +84,107 @@ int sysExec(uint64_t filename, uint64_t argc, uint64_t argv) {
 }
 
 int sysMalloc(uint64_t address, uint64_t size, uint64_t rcx) {
+	userMode();
 	*((uint64_t *)address) = malloc(size);
+	kernelMode();
 	return 0;
 }
 
 int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
+	//Change to userMode
 	//TO DO
+	//Return to kernelMode
+	return 0;
+}
+
+int sysSetSem(uint64_t id, uint64_t value, uint64_t rcx){
+	return executeSemaphore(SET, NULL, (int)id, (int)value);
 }
 
 int sysOpenSem(uint64_t name, uint64_t value, uint64_t id){
-	*((uint8_t *)id) = execute(OPEN, (char*) name, (int) value);
-	return 0;
+	return executeSemaphore(OPEN, (char*) name, (int) value, NULL);
 }
 
 int sysCloseSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	execute(CLOSE, NULL, (int) id);
-	return 0;
+	return executeSemaphore(CLOSE, NULL, (int) id, NULL);
 }
 
 int sysUpSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	execute(POST, NULL, (int) id);
-	return 0;
+	return executeSemaphore(POST, NULL, (int) id, NULL);
 }
 
 int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	execute(WAIT, NULL, (int) id);
-	return 0;
+	return executeSemaphore(WAIT, NULL, (int) id, NULL);
 }
 
-int sysForkProcess(uint64_t processInfo, uint64_t rdx, uint64_t rcx){
-	
-	return createProcess(processInfo);
+int sysPthread(uint64_t startRoutine, uint64_t arg, uint64_t rcx){
+	return createThread(startRoutine, arg); //Crea una shell sin args
 }
 
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
-	removePCB(pid);
+	exitProcess(pid, FAIL);
+	return SUCCESS;
 }
 
 int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
 	processesInfo(buffer);
+	return SUCCESS;
 }
 
-int sysBlockProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//block();
+int sysKeyBlock(uint64_t key, uint64_t rdx, uint64_t rcx){
+	initKey(key);
+	block(key, KEY);
+	return SUCCESS;
 }
 
-int sysUnblockProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//unblock();
+int sysInitMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
+	return executeMessage(INIT, (char*)name, (int)messageSize);
 }
 
-int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//block();
+int sysOpenMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
+	return executeMessage(OPEN, (char*)name, NULL);
+}
+
+int sysDeleteMsg(uint64_t id, uint64_t rdx, uint64_t rcx){
+	return executeMessage(CLOSE, NULL, (int)id);
+}
+
+int sysWriteMsg(uint64_t id, uint64_t content, uint64_t rcx){
+	return executeMessage(WRITE, (char*)content, (int)id);
+}
+
+int sysReadMsg(uint64_t id, uint64_t buffer, uint64_t rcx){
+	return executeMessage(READ, (char*)buffer, (int)id);
 }
 
 int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
 	if(rdi < 0 || rdi >= SYSCALLS)
 		return -1; //Tirar error??
 	return sysCalls[rdi](rsi, rdx, rcx);
+}
+
+int sysExit(uint64_t value, uint64_t rdx, uint64_t rcx){
+	exitCurrentProcess(value);
+	return 0;
+}
+
+int sysExitThread(uint64_t rsi, uint64_t rdx, uint64_t rcx){
+	killThread();
+	return 0;
+}
+
+int sysGetPid(uint64_t rsi, uint64_t rdx, uint64_t rcx){
+	return getCurrentProcess();
+}
+
+int sysGetVar(uint64_t name, uint64_t buffer, uint64_t rcx){
+	if(strcmp((char*) name,"$?") == 0)
+		uintToBase(exitValue,buffer,10);
+	else if(strcmp((char*) name, "$sems") == 0)
+		semString((char*) buffer);
+	else if(strcmp((char*) name, "$msgs") == 0)
+		msgString((char*) buffer);
+	return 0;
 }
 
 void sysCallsSetup(){
@@ -137,14 +198,22 @@ void sysCallsSetup(){
 	sysCalls[7] = &sysExec;
 	sysCalls[8] = &sysMalloc;
 	sysCalls[9] = &sysFree;
-	sysCalls[10] = &sysForkProcess;
+	sysCalls[10] = &sysPthread;
 	sysCalls[11] = &sysKillProcess;
 	sysCalls[12] = &sysListProcesses;
-	sysCalls[13] = &sysBlockProcess;
-	sysCalls[14] = &sysUnblockProcess;
-	sysCalls[15] = &sysYieldProcess;
+	sysCalls[13] = &sysKeyBlock;
+	sysCalls[14] = &sysInitMsg;
+	sysCalls[15] = &sysSetSem;
 	sysCalls[16] = &sysOpenSem;
 	sysCalls[17] = &sysCloseSem;
 	sysCalls[18] = &sysUpSem;
 	sysCalls[19] = &sysDownSem;
+	sysCalls[20] = &sysOpenMsg;
+	sysCalls[21] = &sysDeleteMsg;
+	sysCalls[22] = &sysWriteMsg;
+	sysCalls[23] = &sysReadMsg;
+	sysCalls[24] = &sysExit;
+	sysCalls[25] = &sysExitThread;
+	sysCalls[26] = &sysGetPid;
+	sysCalls[27] = &sysGetVar;
 }

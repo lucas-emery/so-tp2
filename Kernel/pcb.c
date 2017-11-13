@@ -1,7 +1,7 @@
 #include <pcb.h>
 
 typedef struct pcbCDT{
-	char* name;
+	char name[32];
 	int pid;
 	int state;
 	int privilege;
@@ -10,8 +10,9 @@ typedef struct pcbCDT{
 }pcbCDT;
 
 static int idCount = 0;
-static pcbADT* pcbTable;
+static pcbADT * pcbTable;
 static int tableSize = 0;
+static int maxNameLength = 0;
 
 /*
 *Creates the string having the info of the process in parameter
@@ -23,22 +24,29 @@ void setupPCB(){
 	pcbTable = malloc(sizeof(pcbADT));
 }
 
-int addPCB(char* name, int privilege){
-	pcbADT newPCB;
+int addPCB(char * name, int privilege){
+	if(idCount == 0)
+		name = "sysIdle";
+	if(strlen(name) > maxNameLength)
+		maxNameLength = strlen(name);
+	pcbADT newPCB = malloc(sizeof(pcbCDT));
 	newPCB->pid = idCount++;
 	newPCB->state = NEW;
-	newPCB->name = name;
+	strcat(newPCB->name,name);
 	newPCB->privilege = privilege;
 	tableSize++;
 	pcbTable = realloc(pcbTable, tableSize * sizeof(pcbADT));
 	pcbTable[tableSize-1] = newPCB;
-	//*threads=firstTCB(privilege);
 	return newPCB->pid;
 }
 
 int removePCB(int id){
 	for (int i = 0; i < tableSize; i++){
 		if(pcbTable[i]->pid == id){
+			pcbADT pcb = pcbTable[i];
+			for(int j = 0; j < pcb->threadCount; j++)
+				pcb->threads[j]->state = DEAD;
+			freeProcessContext(pcb->threads[0]->context); //TODO: Existe este thread siempre?? Creo que si, gracias stu <3
 			free(pcbTable[i]);
 			for(int j = i; j < tableSize-1; j++)
 				pcbTable[j] = pcbTable[j+1];
@@ -68,37 +76,43 @@ int getState(int id){
 }
 
 void processesInfo(char* buffer){
-	*buffer = 0;
-	strcat(buffer, "NAME PID STATE PRIVILEGE\n");
 	for (int i = 0; i < tableSize; i++){
 		strcat(buffer, makeString(pcbTable[i]));
 	}
-} 
+}
 
 static char* makeString(pcbADT process){
-	char aux[100] = {0};
-	char str[15];
-	uintToBase(process->pid,str,10);
-	strcat(aux, str);
+	char* aux = malloc(100);
+	char* str1 = malloc(10);
+	char* str2 = malloc(10);
+	char* str3 = malloc(10);
+	int diff = maxNameLength - strlen(process->name);
+	strcat(aux, "PID: ");
+	uintToBase(process->pid,str1,10);
+	strcat(aux, str1);
+	strcat(aux, " NAME: ");
 	strcat(aux, process->name);
+	for(int i = 0; i < diff; i++)
+		strcat(aux," ");
+	strcat(aux, " PRIVILEGE: ");
+	uintToBase(process->privilege,str3,10);
+	strcat(aux, str3);
+	strcat(aux, " STATE: ");
 	switch(process->state){
 		case RUNNING:
-			strcpy(str, "running");
+			strcpy(str2, "running\n");
 		break;
 		case BLOCKED:
-			strcpy(str, "blocked");
+			strcpy(str2, "blocked\n");
 		break;
 		case READY:
-			strcpy(str, "ready");
+			strcpy(str2, "ready\n");
 		break;
 		case NEW:
-			strcpy(str, "new");
+			strcpy(str2, "new\n");
 		break;
 	}
-	strcat(aux, str);
-	uintToBase(process->privilege,str,10);
-	strcat(aux, str);
-	strcat(aux, "\n");
+	strcat(aux, str2);
 	return aux;
 }
 

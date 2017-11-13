@@ -1,8 +1,4 @@
 #include <keyboard.h>
-#include <terminal.h>
-#include <lib.h>
-#include <scanCodes.h>
-#include <MMU.h>
 
 static uint8_t shiftMayus = 0;
 static uint8_t leftShift = FALSE;
@@ -41,7 +37,8 @@ void parseScanCode(uint8_t scanCode) {
 					if(ch != 0)
 						if(ctrl && ch == 'c') {
 							sendEOI(1);
-							copyAndExecuteDefaultModule();
+							newLine();
+							exitProcess(getFocusedPID(), 1);
 						}
 						else
 							writeBuffer(ch);
