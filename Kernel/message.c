@@ -34,7 +34,9 @@ int createMessage(char* name, int messageSize){
 	newMessage->id = id;
 	newMessage->messageSize = messageSize;
 	id++;
-	newMessage->buffer = malloc(messageSize*MAX_SIZE_BUFFER);
+	newMessage->buffer = malloc(messageSize*MAX_SIZE_BUFFER+1);
+	for(int j=0; j<=((newMessage->messageSize)*MAX_SIZE_BUFFER); j++)
+				newMessage->buffer[j] = 0;
 	println(newMessage->buffer);
 	newMessage->contentCount = 0;
 	messagesCount++;
@@ -55,16 +57,14 @@ int openMessage(char* name, int arg2){
 int readMessage(char* buffer, int id){
 	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
-			if(messages[i]->contentCount == 0)
+			if(messages[i]->contentCount <= 0)
 				block(id, READ);
-			else{
-				strcpy(buffer, messages[i]->buffer);
-				messages[i]->contentCount = 0;
-				for(int j=0; j<((messages[i]->messageSize)*MAX_SIZE_BUFFER); j++)
-					messages[i]->buffer[j] = 0;
-				//println(messages[i]->buffer);
-				unblock(messages[i]->id, WRITE);
-			}
+			strcpy(buffer, messages[i]->buffer);
+			messages[i]->contentCount = 0;
+			for(int j=0; j<=((messages[i]->messageSize)*MAX_SIZE_BUFFER); j++)
+				messages[i]->buffer[j] = 0;
+			//println(messages[i]->buffer);
+			unblock(messages[i]->id, WRITE);
 			return SUCCESS;
 		}
 	}
@@ -74,15 +74,14 @@ int readMessage(char* buffer, int id){
 int writeMessage(char* content, int id){
 	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
-			if(messages[i]->contentCount == MAX_SIZE_BUFFER)
+			if(messages[i]->contentCount >= MAX_SIZE_BUFFER)
 				block(messages[i]->id, WRITE);
-			else{
-				messages[i]->contentCount++;
-				//println(messages[i]->buffer);
-				strcat(messages[i]->buffer, content);
-				//println(messages[i]->buffer);
-				unblock(messages[i]->id, READ);
-			}
+			messages[i]->contentCount++;
+			//println(messages[i]->buffer);
+			strcat(messages[i]->buffer, content);
+			//println(messages[i]->buffer);
+			unblock(messages[i]->id, READ);
+		
 			return SUCCESS;
 		}
 	}
