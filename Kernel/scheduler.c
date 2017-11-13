@@ -1,12 +1,13 @@
 #include <scheduler.h>
 #include <stdint.h>
 #define IDLE 0
-#define KEYS 50
+#define KEYS 'z' - 'a'
 
 static queueADT RRqueue, stdinQueue;
 static queueADT * semQueues, * rMsgQueues, * wMsgQueues, *keyQueues;
-static int keys[KEYS], keysUsed, moduleCount;
+static int keys[KEYS] = {0}, keysUsed;
 static qnode * idle, * current = NULL;
+extern int moduleCount;
 
 
 uint8_t initScheduler(){
@@ -56,7 +57,7 @@ void schedule(){
     schedule();
     return;
   }
-  printHex(current == idle);
+
   setContext(current->thread->context);
   current->thread->state = RUNNING;
 }
@@ -70,7 +71,6 @@ uint8_t open(int i, queueADT ** array){
     return FAIL;
   return SUCCESS;
 }
-
 
 queueADT getQueue(int i, int type){
   switch(type){

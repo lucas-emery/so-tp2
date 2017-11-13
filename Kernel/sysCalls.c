@@ -132,8 +132,8 @@ int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
 }
 
 int sysKeyBlock(uint64_t key, uint64_t rdx, uint64_t rcx){
-	//initKey(key);
-	//block(key, KEY);
+	initKey(key);
+	block(key, KEY);
 	return SUCCESS;
 }
 
