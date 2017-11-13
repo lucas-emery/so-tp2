@@ -113,7 +113,10 @@ uint8_t unblock(int i, int type){
     return unblock(i, type);
   }
   node->thread->state = READY;
-  return enqueue(RRqueue,node);
+  int ret = enqueue(RRqueue,node);
+  if(type == KEY)
+    unblock(i,type);
+  return ret;
 }
 
 int getKeyId(int key){
