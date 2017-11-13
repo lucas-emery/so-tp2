@@ -6,11 +6,12 @@ extern int int80(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx);
 int main(int argc, char *argv[]) {
 	int rightSide = 0;
 	uint64_t counter;
+	keyBlock('a');
 
 	while(1){
 		int80(2,0,0,0);
 		if(rightSide){
-			
+
 			printf("\n\n\n\n\n\n\n\n");
 			printf("                                      LOL:ROFL:ROFL\n"    );
 			printf("                             _________||_________\n"      );

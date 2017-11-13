@@ -1,9 +1,11 @@
 #include <scheduler.h>
 #include <stdint.h>
 #define IDLE 0
+#define KEYS 'z' - 'a'
 
 static queueADT RRqueue, stdinQueue;
-static queueADT * semQueues, * rMsgQueues, * wMsgQueues;
+static queueADT * semQueues, * rMsgQueues, * wMsgQueues, *keyQueues;
+static int keys[KEYS] = {0}, keysUsed;
 static qnode * idle, * current = NULL;
 extern int moduleCount;
 
@@ -40,7 +42,6 @@ int getCurrentProcess(){
 }
 
 void schedule(){
-  //printHex(current->thread->state);
   if(current != NULL && current->thread->state != BLOCKED && current->thread->state != DEAD && current->thread->tid != IDLE){
      current->thread->state = READY;
      enqueue(RRqueue, current);
@@ -81,6 +82,12 @@ queueADT getQueue(int i, int type){
       return rMsgQueues[i];
     case WRITE:
       return wMsgQueues[i];
+    case KEY:{
+      int id = getKeyId(i);
+      if(id < 0)
+        return NULL;
+      return keyQueues[id];
+    }
   }
   return NULL;
 }
@@ -102,6 +109,21 @@ uint8_t unblock(int i, int type){
   return enqueue(RRqueue,node);
 }
 
+int getKeyId(int key){
+  for(int i = 0; i < KEYS; i++){
+    if(keys[i] == key)
+      return i;
+  }
+  return -1;
+}
+
+uint8_t initKey(int key){
+  if(getKeyId(key) >= 0)
+    return SUCCESS;
+  keys[keysUsed] = key;
+  return !open(keysUsed++,&keyQueues);
+}
+
 uint8_t initMsg(int msgId){
   return !open(msgId,&rMsgQueues) && !open(msgId, &wMsgQueues);
 }
@@ -114,7 +136,7 @@ void destroyMsg(int msgId){
 }
 
 uint8_t initSem(int semId){
-  return open(semId,&semQueues);
+  return !open(semId,&semQueues);
 }
 
 void destroySem(int semId){

@@ -20,7 +20,7 @@ int getPid();
 int getVar(char * name,char* buffer);
 void ps(char * buffer);
 void kill(int pid);
-void block(int pid);
+void keyBlock(char key);
 void unblock(int pid);
 void exit(int value);
 

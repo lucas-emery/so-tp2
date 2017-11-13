@@ -122,17 +122,19 @@ int sysPthread(uint64_t startRoutine, uint64_t arg, uint64_t rcx){
 }
 
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
-	exitProcess(pid, 1);
-	return 0;
+	exitProcess(pid, FAIL);
+	return SUCCESS;
 }
 
 int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
 	processesInfo(buffer);
-	return 0;
+	return SUCCESS;
 }
 
-int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//block();
+int sysKeyBlock(uint64_t key, uint64_t rdx, uint64_t rcx){
+	initKey(key);
+	block(key, KEY);
+	return SUCCESS;
 }
 
 int sysInitMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
@@ -199,7 +201,7 @@ void sysCallsSetup(){
 	sysCalls[10] = &sysPthread;
 	sysCalls[11] = &sysKillProcess;
 	sysCalls[12] = &sysListProcesses;
-	sysCalls[13] = &sysYieldProcess;
+	sysCalls[13] = &sysKeyBlock;
 	sysCalls[14] = &sysInitMsg;
 	sysCalls[15] = &sysSetSem;
 	sysCalls[16] = &sysOpenSem;

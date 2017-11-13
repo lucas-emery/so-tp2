@@ -40,8 +40,8 @@ void ps(char* buffer){
 	int80(12, (uint64_t) buffer,0,0);
 }
 
-void block(int pid){
-	int80(13, (uint64_t) pid,0,0);
+void keyBlock(char key){
+	int80(13, (uint64_t) key,0,0);
 }
 
 void unblock(int pid){

@@ -437,6 +437,7 @@ void writeBuffer(char ch) {
 			}
 			if(echo)
 				printc(ch);
+			unblock((int) ch, KEY);
 			break;
 	}
 }
