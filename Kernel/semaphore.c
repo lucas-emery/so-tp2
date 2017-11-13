@@ -10,7 +10,7 @@ static sem_t* semaphores;
 static int semCount = 0;
 static int id = 0;
 static semOperation semOperations[SEM_OPERATIONS];
-volatile int lock = 0;
+static int lock = 0;
 
 static int exists(char* name);
 
@@ -22,7 +22,7 @@ static int exists(char* name){
 	return FALSE;
 }
 
-int setValue(int id, int value){
+int setValue(char* arg1, int id, int value){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id)
 			semaphores[i]->value = value;
@@ -31,7 +31,7 @@ int setValue(int id, int value){
 	return -1;
 }
 
-int semOpen(char* name, int value){
+int semOpen(char* name, int arg2, int arg3){
 	for (int i = 0; i < semCount; ++i){
 		if(strcmp(semaphores[i]->name,name) == 0)
 			return semaphores[i]->id;
@@ -49,7 +49,7 @@ int semOpen(char* name, int value){
 	return newSem->id;
 }
 
-int semClose(char* name, int id){
+int semClose(char* arg1, int id, int arg3){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
 			destroySem(id);
@@ -63,7 +63,7 @@ int semClose(char* name, int id){
 	return FAIL;
 }
 
-int semPost(char* name, int id){
+int semPost(char* arg1, int id, int arg3){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value++;
@@ -74,7 +74,7 @@ int semPost(char* name, int id){
 	return FAIL;
 }
 
-int semWait(char* name, int id){
+int semWait(char* arg1, int id, int arg3){
 	for (int i = 0; i < semCount; ++i){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value--;
@@ -87,12 +87,12 @@ int semWait(char* name, int id){
 	return FAIL;
 }
 
-int execute(int operation, char* name, int id){
-	if(operation < 0 || operation > 4)
-		return;
+int executeSemaphore(int operation, char* arg1, int arg2, int arg3){
+	if(operation < 0 || operation > SEM_OPERATIONS)
+		return -1;
 	int ret;
-	//testAndSet(&lock);
-	ret = (semOperations[operation])(name, id);
+	testAndSet(&lock);
+	ret = (semOperations[operation])(arg1, arg2, arg3);
 	lock = FALSE;
 	return ret;
 }
@@ -103,4 +103,5 @@ void setupSemaphores(){
 	semOperations[CLOSE] = &semClose;
 	semOperations[POST] = &semPost;
 	semOperations[WAIT] = &semWait;
+	semOperations[SET] = &setValue;
 }

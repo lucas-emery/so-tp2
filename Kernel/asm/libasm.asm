@@ -77,15 +77,14 @@ hang:
 	jmp hang
 
 testAndSet:
-	mov rdx, 1
+	mov rdx, 0x1
 	.spin:
-		mov rax, [rdi]
-		test rax, rax
+		mov eax, [rdi]
+		test eax, eax
 		jnz .spin
 
-		lock cmpxchg rdx, rdi
+		lock cmpxchg [rdi], rdx 
 
-		test rax, rax
+		test eax, eax
 		jnz .spin
-
 		ret

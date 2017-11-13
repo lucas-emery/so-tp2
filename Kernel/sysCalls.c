@@ -93,20 +93,24 @@ int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
 	return 0;
 }
 
+int sysSetSem(uint64_t id, uint64_t value, uint64_t rcx){
+	return executeSemaphore(SET, NULL, (int)id, (int)value);
+}
+
 int sysOpenSem(uint64_t name, uint64_t value, uint64_t id){
-	return execute(OPEN, (char*) name, (int) value);
+	return executeSemaphore(OPEN, (char*) name, (int) value, NULL);
 }
 
 int sysCloseSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	return execute(CLOSE, NULL, (int) id);
+	return executeSemaphore(CLOSE, NULL, (int) id, NULL);
 }
 
 int sysUpSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	return execute(POST, NULL, (int) id);
+	return executeSemaphore(POST, NULL, (int) id, NULL);
 }
 
 int sysDownSem(uint64_t id, uint64_t rdx, uint64_t rcx){
-	return execute(WAIT, NULL, (int) id);
+	return executeSemaphore(WAIT, NULL, (int) id, NULL);
 }
 
 int sysPthread(uint64_t startRoutine, uint64_t arg, uint64_t rcx){
@@ -123,35 +127,28 @@ int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
 	return 0;
 }
 
-int sysSetSem(uint64_t id, uint64_t value, uint64_t rcx){
-	return setValue(id, value);
+int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
+	//block();
 }
 
 int sysInitMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
-	return createMessage(name, messageSize);
-}
-
-int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
-	//block();
-	return 0;
+	return executeMessage(INIT, (char*)name, (int)messageSize);
 }
 
 int sysOpenMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
-	return openMessage(name);
+	return executeMessage(OPEN, (char*)name, NULL);
 }
 
 int sysDeleteMsg(uint64_t id, uint64_t rdx, uint64_t rcx){
-	return closeMessage(id);
+	return executeMessage(CLOSE, NULL, (int)id);
 }
 
 int sysWriteMsg(uint64_t id, uint64_t content, uint64_t rcx){
-	writeMessage(id, content);
-	return SUCCESS;
+	return executeMessage(WRITE, NULL, (int)id);
 }
 
 int sysReadMsg(uint64_t id, uint64_t buffer, uint64_t rcx){
-	readMessage(id, (char*)buffer);
-	return SUCCESS;
+	return executeMessage(READ, (char*)buffer, (int)id);
 }
 
 int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
