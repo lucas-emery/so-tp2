@@ -1,6 +1,8 @@
 #ifndef THREADS_H
 #define THREADS_H
 
+typedef struct tcbCDT* tcbADT;
+
 #include <lib.h>
 #include <MMU.h>
 #include <pcb.h>
@@ -12,8 +14,6 @@ typedef struct tcbCDT{
 	int state;
 	int privilage;
 } tcbCDT;
-
-typedef struct tcbCDT* tcbADT;
 
 
 #include <scheduler.h>

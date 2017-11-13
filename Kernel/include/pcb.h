@@ -18,6 +18,10 @@ void setupPCB();
 */
 int addPCB(char* name, int privilege);
 
+void addTCB(tcbADT thread);
+context_t* getContextOfSibling(int id);
+tcbADT getThreads(int id, int* count);
+
 /*
 *Removes the PCB entry correspoding to the processes id in parameter
 *Returns 0 if the process was found successfully, -1 if not

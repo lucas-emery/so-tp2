@@ -14,8 +14,13 @@ static int lock = 0;
 
 void semString(char * buffer){
 	strcat(buffer, "Semaphores: ");
+	char aux[10];
 	for(int i = 0 ; i < semCount ; i++){
 		strcat(buffer, semaphores[i]->name);
+		strcat(buffer, "(");
+		uintToBase(semaphores[i]->value,aux,10);
+		strcat(aux,")");
+		strcat(buffer, aux);
 		if(i != semCount -1)
 			strcat(buffer, ", ");
 	}

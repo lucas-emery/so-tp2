@@ -1,7 +1,7 @@
 #include <pcb.h>
 
 typedef struct pcbCDT{
-	char* name;
+	char name[32];
 	int pid;
 	int state;
 	int privilege;
@@ -12,6 +12,7 @@ typedef struct pcbCDT{
 static int idCount = 0;
 static pcbADT * pcbTable;
 static int tableSize = 0;
+static int maxNameLength = 0;
 
 /*
 *Creates the string having the info of the process in parameter
@@ -24,15 +25,18 @@ void setupPCB(){
 }
 
 int addPCB(char * name, int privilege){
+	if(idCount == 0)
+		name = "sysIdle";
+	if(strlen(name) > maxNameLength)
+		maxNameLength = strlen(name);
 	pcbADT newPCB = malloc(sizeof(pcbCDT));
 	newPCB->pid = idCount++;
 	newPCB->state = NEW;
-	newPCB->name = name;
+	strcat(newPCB->name,name);
 	newPCB->privilege = privilege;
 	tableSize++;
 	pcbTable = realloc(pcbTable, tableSize * sizeof(pcbADT));
 	pcbTable[tableSize-1] = newPCB;
-	//*threads=firstTCB(privilege);
 	return newPCB->pid;
 }
 
@@ -73,7 +77,6 @@ int getState(int id){
 void processesInfo(char* buffer){
 	for (int i = 0; i < tableSize; i++){
 		strcat(buffer, makeString(pcbTable[i]));
-		//print(buffer);
 	}
 }
 
@@ -82,11 +85,14 @@ static char* makeString(pcbADT process){
 	char* str1 = malloc(10);
 	char* str2 = malloc(10);
 	char* str3 = malloc(10);
+	int diff = maxNameLength - strlen(process->name);
 	strcat(aux, "PID: ");
 	uintToBase(process->pid,str1,10);
 	strcat(aux, str1);
 	strcat(aux, " NAME: ");
 	strcat(aux, process->name);
+	for(int i = 0; i < diff; i++)
+		strcat(aux," ");
 	strcat(aux, " PRIVILEGE: ");
 	uintToBase(process->privilege,str3,10);
 	strcat(aux, str3);

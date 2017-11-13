@@ -18,8 +18,6 @@ extern char* moduleNames[];
 
 typedef int (*sys)(uint64_t rsi, uint64_t rdx, uint64_t rcx);
 
-static sys sysCalls[SYSCALLS];
-
 int sysRead(uint64_t fileDescriptor, uint64_t buffer, uint64_t size);
 int sysWrite(uint64_t fileDescriptor, uint64_t buffer, uint64_t size);
 int sysSetTimeZone(uint64_t timeZone, uint64_t rdx, uint64_t rcx);

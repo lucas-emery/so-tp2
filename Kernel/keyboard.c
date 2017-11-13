@@ -1,9 +1,4 @@
 #include <keyboard.h>
-#include <terminal.h>
-#include <lib.h>
-#include <scanCodes.h>
-#include <MMU.h>
-#include <process.h>
 
 static uint8_t shiftMayus = 0;
 static uint8_t leftShift = FALSE;

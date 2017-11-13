@@ -30,5 +30,7 @@ void userMode();
 void setContext(context_t * newContext);
 void initSharedMemory();
 void enableMemoryProtection();
+void setupTSS();
+void setupGDT();
 
 #endif

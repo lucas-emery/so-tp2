@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 static const char * modules[][2] = {
   "accessKernel","Attempts to read data from the kernel.\nParams: None",

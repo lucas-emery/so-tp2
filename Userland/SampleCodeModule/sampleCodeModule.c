@@ -14,10 +14,10 @@ int main(int argc, char *argv[]) {
 	//while(1){
 
 	//}
-	int messageID = message_init("Diego", 5);
+	uint64_t messageID = (uint64_t) message_init("Diego", 5);
 	//printf("%d\n", messageID);
-	pthread_create(producer, messageID);
-	pthread_create(consumer, messageID);
+	pthread_create((function) producer, (void*) messageID);
+	pthread_create((function) consumer, (void*) messageID);
 	while(1);
 }
 

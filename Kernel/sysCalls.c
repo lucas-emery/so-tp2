@@ -1,5 +1,7 @@
 #include <sysCalls.h>
 
+static sys sysCalls[SYSCALLS];
+
 int sysRead(uint64_t fileDescriptor, uint64_t buffer, uint64_t size) {
 	int index = 0;
 	char c;
