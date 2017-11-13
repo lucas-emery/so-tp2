@@ -10,15 +10,20 @@
 #define IDLE 0
 #define KEYS 'z' - 'a' +1
 
+typedef struct wnode{
+  int id, threadCount;
+  qnode ** threads;
+} wnode;
+
 typedef struct qnode{
-        tcbADT thread;
-        struct qnode *next;
-        struct qnode *prev;
+  tcbADT thread;
+  struct qnode *next;
+  struct qnode *prev;
 } qnode;
 
 typedef struct{
-        qnode *back;
-        qnode *front;
+  qnode *back;
+  qnode *front;
 }queueCDT;
 
 typedef queueCDT * queueADT;

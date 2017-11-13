@@ -1,8 +1,33 @@
 #include <scheduler.h>
 
 static queueADT RRqueue, stdinQueue, semQueues[MAX_QUEUES], rMsgQueues[MAX_QUEUES], wMsgQueues[MAX_QUEUES], keyQueues[KEYS];
+static wnode waitMap[MAX_THREADS];
+static int waitCount;
 static qnode * idle, * current = NULL;
 extern uint32_t moduleCount;
+
+void wait(int id){
+  int firstFree = waitCount;
+  for(int i = 0; i < waitCount; i++){
+    if(waitMap[i].id == 0)
+      firstFree = i;
+    if(waitMap[i].id == id){
+      threadCount++;
+      waitMap[i].threads = realloc(waitMap[i].threads,threadCount * sizeof(*qnode));
+      waitMap[i].threads[threadCount-1] = current;
+      current->thread->state = BLOCKED;
+      intTT();
+      return;
+    }
+  }
+  if(firstFree == waitCount && waitCount + 1 < MAX_THREADS){
+    waitMap[firstFree].id = id;
+    waitMap[firstFree].threads = NULL;
+    waitMap[firstFree].threadCount = 0;
+    waitCount++;
+    intTT();
+  }
+}
 
 /*
  *  Create an empty queue.
@@ -55,8 +80,16 @@ uint8_t addThread(tcbADT t){
 }
 
 void killThread(){
+  for(int i = 0; i < waitCount; i++){
+    if(waitMap[i].id == current->thread->tid){
+      for (int j = 0; j < waitMap[i].threadCount; j++) {
+        waitMap[i].threads[j]->thread->state = READY;
+        enqueue(RRqueue, waitMap[i].threads[j]);
+      }
+      waitMap[i].id = 0;
+    }
+  }
   current->thread->state = DEAD;
-  sti();
   intTT();
 }
 

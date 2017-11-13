@@ -31,6 +31,7 @@
 #define SEM 5
 #define STDIN 6
 #define KEY 7
+#define waitThread 8
 
 //threads
 #define RUNNING 0

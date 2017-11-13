@@ -226,7 +226,8 @@ void * calloc(uint64_t request){
 
 void * realloc(void * ptr, uint64_t size) {
 	void *  newptr = malloc(size);
-	memcpy(newptr, ptr, size);
+	if(ptr != NULL)
+		memcpy(newptr, ptr, size);
 	return newptr;
 }
 
