@@ -41,6 +41,8 @@ void free(void * ptr);
 void * realloc(void * ptr, uint64_t size);
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]);
 context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg);
+void freeProcessContext(context_t * context);
+void freeThreadContext(context_t * context);
 void kernelMode();
 void userMode();
 void setContext(context_t * newContext);

@@ -54,6 +54,7 @@ void schedule(){
   }
 
   if(current->thread->state == DEAD){
+    freeThreadContext(current->thread->context);
     schedule();
     return;
   }

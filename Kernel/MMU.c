@@ -135,6 +135,16 @@ context_t * createThreadContext(context_t * siblingContext, void * start_routine
 	return newContext;
 }
 
+void freeProcessContext(context_t * context) {
+	freePage(context->dataPage.address);
+	freePage(context->heapPage.address);
+}
+
+void freeThreadContext(context_t * context) {
+	freePage(context->stackPage.address);
+	freePage(context->kernelPage.address);
+}
+
 void loadPage(page_t page) {
 	changePDE(page.index, page.address, PRESENT);
 }
