@@ -4,6 +4,7 @@
 
 int main(int argc, char *argv[]) {
 	char* buffer = malloc(100);
-	printf("%s\n", ps(buffer));
+	ps(buffer);
+	printf("%s\n", buffer);
 	return 0;
 }

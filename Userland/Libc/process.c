@@ -21,7 +21,7 @@ int execv(char * filename, int argc, char * argv[]){
 }
 
 int pthread_create(void *(*startRoutine)(void*), void * arg){
-	return int80(10, startRoutine, arg, 0);
+	return int80(10, (uint64_t) startRoutine, (uint64_t) arg, 0);
 }
 
 int getPid(){
@@ -29,28 +29,23 @@ int getPid(){
 }
 
 int getVar(char* name){
-	return int80(27,name,0,0);
+	return int80(27, (uint64_t) name,0,0);
 }
 
 void kill(int pid){
-	int80(11,pid,0,0);
+	int80(11, (uint64_t) pid,0,0);
 }
 
-char* ps(char* buffer){
-	int80(12, buffer,0,0);
-	return buffer;
+void ps(char* buffer){
+	int80(12, (uint64_t) buffer,0,0);
 }
 
 void block(int pid){
-	int80(13,pid,0,0);
+	int80(13, (uint64_t) pid,0,0);
 }
 
 void unblock(int pid){
-	int80(14,pid,0,0);
-}
-
-void yield(){
-	int80(15,0,0,0);
+	int80(14, (uint64_t) pid,0,0);
 }
 
 void exit(int value){
