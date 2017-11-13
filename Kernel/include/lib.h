@@ -11,11 +11,11 @@
 #define FAIL 1
 
 //messages
-#define OPEN 0
-#define CLOSE 1
-#define INIT 2
-#define READ 3
-#define WRITE 4
+#define OPEN_MESSAGE 0
+#define CLOSE_MESSAGE 1
+#define INIT_MESSAGE 2
+#define READ_MESSAGE 3
+#define WRITE_MESSAGE 4
 
 //semaphores
 #define OPEN 0
