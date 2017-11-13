@@ -3,6 +3,8 @@
 int sysRead(uint64_t fileDescriptor, uint64_t buffer, uint64_t size) {
 	int index = 0;
 	char c;
+	if(getCurrentProcess() != getFocusedPID())
+		return 1;
 	if(fileDescriptor == 0) {
 		if((c = readBuffer()) == NULL)
 			block(0, STDIN);
@@ -132,23 +134,23 @@ int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
 }
 
 int sysInitMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
-	return executeMessage(INIT_MESSAGE, (char*)name, (int)messageSize);
+	return executeMessage(INIT, (char*)name, (int)messageSize);
 }
 
 int sysOpenMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
-	return executeMessage(OPEN_MESSAGE, (char*)name, NULL);
+	return executeMessage(OPEN, (char*)name, NULL);
 }
 
 int sysDeleteMsg(uint64_t id, uint64_t rdx, uint64_t rcx){
-	return executeMessage(CLOSE_MESSAGE, NULL, (int)id);
+	return executeMessage(CLOSE, NULL, (int)id);
 }
 
 int sysWriteMsg(uint64_t id, uint64_t content, uint64_t rcx){
-	return executeMessage(WRITE_MESSAGE, NULL, (int)id);
+	return executeMessage(WRITE, NULL, (int)id);
 }
 
 int sysReadMsg(uint64_t id, uint64_t buffer, uint64_t rcx){
-	return executeMessage(READ_MESSAGE, (char*)buffer, (int)id);
+	return executeMessage(READ, (char*)buffer, (int)id);
 }
 
 int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {
@@ -171,10 +173,14 @@ int sysGetPid(uint64_t rsi, uint64_t rdx, uint64_t rcx){
 	return getCurrentProcess();
 }
 
-int sysGetVar(uint64_t name, uint64_t rdx, uint64_t rcx){
-	if(strcmp(name,"$?") == 0)
-		return exitValue;
-	return -1;
+int sysGetVar(uint64_t name, uint64_t buffer, uint64_t rcx){
+	if(strcmp((char*) name,"$?") == 0)
+		uintToBase(exitValue,buffer,10);
+	else if(strcmp((char*) name, "$sems") == 0)
+		semString((char*) buffer);
+	else if(strcmp((char*) name, "$msgs") == 0)
+		msgString((char*) buffer);
+	return 0;
 }
 
 void sysCallsSetup(){

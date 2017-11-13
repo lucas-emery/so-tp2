@@ -14,6 +14,16 @@ static messageADT* messages;
 static messageOperation messageOperations[MESSAGE_OPERATIONS];
 static int lock = 0;
 
+
+void msgString(char* buffer){
+	strcat(buffer, "Messages: ");
+	for(int i = 0; i < messagesCount ; i++){
+		strcat(buffer,messages[i]->name);
+		if(i != messagesCount -1)
+			strcat(buffer, ", ");
+	}
+}
+
 void initMessages(){
 	messages = malloc(sizeof(messageADT));
 }
@@ -35,6 +45,7 @@ int createMessage(char* name, int messageSize){
 
 int openMessage(char* name, int arg2){
 	for (int i = 0; i < messagesCount; ++i){
+	for (int i = 0; i < messagesCount; i++){
 		if(strcmp(messages[i]->name, name) == 0)
 			return messages[i]->id;
 	}
@@ -44,6 +55,7 @@ int openMessage(char* name, int arg2){
 int readMessage(char* buffer, int id){
 	printHex(buffer);
 	for (int i = 0; i < messagesCount; ++i){
+	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
 			if(messages[i]->contentCount == 0)
 				block(id, READ);
@@ -61,6 +73,7 @@ int readMessage(char* buffer, int id){
 
 int writeMessage(char* content, int id){
 	for (int i = 0; i < messagesCount; ++i){
+	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
 			if(messages[i]->contentCount == MAX_SIZE_BUFFER)
 				block(messages[i]->id, WRITE);
@@ -78,6 +91,7 @@ int writeMessage(char* content, int id){
 
 int closeMessage(char*arg1, int id){
 	for (int i = 0; i < messagesCount; ++i){
+	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
 			destroyMsg(messages[i]->id); //remove queue
 			free(messages[i]);

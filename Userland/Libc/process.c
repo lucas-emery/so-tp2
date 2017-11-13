@@ -28,8 +28,8 @@ int getPid(){
 	return int80(26,0,0,0);
 }
 
-int getVar(char* name){
-	return int80(27, (uint64_t) name,0,0);
+int getVar(char* name, char* buffer){
+	return int80(27, (uint64_t) name, (uint64_t) buffer,0);
 }
 
 void kill(int pid){

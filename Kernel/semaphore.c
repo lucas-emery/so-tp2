@@ -12,18 +12,17 @@ static int id = 0;
 static semOperation semOperations[SEM_OPERATIONS];
 static int lock = 0;
 
-static int exists(char* name);
-
-static int exists(char* name){
-	for (int i = 0; i < semCount; ++i){
-		if(semaphores[i]->name == name)
-			return TRUE;
+void semString(char * buffer){
+	strcat(buffer, "Semaphores: ");
+	for(int i = 0 ; i < semCount ; i++){
+		strcat(buffer, semaphores[i]->name);
+		if(i != semCount -1)
+			strcat(buffer, ", ");
 	}
-	return FALSE;
 }
 
 int setValue(char* arg1, int id, int value){
-	for (int i = 0; i < semCount; ++i){
+	for (int i = 0; i < semCount; i++){
 		if(semaphores[i]->id == id)
 			semaphores[i]->value = value;
 			return value;
@@ -32,7 +31,7 @@ int setValue(char* arg1, int id, int value){
 }
 
 int semOpen(char* name, int arg2, int arg3){
-	for (int i = 0; i < semCount; ++i){
+	for (int i = 0; i < semCount; i++){
 		if(strcmp(semaphores[i]->name,name) == 0)
 			return semaphores[i]->id;
 	}
@@ -50,7 +49,7 @@ int semOpen(char* name, int arg2, int arg3){
 }
 
 int semClose(char* arg1, int id, int arg3){
-	for (int i = 0; i < semCount; ++i){
+	for (int i = 0; i < semCount; i++){
 		if(semaphores[i]->id == id){
 			destroySem(id);
 			free(semaphores[i]);
@@ -64,7 +63,7 @@ int semClose(char* arg1, int id, int arg3){
 }
 
 int semPost(char* arg1, int id, int arg3){
-	for (int i = 0; i < semCount; ++i){
+	for (int i = 0; i < semCount; i++){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value++;
 			unblock(id, SEM);
@@ -75,7 +74,7 @@ int semPost(char* arg1, int id, int arg3){
 }
 
 int semWait(char* arg1, int id, int arg3){
-	for (int i = 0; i < semCount; ++i){
+	for (int i = 0; i < semCount; i++){
 		if(semaphores[i]->id == id){
 			semaphores[i]->value--;
 			if(semaphores[i]->value < 0){

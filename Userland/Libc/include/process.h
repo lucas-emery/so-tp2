@@ -17,7 +17,7 @@ int execv(char * filename, int argc, char * argv[]);
 int pthread_create(void *(*startRoutine)(void*), void * arg);
 void pthread_exit();
 int getPid();
-int getVar(char * name);
+int getVar(char * name,char* buffer);
 void ps(char * buffer);
 void kill(int pid);
 void block(int pid);
