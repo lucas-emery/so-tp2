@@ -53,7 +53,6 @@ int openMessage(char* name, int arg2){
 }
 
 int readMessage(char* buffer, int id){
-	printHex(buffer);
 	for (int i = 0; i < messagesCount; ++i){
 	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
@@ -115,9 +114,9 @@ int executeMessage(int operation, char* arg1, int arg2){
 }
 
 void setupMessages(){
-	messageOperations[OPEN] = &openMessage;
-	messageOperations[CLOSE] = &closeMessage;
-	messageOperations[INIT] = &createMessage;
-	messageOperations[READ] = &readMessage;
-	messageOperations[WRITE] = &writeMessage;
+	messageOperations[OPEN_MESSAGE] = &openMessage;
+	messageOperations[CLOSE_MESSAGE] = &closeMessage;
+	messageOperations[INIT_MESSAGE] = &createMessage;
+	messageOperations[READ_MESSAGE] = &readMessage;
+	messageOperations[WRITE_MESSAGE] = &writeMessage;
 }
