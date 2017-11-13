@@ -34,7 +34,8 @@ int createMessage(char* name, int messageSize){
 	newMessage->id = id;
 	newMessage->messageSize = messageSize;
 	id++;
-	newMessage->buffer = malloc(sizeof(char));
+	newMessage->buffer = malloc(messageSize*MAX_SIZE_BUFFER);
+	println(newMessage->buffer);
 	newMessage->contentCount = 0;
 	messagesCount++;
 	messages = realloc(messages, messagesCount * sizeof(messageADT));
@@ -59,7 +60,9 @@ int readMessage(char* buffer, int id){
 			else{
 				strcpy(buffer, messages[i]->buffer);
 				messages[i]->contentCount = 0;
-				messages[i]->buffer = realloc(messages[i]->buffer, sizeof(char));
+				for(int j=0; j<((messages[i]->messageSize)*MAX_SIZE_BUFFER); j++)
+					messages[i]->buffer[j] = 0;
+				//println(messages[i]->buffer);
 				unblock(messages[i]->id, WRITE);
 			}
 			return SUCCESS;
@@ -75,8 +78,9 @@ int writeMessage(char* content, int id){
 				block(messages[i]->id, WRITE);
 			else{
 				messages[i]->contentCount++;
-				messages[i]->buffer = realloc(messages[i]->buffer, messages[i]->contentCount * messages[i]->messageSize);
+				//println(messages[i]->buffer);
 				strcat(messages[i]->buffer, content);
+				//println(messages[i]->buffer);
 				unblock(messages[i]->id, READ);
 			}
 			return SUCCESS;

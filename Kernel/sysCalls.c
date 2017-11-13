@@ -150,7 +150,7 @@ int sysDeleteMsg(uint64_t id, uint64_t rdx, uint64_t rcx){
 }
 
 int sysWriteMsg(uint64_t id, uint64_t content, uint64_t rcx){
-	return executeMessage(WRITE, NULL, (int)id);
+	return executeMessage(WRITE, (char*)content, (int)id);
 }
 
 int sysReadMsg(uint64_t id, uint64_t buffer, uint64_t rcx){
