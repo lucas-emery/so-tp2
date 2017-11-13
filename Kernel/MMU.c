@@ -13,24 +13,8 @@
 #define USER_CS 0x18
 #define TR 0x28
 #define PD_ADDR 0x10000
-#define PAGESIZE 0x200000
-#define KERNEL 0x0
-#define KERNEL_HEAP 0x200000
-#define KERNEL_STACK 0x400000
-#define	CONTEXT_SWITCH_STACK 0x600000
-#define SHARED_MEMORY 0x800000
-#define EXEC_MEM_ADDR 0xA00000
-#define ROM 0xC00000
-#define MAPPEDMEMORY 0x100000000
-#define USER_HEAP (MAPPEDMEMORY/2)
-#define STACKBASE (MAPPEDMEMORY - sizeof(uint64_t))
-#define KERNEL_STACKBASE (KERNEL_STACK + PAGESIZE - sizeof(uint64_t))
-#define	CONTEXT_SWITCH_STACKBASE (CONTEXT_SWITCH_STACK + PAGESIZE - sizeof(uint64_t))
-#define KERNEL_STACK_BOTTOM (KERNEL_STACK + PAGESIZE)
-#define CS_STACK_BOTTOM (CONTEXT_SWITCH_STACK + PAGESIZE)
 #define PRESENT 1
 #define NOT_PRESENT 0
-#define AVOID_BSS 1
 #define INITIAL_PC 3
 #define HEAP_PAGE_IDX 0
 #define STACK_PAGE_IDX 1
@@ -68,20 +52,14 @@ static context_t * processContext = AVOID_BSS;
 static context_t * sharedContext = AVOID_BSS;
 
 
-void * getFreePage() {
-	static uint64_t last = EXEC_MEM_ADDR;
-	last += PAGESIZE;
-	return (void *)last;
-}
-
 context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, uint64_t heapSize) { //TODO: Support many heap pages
 	if(heapPageAddress == NULL) {
-		heapPageAddress = (uint64_t)getFreePage();
+		heapPageAddress = getFreePage();
 		heapSize = EMPTY;
 	}
 
-	uint64_t stackPageAddress = (uint64_t)getFreePage();
-	uint64_t kernelPageAddress = (uint64_t)getFreePage();
+	uint64_t stackPageAddress = getFreePage();
+	uint64_t kernelPageAddress = getFreePage();
 
 	context_t * newContext = malloc(sizeof(context_t));
 	newContext->dataPage.index = EXEC_MEM_ADDR/PAGESIZE;
@@ -136,8 +114,8 @@ void restoreProcessHeap() {
 }
 
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
-	void * dataPageAddress = getFreePage();
-	memcpy(dataPageAddress, moduleAddresses[moduleIndex], PAGESIZE);
+	uint64_t dataPageAddress = getFreePage();
+	memcpy((void *)dataPageAddress, moduleAddresses[moduleIndex], PAGESIZE);
 	context_t * newContext = createContext(dataPageAddress, NULL, NULL);
 
 	sharedMode();
@@ -261,7 +239,7 @@ void changePDE(int entry, uint64_t physAddr, int present){
 	}
 
 	if(present)
-		*((uint64_t*)PD) = (uint64_t)physAddr | 0x8F;
+		*((uint64_t*)PD) = (uint64_t)physAddr | 0x8F; //TODO: Don´t override
 	else
 		*((uint64_t*)PD) = ((uint64_t)physAddr | 0x8F) & ~(uint64_t)0x1;
 }
@@ -284,6 +262,8 @@ void initializeKernelContext(uint64_t heapSize) {
 	kernelContext->heapSize = heapSize + sizeof(context_t);
 	kernelContext->heapBase = KERNEL_HEAP;
 
+	changePDE(CONTEXT_SWITCH_STACK/PAGESIZE, getFreePage(), PRESENT);
+
 	context = kernelContext;
 }
 
@@ -291,6 +271,8 @@ void initSharedMemory() {
 	sharedContext = (context_t *) malloc(sizeof(context_t));
 	sharedContext->heapSize = EMPTY;
 	sharedContext->heapBase = SHARED_MEMORY;
+
+	changePDE(SHARED_MEMORY/PAGESIZE, getFreePage(), PRESENT);
 }
 
 void * initializeKernelBinary()
@@ -300,7 +282,9 @@ void * initializeKernelBinary()
 	context_t tempContext;
 	tempContext.heapBase = KERNEL_HEAP;
 	tempContext.heapSize = EMPTY;
-	context = &tempContext; //So module loader has a working heap
+	context = &tempContext; //So we have a working heap
+
+	initPageAllocator();
 
 	moduleAddresses = loadModules(&endOfKernelBinary);
 	clearBSS(&bss, &endOfKernel - &bss);

@@ -18,7 +18,7 @@ void ** loadModules(void * payloadStart){
 	void ** moduleAddresses = malloc(moduleCount * sizeof(void *));
 
 	for (i = 0; i < moduleCount; i++) {
-		moduleAddress = getFreePage();
+		moduleAddress = (void *)getFreePage();
 		loadModule(&currentModule, moduleAddress);
 		moduleAddresses[i] = moduleAddress;
 	}
