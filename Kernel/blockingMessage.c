@@ -44,7 +44,6 @@ int createMessage(char* name, int messageSize){
 }
 
 int openMessage(char* name, int arg2){
-	for (int i = 0; i < messagesCount; ++i){
 	for (int i = 0; i < messagesCount; i++){
 		if(strcmp(messages[i]->name, name) == 0)
 			return messages[i]->id;
@@ -53,7 +52,6 @@ int openMessage(char* name, int arg2){
 }
 
 int readMessage(char* buffer, int id){
-	for (int i = 0; i < messagesCount; ++i){
 	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
 			if(messages[i]->contentCount == 0)
@@ -71,7 +69,6 @@ int readMessage(char* buffer, int id){
 }
 
 int writeMessage(char* content, int id){
-	for (int i = 0; i < messagesCount; ++i){
 	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
 			if(messages[i]->contentCount == MAX_SIZE_BUFFER)
@@ -89,7 +86,6 @@ int writeMessage(char* content, int id){
 }
 
 int closeMessage(char*arg1, int id){
-	for (int i = 0; i < messagesCount; ++i){
 	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
 			destroyMsg(messages[i]->id); //remove queue
@@ -114,9 +110,9 @@ int executeMessage(int operation, char* arg1, int arg2){
 }
 
 void setupMessages(){
-	messageOperations[OPEN_MESSAGE] = &openMessage;
-	messageOperations[CLOSE_MESSAGE] = &closeMessage;
-	messageOperations[INIT_MESSAGE] = &createMessage;
-	messageOperations[READ_MESSAGE] = &readMessage;
-	messageOperations[WRITE_MESSAGE] = &writeMessage;
+	messageOperations[OPEN] = &openMessage;
+	messageOperations[CLOSE] = &closeMessage;
+	messageOperations[INIT] = &createMessage;
+	messageOperations[READ] = &readMessage;
+	messageOperations[WRITE] = &writeMessage;
 }
