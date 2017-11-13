@@ -72,6 +72,8 @@ int readMessage(char* buffer, int id){
 int writeMessage(char* content, int id){
 	for (int i = 0; i < messagesCount; i++){
 		if(messages[i]->id == id){
+			if(strlen(content) > messages[i]->messageSize)
+				return FAIL;
 			if(messages[i]->contentCount >= MAX_SIZE_BUFFER)
 				block(messages[i]->id, WRITE);
 			messages[i]->contentCount++;
