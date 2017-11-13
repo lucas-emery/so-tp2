@@ -13,8 +13,6 @@
 #define USER_CS 0x18
 #define TR 0x28
 #define PD_ADDR 0x10000
-#define PRESENT 1
-#define NOT_PRESENT 0
 #define INITIAL_PC 3
 #define HEAP_PAGE_IDX 0
 #define STACK_PAGE_IDX 1
@@ -109,13 +107,41 @@ void changeHeap(context_t * newContext) {
 }
 
 void restoreProcessHeap() {
-	loadPage(processContext->heapPage);
+	if(processContext != NULL) {
+		loadPage(processContext->heapPage);
+		flushPaging();
+	}
+}
+
+void changeDataPage(uint64_t address) {
+	changePDE(EXEC_MEM_ADDR / PAGESIZE, address, PRESENT);
 	flushPaging();
 }
 
-context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
+void restoreProcessData() {
+	if(processContext != NULL) {
+		loadPage(processContext->dataPage);
+		flushPaging();
+	}
+}
+
+uint64_t copyModule(int moduleIndex) {
 	uint64_t dataPageAddress = getFreePage();
+	changeDataPage(dataPageAddress);
+	printHex(moduleIndex);
+	print(" MA ");
+	printHex(moduleAddresses[moduleIndex]);
+	print(" PA ");
+	printHex(dataPageAddress);
+	newLine();
+	//while(1);
 	memcpy((void *)dataPageAddress, moduleAddresses[moduleIndex], PAGESIZE);
+	restoreProcessData();
+	return dataPageAddress;
+}
+
+context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
+	uint64_t dataPageAddress = copyModule(moduleIndex);
 	context_t * newContext = createContext(dataPageAddress, NULL, NULL);
 
 	sharedMode();
@@ -256,6 +282,12 @@ void changePDE(int entry, uint64_t physAddr, int present){
 
 void pageFaultHandler(){
 	kernelMode();
+	uint64_t * PD = 0x10000;
+	for(int i = 0; i < 20; i++) {
+		printHex(PD[i]);
+		newLine();
+	}
+	while(1);
 	print("ACCESS DENIED");
 	newLine();
 	exitCurrentProcess(0xE);
@@ -273,7 +305,7 @@ void initializeKernelContext(uint64_t heapSize) {
 	kernelContext->heapBase = KERNEL_HEAP;
 
 	changePDE(CONTEXT_SWITCH_STACK/PAGESIZE, getFreePage(), PRESENT);
-
+	flushPaging();
 	context = kernelContext;
 }
 
@@ -283,6 +315,7 @@ void initSharedMemory() {
 	sharedContext->heapBase = SHARED_MEMORY;
 
 	changePDE(SHARED_MEMORY/PAGESIZE, getFreePage(), PRESENT);
+	flushPaging();
 }
 
 void * initializeKernelBinary()
@@ -312,7 +345,7 @@ void enableMemoryProtection() {
 	changePDEPrivilege(CONTEXT_SWITCH_STACK/PAGESIZE, SUPERVISOR);
 
 	int i = 0;
-	while(moduleNames[i] != 0) {
+	while(i < moduleCount) {
 		changePDEPrivilege((uint64_t)moduleAddresses[i]/PAGESIZE, SUPERVISOR);
 		i++;
 	}

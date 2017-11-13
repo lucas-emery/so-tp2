@@ -17,6 +17,8 @@
 #define KERNEL_STACK_BOTTOM (KERNEL_STACK + PAGESIZE)
 #define CS_STACK_BOTTOM (CONTEXT_SWITCH_STACK + PAGESIZE)
 #define AVOID_BSS 1
+#define PRESENT 1
+#define NOT_PRESENT 0
 
 typedef struct {
 	int index;

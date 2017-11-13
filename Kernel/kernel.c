@@ -8,17 +8,29 @@
 #include <pcb.h>
 #include <scheduler.h>
 
+void deb() {
+	uint64_t * PD = 0x10000;
+	for(int i = 0; i < 20; i++) {
+		printHex(PD[i]);
+		newLine();
+	}
+	while(1);
+}
+
 int main(){
+	//while(1);
 	clearScreen();
 	setupGDT();
 	setupTSS();
 	setupIDT();
 	setupPCB();
-	initScheduler();
 	initSharedMemory();
+	//deb();
+	initScheduler();
+	//deb();
 	enableMemoryProtection();
-	//ncClear();
 	setFocusedPID(createProcess(0,0,0));
+	//deb();
   sti();
   while(1);
 }

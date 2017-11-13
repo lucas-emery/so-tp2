@@ -12,15 +12,17 @@ extern uint32_t moduleCount;
 
 void ** loadModules(void * payloadStart){
 	int i;
-	void * moduleAddress;
+	uint64_t moduleAddress = ROM;
 	uint8_t * currentModule = (uint8_t*)payloadStart;
 	moduleCount = readUint32(&currentModule);
 	void ** moduleAddresses = malloc(moduleCount * sizeof(void *));
 
 	for (i = 0; i < moduleCount; i++) {
-		moduleAddress = (void *)getFreePage();
-		loadModule(&currentModule, moduleAddress);
-		moduleAddresses[i] = moduleAddress;
+		changePDE(moduleAddress / PAGESIZE, getFreePage(), PRESENT);
+		flushPaging();
+		loadModule(&currentModule, (void*)moduleAddress);
+		moduleAddresses[i] = (void*)moduleAddress;
+		moduleAddress += PAGESIZE;
 	}
 
 	return moduleAddresses;
