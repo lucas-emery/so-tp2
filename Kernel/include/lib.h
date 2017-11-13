@@ -29,6 +29,7 @@
 #define WRITE 4
 #define SEM 5
 #define STDIN 6
+#define KEY 7
 
 //threads
 #define RUNNING 0

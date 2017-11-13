@@ -34,7 +34,7 @@ int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
 int sysListProcesses(uint64_t rsi, uint64_t rdx, uint64_t rcx);
 int sysBlockProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
 int sysUnblockProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
-int sysYieldProcess(uint64_t pid, uint64_t rdx, uint64_t rcx);
+int sysKeyBlock(uint64_t pid, uint64_t rdx, uint64_t rcx);
 int sysCreateMsg(uint64_t name, uint64_t messageSize, uint64_t rcx);
 int sysDeleteMsg(uint64_t name, uint64_t rdx, uint64_t rcx);
 int sysWriteMsg(uint64_t name, uint64_t content, uint64_t rcx);
