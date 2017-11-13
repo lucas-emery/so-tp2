@@ -6,7 +6,7 @@
 static queueADT RRqueue, stdinQueue;
 static queueADT semQueues[MAX_QUEUES], rMsgQueues[MAX_QUEUES], wMsgQueues[MAX_QUEUES], keyQueues[KEYS];
 static qnode * idle, * current = NULL;
-extern int moduleCount;
+extern uint32_t moduleCount;
 
 
 uint8_t initScheduler(){
@@ -53,6 +53,7 @@ void schedule(){
   }
 
   if(current->thread->state == DEAD){
+    freeThreadContext(current->thread->context);
     schedule();
     return;
   }

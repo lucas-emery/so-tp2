@@ -14,10 +14,9 @@ int main(){
 	setupTSS();
 	setupIDT();
 	setupPCB();
-	initScheduler();
 	initSharedMemory();
+	initScheduler();
 	enableMemoryProtection();
-	//ncClear();
 	setFocusedPID(createProcess(0,0,0));
   sti();
   while(1);
