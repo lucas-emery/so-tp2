@@ -424,20 +424,21 @@ void writeBuffer(char ch) {
 			unblock(0,STDIN);
 			break;
 		default:
-			if(size < BUFFER_SIZE-1) {					//Dejar un espacio para \n
-				shiftRight();
-				kbBuffer[writeIndex] = ch;
-				writeIndex++;
-				if(writeIndex == BUFFER_SIZE)
-					writeIndex = 0;
-				endIndex++;
-				if(endIndex == BUFFER_SIZE)
-					endIndex = 0;
-				size++;
+			if(unblock((int) ch, KEY) == FAIL){
+				if(size < BUFFER_SIZE-1) {					//Dejar un espacio para \n
+					shiftRight();
+					kbBuffer[writeIndex] = ch;
+					writeIndex++;
+					if(writeIndex == BUFFER_SIZE)
+						writeIndex = 0;
+					endIndex++;
+					if(endIndex == BUFFER_SIZE)
+						endIndex = 0;
+					size++;
+				}
+				if(echo)
+					printc(ch);
 			}
-			if(echo)
-				printc(ch);
-			unblock((int) ch, KEY);
 			break;
 	}
 }

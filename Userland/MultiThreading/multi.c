@@ -6,13 +6,9 @@
 int semId;
 
 int doIt(int num){
-  int timeout = 10000000;
   while(1){
-    if(timeout == 0){
-      printf("%d",num);
-      timeout=10000000;
-    }
-    timeout--;
+    keyBlock('a');
+    printf("%d", num);
   }
   pthread_exit();
   return 0;
@@ -22,9 +18,9 @@ int doIt(int num){
 int main(int argc, char *argv[]) {
   semId = sem_open("topkek");
   sem_set(semId,0);
-  pthread_create((function) doIt,(void *) 1);
+  pthread_create((function) doIt,(void *) 0);
   sem_wait(semId);
-  pthread_create((function) doIt,(void *) 2);
+  pthread_create((function) doIt,(void *) 1);
   while(1);
   return 0;
 }

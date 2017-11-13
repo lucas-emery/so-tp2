@@ -120,7 +120,7 @@ void destroySem(int semId);
  *	Opens a queue at index @i of @array.
  *	Paramaters: i, array
  */
-uint8_t open(int i, queueADT ** array);
+uint8_t open(int i, queueADT * array);
 
 /*
  *	Blocks $current thread and offers it to the queue at index @i of @array.

@@ -208,6 +208,16 @@ void * malloc(uint64_t request) {
 	return blockAddress;
 }
 
+void * calloc(uint64_t request){
+	void * blockAddress = malloc(request);
+	
+	uint8_t * aux = (uint8_t *) blockAddress;
+	for(int i = 0; i < request ; i++){
+		aux[i] = 0;
+	}
+	return blockAddress;
+}
+
 void * realloc(void * ptr, uint64_t size) {
 	void *  newptr = malloc(size);
 	memcpy(newptr, ptr, size);

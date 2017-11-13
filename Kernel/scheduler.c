@@ -1,12 +1,11 @@
 #include <scheduler.h>
 #include <stdint.h>
 #define IDLE 0
-#define KEYS 'z' - 'a'
+#define KEYS 'z' - 'a' +1
 
 static queueADT RRqueue, stdinQueue;
-static queueADT * semQueues, * rMsgQueues, * wMsgQueues, *keyQueues;
+static queueADT semQueues[MAX_QUEUES], rMsgQueues[MAX_QUEUES], wMsgQueues[MAX_QUEUES], keyQueues[KEYS];
 static qnode * idle, * current = NULL;
-int keys[KEYS] = {0};
 extern int moduleCount;
 
 
@@ -48,7 +47,7 @@ void schedule(){
   }
 
   current = dequeue(RRqueue);
-  //printHex(current->thread->tid);
+
   if(current == NULL){
     current = idle;
   }
@@ -62,12 +61,10 @@ void schedule(){
   current->thread->state = RUNNING;
 }
 
-uint8_t open(int i, queueADT ** arrayRef){
-  *arrayRef = (queueADT *) realloc(*arrayRef, (i+1)*sizeof(queueCDT));
-  queueADT * array = *arrayRef;
-
-  if(array == NULL)
+uint8_t open(int i, queueADT * array){
+  if(/*i >= MAX_QUEUES || */array[i] != NULL)
     return FAIL;
+
   array[i] = initQueue();
   if(array[i] == NULL)
     return FAIL;
@@ -78,14 +75,23 @@ queueADT getQueue(int i, int type){
   switch(type){
     case STDIN:
       return stdinQueue;
-    case SEM:
+    case SEM:{
+      if(i<0 || i>=MAX_QUEUES)
+        return NULL;
       return semQueues[i];
-    case READ:
+    }
+    case READ:{
+      if(i<0 || i>=MAX_QUEUES)
+        return NULL;
       return rMsgQueues[i];
-    case WRITE:
+    }
+    case WRITE:{
+      if(i<0 || i>=MAX_QUEUES)
+        return NULL;
       return wMsgQueues[i];
+    }
     case KEY:{
-      if(i < 'a' || i > 'z' || !keys[getKeyId()])
+      if(getKeyId(i)<0 || getKeyId(i)>KEYS)
         return NULL;
       return keyQueues[getKeyId(i)];
     }
@@ -95,7 +101,6 @@ queueADT getQueue(int i, int type){
 
 void block(int i, int type){
   current->thread->state = BLOCKED;
-  if(type == KEY){ print("blocking: "); printDec(current->thread->tid); print(" | "); printDec(type); print(" | "); printHex(getQueue(i,type));print(" | ");}
   enqueue(getQueue(i,type),current);
 	intTT();
 }
@@ -118,28 +123,40 @@ int getKeyId(int key){
 uint8_t initKey(int key){
   if(key < 'a' || key > 'z')
     return FAIL;
-  keys[getKeyId(key)] = 1;
-  return !open(getKeyId(key),&keyQueues);
+  return open(getKeyId(key), keyQueues);
+}
+
+void destroyKey(int key){
+  if(key < 'a' || key > 'z')
+    return FAIL;
+  free(keyQueues[getKeyId(key)]);
+  keyQueues[getKeyId(key)] = NULL;
 }
 
 uint8_t initMsg(int msgId){
-  return !open(msgId,&rMsgQueues) && !open(msgId, &wMsgQueues);
+  if(open(msgId,rMsgQueues)==SUCCESS && open(msgId,wMsgQueues)==SUCCESS)
+    return SUCCESS;
+  return FAIL;
 }
 
 void destroyMsg(int msgId){
-  free(rMsgQueues[msgId]);
-  rMsgQueues[msgId] = NULL;
-  free(wMsgQueues[msgId]);
-  wMsgQueues[msgId] = NULL;
+  if(msgId < MAX_QUEUES || msgId >= 0){
+    free(rMsgQueues[msgId]);
+    rMsgQueues[msgId] = NULL;
+    free(wMsgQueues[msgId]);
+    wMsgQueues[msgId] = NULL;
+  }
 }
 
 uint8_t initSem(int semId){
-  return !open(semId,&semQueues);
+  return open(semId,semQueues);
 }
 
 void destroySem(int semId){
-  free(semQueues[semId]);
-  semQueues[semId] = NULL;
+  if(semId < MAX_QUEUES || semId >= 0){
+    free(semQueues[semId]);
+    semQueues[semId] = NULL;
+  }
 }
 
 queueADT initQueue(){

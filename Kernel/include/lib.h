@@ -25,6 +25,7 @@
 #define SET 4
 
 //scheduler
+#define MAX_QUEUES 10
 #define READ 3
 #define WRITE 4
 #define SEM 5
