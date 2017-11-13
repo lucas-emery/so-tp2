@@ -69,6 +69,9 @@ void schedule(){
      current->thread->state = READY;
      enqueue(RRqueue, current);
   }
+  else if(current != NULL && current->thread->state == DEAD) {
+    freeThreadContext(current->thread->context);
+  }
 
   current = dequeue(RRqueue);
 
@@ -135,6 +138,7 @@ uint8_t unblock(int i, int type){
   if(node == NULL)
     return FAIL;
   if(node->thread->state == DEAD){
+    freeThreadContext(node->thread->context);
     return unblock(i, type);
   }
   node->thread->state = READY;

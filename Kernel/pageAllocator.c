@@ -30,7 +30,6 @@ uint64_t getFreePage() {
     index++;
   }
   if(index == size) {
-    //Kill process?
     print("OUT OF MEMORY :/");
     while(1);
   }
