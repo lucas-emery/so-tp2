@@ -9,7 +9,7 @@
 #include <pcb.h>
 #include <semaphore.h>
 #include <process.h>
-#include <blockingMessage.h>
+#include <message.h>
 
 #define SYSCALLS 30
 

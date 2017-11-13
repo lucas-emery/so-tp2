@@ -7,7 +7,7 @@
 
 #define SEM_OPERATIONS 5
 
-typedef struct sem_tCDT* sem_t;
+typedef struct semCDT* semADT;
 
 typedef int (*semOperation)(char*, int, int);
 

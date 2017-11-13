@@ -1,12 +1,12 @@
 #include <semaphore.h>
 
-typedef struct sem_tCDT{
+typedef struct semCDT{
 	int value;
 	char* name;
 	int id;
-}sem_tCDT;
+} semCDT;
 
-static sem_t* semaphores;
+static semADT* semaphores;
 static int semCount = 0;
 static int id = 0;
 static semOperation semOperations[SEM_OPERATIONS];
@@ -35,14 +35,14 @@ int semOpen(char* name, int arg2, int arg3){
 		if(strcmp(semaphores[i]->name,name) == 0)
 			return semaphores[i]->id;
 	}
-	sem_t newSem = malloc(sizeof(sem_tCDT));
+	semADT newSem = malloc(sizeof(semCDT));
 	newSem->name = malloc(strlen(name)+1);
 	strcpy(newSem->name,name);
 	newSem->value = 0;
 	newSem->id = id;
 	id++;
 	semCount++;
-	semaphores = realloc(semaphores, semCount * sizeof(sem_t));
+	semaphores = realloc(semaphores, semCount * sizeof(semADT));
 	semaphores[semCount - 1] = newSem;
 	initSem(newSem->id);
 	return newSem->id;
@@ -95,7 +95,6 @@ int executeSemaphore(int operation, char* arg1, int arg2, int arg3){
 	lock = FALSE;
 	return ret;
 }
-
 
 void setupSemaphores(){
 	semOperations[OPEN] = &semOpen;

@@ -40,6 +40,7 @@ int getCurrentProcess(){
 }
 
 void schedule(){
+  //printHex(current->thread->state);
   if(current != NULL && current->thread->state != BLOCKED && current->thread->state != DEAD && current->thread->tid != IDLE){
      current->thread->state = READY;
      enqueue(RRqueue, current);
@@ -94,6 +95,9 @@ uint8_t unblock(int i, int type){
   qnode * node = dequeue(getQueue(i,type));
   if(node == NULL)
     return FAIL;
+  if(node->thread->state == DEAD){
+    return unblock(i, type);
+  }
   node->thread->state = READY;
   return enqueue(RRqueue,node);
 }

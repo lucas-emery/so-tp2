@@ -1,4 +1,4 @@
-#include <blockingMessage.h>
+#include <message.h>
 
 typedef struct messageCDT{
 	const char* name;
