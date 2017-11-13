@@ -5,8 +5,8 @@
 
 static queueADT RRqueue, stdinQueue;
 static queueADT * semQueues, * rMsgQueues, * wMsgQueues, *keyQueues;
-static int keys[KEYS] = {0}, keysUsed;
 static qnode * idle, * current = NULL;
+int keys[KEYS] = {0};
 extern int moduleCount;
 
 
@@ -48,7 +48,7 @@ void schedule(){
   }
 
   current = dequeue(RRqueue);
-
+  //printHex(current->thread->tid);
   if(current == NULL){
     current = idle;
   }
@@ -62,12 +62,14 @@ void schedule(){
   current->thread->state = RUNNING;
 }
 
-uint8_t open(int i, queueADT ** array){
-  *array = (queueADT *) realloc(*array, (i+1)*sizeof(queueCDT));
-  if(*array == NULL)
+uint8_t open(int i, queueADT ** arrayRef){
+  *arrayRef = (queueADT *) realloc(*arrayRef, (i+1)*sizeof(queueCDT));
+  queueADT * array = *arrayRef;
+
+  if(array == NULL)
     return FAIL;
-  *array[i] = initQueue();
-  if(*array[i] == NULL)
+  array[i] = initQueue();
+  if(array[i] == NULL)
     return FAIL;
   return SUCCESS;
 }
@@ -83,10 +85,9 @@ queueADT getQueue(int i, int type){
     case WRITE:
       return wMsgQueues[i];
     case KEY:{
-      int id = getKeyId(i);
-      if(id < 0)
+      if(i < 'a' || i > 'z' || !keys[getKeyId()])
         return NULL;
-      return keyQueues[id];
+      return keyQueues[getKeyId(i)];
     }
   }
   return NULL;
@@ -94,6 +95,7 @@ queueADT getQueue(int i, int type){
 
 void block(int i, int type){
   current->thread->state = BLOCKED;
+  if(type == KEY){ print("blocking: "); printDec(current->thread->tid); print(" | "); printDec(type); print(" | "); printHex(getQueue(i,type));print(" | ");}
   enqueue(getQueue(i,type),current);
 	intTT();
 }
@@ -110,18 +112,14 @@ uint8_t unblock(int i, int type){
 }
 
 int getKeyId(int key){
-  for(int i = 0; i < KEYS; i++){
-    if(keys[i] == key)
-      return i;
-  }
-  return -1;
+  return key - 'a';
 }
 
 uint8_t initKey(int key){
-  if(getKeyId(key) >= 0)
-    return SUCCESS;
-  keys[keysUsed] = key;
-  return !open(keysUsed++,&keyQueues);
+  if(key < 'a' || key > 'z')
+    return FAIL;
+  keys[getKeyId(key)] = 1;
+  return !open(getKeyId(key),&keyQueues);
 }
 
 uint8_t initMsg(int msgId){
@@ -162,6 +160,7 @@ int isEmpty(queueADT q){
 uint8_t enqueue(queueADT q, qnode* node){
   if(q == NULL || node == NULL)
     return FAIL;
+
   node->next = q->back;
   node->prev = NULL;
 
