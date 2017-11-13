@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-static const char* ls = "hello roflmao date time";
+static const char* ls = "hello roflmao date time philosophers prodcons";
 
 
 int main(int argc, char *argv[]) {

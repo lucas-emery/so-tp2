@@ -58,7 +58,7 @@ extern void flushPaging();
 
 typedef int (*EntryPoint)(int argc, char *argv[]);
 
-char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao","ps", "ls", "philosophers","multi","sem","echo","kill","accessKernel","man",0};
+char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao","ps", "ls", "philosophers","multi","sem","echo","kill","accessKernel","man", "prodcons", 0};
 void ** moduleAddresses = AVOID_BSS;
 uint32_t moduleCount = AVOID_BSS;
 

@@ -37,7 +37,6 @@ int createMessage(char* name, int messageSize){
 	newMessage->buffer = malloc(messageSize*MAX_SIZE_BUFFER+1);
 	for(int j=0; j<=((newMessage->messageSize)*MAX_SIZE_BUFFER); j++)
 				newMessage->buffer[j] = 0;
-	println(newMessage->buffer);
 	newMessage->contentCount = 0;
 	messagesCount++;
 	messages = realloc(messages, messagesCount * sizeof(messageADT));
@@ -63,7 +62,6 @@ int readMessage(char* buffer, int id){
 			messages[i]->contentCount = 0;
 			for(int j=0; j<=((messages[i]->messageSize)*MAX_SIZE_BUFFER); j++)
 				messages[i]->buffer[j] = 0;
-			//println(messages[i]->buffer);
 			unblock(messages[i]->id, WRITE);
 			return SUCCESS;
 		}
@@ -77,11 +75,8 @@ int writeMessage(char* content, int id){
 			if(messages[i]->contentCount >= MAX_SIZE_BUFFER)
 				block(messages[i]->id, WRITE);
 			messages[i]->contentCount++;
-			//println(messages[i]->buffer);
 			strcat(messages[i]->buffer, content);
-			//println(messages[i]->buffer);
 			unblock(messages[i]->id, READ);
-		
 			return SUCCESS;
 		}
 	}
@@ -105,11 +100,7 @@ int closeMessage(char*arg1, int id){
 int executeMessage(int operation, char* arg1, int arg2){
 	if(operation < 0 || operation > MESSAGE_OPERATIONS)
 		return -1;
-	int ret;
-	//testAndSet(&lock);
-	ret = (messageOperations[operation])(arg1, arg2);
-	lock = FALSE;
-	return ret;
+	return (messageOperations[operation])(arg1, arg2);
 }
 
 void setupMessages(){
