@@ -187,6 +187,10 @@ int sysGetVar(uint64_t name, uint64_t buffer, uint64_t rcx){
 	return 0;
 }
 
+int sysWait(uint64_t id, uint64_t buffer, uint64_t rcx){
+	wait(id);
+}
+
 void sysCallsSetup(){
 	sysCalls[0] = &sysRead;
 	sysCalls[1] = &sysWrite;
@@ -216,4 +220,5 @@ void sysCallsSetup(){
 	sysCalls[25] = &sysExitThread;
 	sysCalls[26] = &sysGetPid;
 	sysCalls[27] = &sysGetVar;
+	sysCalls[28] = &sysWait;
 }

@@ -20,6 +20,10 @@ int execv(char * filename, int argc, char * argv[]){
 	return ret;
 }
 
+int wait(int id){
+	int80(28,(uint64_t) id, 0, 0);
+}
+
 int pthread_create(void *(*startRoutine)(void*), void * arg){
 	return int80(10, (uint64_t) startRoutine, (uint64_t) arg, 0);
 }

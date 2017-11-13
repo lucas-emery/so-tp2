@@ -8,12 +8,8 @@
 #include <lib.h>
 
 #define IDLE 0
+#define MAX_THREADS 15
 #define KEYS 'z' - 'a' +1
-
-typedef struct wnode{
-  int id, threadCount;
-  qnode ** threads;
-} wnode;
 
 typedef struct qnode{
   tcbADT thread;
@@ -25,6 +21,11 @@ typedef struct{
   qnode *back;
   qnode *front;
 }queueCDT;
+
+typedef struct wnode{
+  int id, threadCount;
+  qnode ** threads;
+} wnode;
 
 typedef queueCDT * queueADT;
 

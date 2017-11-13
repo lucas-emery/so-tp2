@@ -7,26 +7,23 @@ static qnode * idle, * current = NULL;
 extern uint32_t moduleCount;
 
 void wait(int id){
-  int firstFree = waitCount;
-  for(int i = 0; i < waitCount; i++){
-    if(waitMap[i].id == 0)
+  int firstFree = MAX_THREADS - 1, index=-1;
+  for(int i = 0; i < MAX_THREADS; i++){
+    if(waitMap[i].id == 0 && firstFree == MAX_THREADS-1)
       firstFree = i;
-    if(waitMap[i].id == id){
-      threadCount++;
-      waitMap[i].threads = realloc(waitMap[i].threads,threadCount * sizeof(*qnode));
-      waitMap[i].threads[threadCount-1] = current;
-      current->thread->state = BLOCKED;
-      intTT();
-      return;
-    }
+    if(waitMap[i].id == id)
+      index = i;
   }
-  if(firstFree == waitCount && waitCount + 1 < MAX_THREADS){
-    waitMap[firstFree].id = id;
-    waitMap[firstFree].threads = NULL;
-    waitMap[firstFree].threadCount = 0;
-    waitCount++;
-    intTT();
-  }
+  if(index < 0)
+    index = firstFree;
+  wnode node = waitMap[index];
+  printDec(index);
+  node.id = id;
+  node.threads = realloc(node.threads, (node.threadCount+1)*sizeof(qnode*));
+  node.threads[node.threadCount++] = current;
+  current->thread->state = BLOCKED;
+  intTT();
+  return;
 }
 
 /*
@@ -72,21 +69,24 @@ uint8_t addThread(tcbADT t){
   t->state = NEW;
   qnode * new = (qnode*) malloc(sizeof(qnode));
   new->thread = t;
+
   if(current == NULL){
     current = new;
     return SUCCESS;
   }
+
   return enqueue(RRqueue,new);
 }
 
 void killThread(){
-  for(int i = 0; i < waitCount; i++){
+  for(int i = 0; i < MAX_THREADS; i++){
+    printDec(waitMap[i].id); print(" | "); printDec(current->thread->tid);
+    newLine();
     if(waitMap[i].id == current->thread->tid){
-      for (int j = 0; j < waitMap[i].threadCount; j++) {
+      for(int j = 0; j < waitMap[i].threadCount; j++){
         waitMap[i].threads[j]->thread->state = READY;
         enqueue(RRqueue, waitMap[i].threads[j]);
       }
-      waitMap[i].id = 0;
     }
   }
   current->thread->state = DEAD;
