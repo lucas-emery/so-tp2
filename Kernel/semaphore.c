@@ -95,7 +95,6 @@ int executeSemaphore(int operation, char* arg1, int arg2, int arg3){
 	if(operation < 0 || operation > SEM_OPERATIONS)
 		return -1;
 	int ret;
-	testAndSet(&lock);
 	ret = (semOperations[operation])(arg1, arg2, arg3);
 	lock = FALSE;
 	return ret;

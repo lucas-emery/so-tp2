@@ -1,12 +1,36 @@
 #include <scheduler.h>
-#include <stdint.h>
-#define IDLE 0
-#define KEYS 'z' - 'a' +1
 
-static queueADT RRqueue, stdinQueue;
-static queueADT semQueues[MAX_QUEUES], rMsgQueues[MAX_QUEUES], wMsgQueues[MAX_QUEUES], keyQueues[KEYS];
+static queueADT RRqueue, stdinQueue, semQueues[MAX_QUEUES], rMsgQueues[MAX_QUEUES], wMsgQueues[MAX_QUEUES], keyQueues[KEYS];
 static qnode * idle, * current = NULL;
 extern uint32_t moduleCount;
+
+/*
+ *  Create an empty queue.
+ *  Returns a queueADT on success, otherwise #FAIL.
+ */
+static queueADT initQueue();
+
+/*
+ * Check if queue is empty.
+ * Returns #TRUE if the queue is empty, and otherwise #FALSE.
+ */
+static int isEmpty(queueADT q);
+
+/*
+ * Add @node to @q.
+ * Returns #SUCCESS on success, and otherwise #FAIL.
+ */
+static uint8_t enqueue(queueADT q, qnode* node);
+
+/*
+ *  Remove last element from queue, and return it.
+ *  Returns a qnode if @queueADT is not empty, and otherwise #NULL.
+ */
+static qnode* dequeue(queueADT q);
+
+static queueADT getQueue(int index, int type);
+
+static int getKeyId(int key);
 
 
 uint8_t initScheduler(){
@@ -72,7 +96,7 @@ uint8_t open(int i, queueADT * array){
   return SUCCESS;
 }
 
-queueADT getQueue(int i, int type){
+static queueADT getQueue(int i, int type){
   switch(type){
     case STDIN:
       return stdinQueue;
@@ -114,13 +138,10 @@ uint8_t unblock(int i, int type){
     return unblock(i, type);
   }
   node->thread->state = READY;
-  int ret = enqueue(RRqueue,node);
-  if(type == KEY)
-    unblock(i,type);
-  return ret;
+  return enqueue(RRqueue, node);
 }
 
-int getKeyId(int key){
+static int getKeyId(int key){
   return key - 'a';
 }
 
@@ -163,7 +184,7 @@ void destroySem(int semId){
   }
 }
 
-queueADT initQueue(){
+static queueADT initQueue(){
   queueADT ret = (queueADT) malloc(sizeof(queueCDT));
   if(ret == NULL)
     return NULL;
@@ -172,13 +193,13 @@ queueADT initQueue(){
   return ret;
 }
 
-int isEmpty(queueADT q){
+static int isEmpty(queueADT q){
   if(q == NULL)
     return 1;
   return q->front == NULL;
 }
 
-uint8_t enqueue(queueADT q, qnode* node){
+static uint8_t enqueue(queueADT q, qnode* node){
   if(q == NULL || node == NULL)
     return FAIL;
 
@@ -196,7 +217,7 @@ uint8_t enqueue(queueADT q, qnode* node){
   return SUCCESS;
 }
 
-qnode* dequeue(queueADT q){
+static qnode* dequeue(queueADT q){
   if(isEmpty(q)){
     return NULL;
   }

@@ -424,7 +424,7 @@ void writeBuffer(char ch) {
 			unblock(0,STDIN);
 			break;
 		default:
-			unblock((int) ch, KEY);
+			while(unblock((int) ch, KEY) != FAIL);
 			if(size < BUFFER_SIZE-1) {					//Dejar un espacio para \n
 				shiftRight();
 				kbBuffer[writeIndex] = ch;
