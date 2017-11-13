@@ -4,13 +4,16 @@
 
 #define FREE 0
 #define USED 1
+#define SYSTEM_RAM_ADDRESS 0x5020
+#define MB 0x100000
 
 static uint8_t * pages = AVOID_BSS;
 static uint64_t size = AVOID_BSS;
 static uint64_t firstCandidate = AVOID_BSS;
 
 void initPageAllocator() {
-  size = MAPPEDMEMORY / PAGESIZE;
+  uint32_t ram = *((uint32_t*)SYSTEM_RAM_ADDRESS);
+  size = ram / (PAGESIZE / MB);
   pages = malloc(size * sizeof(uint8_t));
   firstCandidate = 0;
   for(uint64_t i = 0; i < size; i++) {

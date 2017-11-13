@@ -203,9 +203,8 @@ void loadContext() {
 }
 
 void * malloc(uint64_t request) {
-
 	uint64_t futureSize = context->heapSize + request;
-	if (futureSize > PAGESIZE) {	//TODO: Add a page to the heap
+	if (futureSize > PAGESIZE) {
 		return NULL;
 	}
 
@@ -217,7 +216,7 @@ void * malloc(uint64_t request) {
 
 void * calloc(uint64_t request){
 	void * blockAddress = malloc(request);
-	
+
 	uint8_t * aux = (uint8_t *) blockAddress;
 	for(int i = 0; i < request ; i++){
 		aux[i] = 0;
