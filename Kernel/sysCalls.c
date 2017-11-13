@@ -132,23 +132,23 @@ int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
 }
 
 int sysInitMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
-	return executeMessage(INIT, (char*)name, (int)messageSize);
+	return executeMessage(INIT_MESSAGE, (char*)name, (int)messageSize);
 }
 
 int sysOpenMsg(uint64_t name, uint64_t rdx, uint64_t rcx){
-	return executeMessage(OPEN, (char*)name, NULL);
+	return executeMessage(OPEN_MESSAGE, (char*)name, NULL);
 }
 
 int sysDeleteMsg(uint64_t id, uint64_t rdx, uint64_t rcx){
-	return executeMessage(CLOSE, NULL, (int)id);
+	return executeMessage(CLOSE_MESSAGE, NULL, (int)id);
 }
 
 int sysWriteMsg(uint64_t id, uint64_t content, uint64_t rcx){
-	return executeMessage(WRITE, NULL, (int)id);
+	return executeMessage(WRITE_MESSAGE, NULL, (int)id);
 }
 
 int sysReadMsg(uint64_t id, uint64_t buffer, uint64_t rcx){
-	return executeMessage(READ, (char*)buffer, (int)id);
+	return executeMessage(READ_MESSAGE, (char*)buffer, (int)id);
 }
 
 int sysCallHandler(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx) {

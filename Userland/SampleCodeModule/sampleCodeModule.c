@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 int producer(int messageID){
 	while(1){
 		message_write(messageID, "capo");
-		//printf("Produce: capo\n");
+		printf("Produce: capo\n");
 	}
 }
 

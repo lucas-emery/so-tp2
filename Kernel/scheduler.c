@@ -46,7 +46,6 @@ void schedule(){
   }
 
   current = dequeue(RRqueue);
-  //printHex(current);
   if(current == NULL){
     current = idle;
   }
@@ -65,7 +64,6 @@ uint8_t open(int i, queueADT ** array){
   if(*array == NULL)
     return FAIL;
   *array[i] = initQueue();
-  printHex(*array[i]);
   if(*array[i] == NULL)
     return FAIL;
   return SUCCESS;

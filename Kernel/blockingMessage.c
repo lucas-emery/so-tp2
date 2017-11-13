@@ -42,6 +42,7 @@ int openMessage(char* name, int arg2){
 }
 
 int readMessage(char* buffer, int id){
+	printHex(buffer);
 	for (int i = 0; i < messagesCount; ++i){
 		if(messages[i]->id == id){
 			if(messages[i]->contentCount == 0)
@@ -93,16 +94,16 @@ int executeMessage(int operation, char* arg1, int arg2){
 	if(operation < 0 || operation > MESSAGE_OPERATIONS)
 		return -1;
 	int ret;
-	testAndSet(&lock);
+	//testAndSet(&lock);
 	ret = (messageOperations[operation])(arg1, arg2);
 	lock = FALSE;
 	return ret;
 }
 
 void setupMessages(){
-	messageOperations[OPEN] = &openMessage;
-	messageOperations[CLOSE] = &closeMessage;
-	messageOperations[INIT] = &createMessage;
-	messageOperations[READ] = &readMessage;
-	messageOperations[WRITE] = &writeMessage;
+	messageOperations[OPEN_MESSAGE] = &openMessage;
+	messageOperations[CLOSE_MESSAGE] = &closeMessage;
+	messageOperations[INIT_MESSAGE] = &createMessage;
+	messageOperations[READ_MESSAGE] = &readMessage;
+	messageOperations[WRITE_MESSAGE] = &writeMessage;
 }

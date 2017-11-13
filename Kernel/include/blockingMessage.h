@@ -7,13 +7,13 @@
 #include <lib.h>
 
 #define MESSAGE_OPERATIONS 5
-#define OPEN 0
-#define CLOSE 1
-#define INIT 2
-#define READ 3
-#define WRITE 4
+#define OPEN_MESSAGE 0
+#define CLOSE_MESSAGE 1
+#define INIT_MESSAGE 2
+#define READ_MESSAGE 3
+#define WRITE_MESSAGE 4
 
-#define MAX_SIZE_BUFFER 50 //it's not the actual size of the buffer but the amount of times write() was executed
+#define MAX_SIZE_BUFFER 10 //it's not the actual size of the buffer but the amount of times write() was executed
 
 typedef struct messageCDT* messageADT;
 typedef int (*messageOperation)(char*, int);
