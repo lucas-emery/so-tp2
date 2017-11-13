@@ -12,13 +12,13 @@ static const char * modules[][2] = {
   "kill","Kills the specified process.\nParams: [PID]",
   "ls","Prints available modules.\nParams: None",
   "man","Provides information about a module.\nParams: [Module]",
-  "philosophers","Chinese Philosophers Problem.\nParams: None",
+  "philosophers","Prints solution to philosophers problem.\nParams: None",
   "ps","Prints information about the system processes.\nParams: None",
   "roflmao","Easter Egg.\nParams: None",
   "sampleCodeModule","A sampleCodeModule.\nParams: None",
   "sem","Performs a sem_post on the 'topkek' semaphore.\nParams: None",
   "time","Prints the actual time.\nParams: None",
-  "prodcons","Prints solution to producer-consumer problem.\nParams: None",
+  "prodcons","Prints solution to producer-consumer problem.\nParams: create producer letter, create consumer letter, remove producer letter, remove consumer letter",
   0};
 
 int main(int argc, char *argv[]) {
