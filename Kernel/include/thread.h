@@ -5,11 +5,6 @@
 #include <MMU.h>
 #include <pcb.h>
 
-#define RUNNING 0
-#define BLOCKED 1
-#define READY 2
-#define NEW 3
-
 typedef struct tcbCDT{
 	int tid;
 	int pid;

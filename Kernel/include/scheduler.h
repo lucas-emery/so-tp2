@@ -1,11 +1,6 @@
 #ifndef SCHED_H
 #define SCHED_H
 
-#define BLOCK 0
-#define UNBLOCK 1
-#define SEM 3
-#define STDIN 4
-
 #include <stdint.h>
 #include <pcb.h>
 #include <MMU.h>

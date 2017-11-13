@@ -12,7 +12,7 @@ int consumer(int messageID);
 
 int main(int argc, char *argv[]) {
 	//while(1){
-	
+
 	//}
 	int messageID = message_init("Diego", 5);
 	//printf("%d\n", messageID);

@@ -6,11 +6,6 @@
 #include <scheduler.h>
 
 #define SEM_OPERATIONS 5
-#define OPEN 0
-#define CLOSE 1
-#define POST 2
-#define WAIT 3
-#define SET 4
 
 typedef struct sem_tCDT* sem_t;
 

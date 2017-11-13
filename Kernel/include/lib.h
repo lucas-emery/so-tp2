@@ -6,10 +6,36 @@
 
 #define TRUE 1
 #define FALSE 0
+
 #define SUCCESS 0
 #define FAIL 1
-#define READ 0
-#define WRITE 1
+
+//messages
+#define OPEN 0
+#define CLOSE 1
+#define INIT 2
+#define READ 3
+#define WRITE 4
+
+//semaphores
+#define OPEN 0
+#define CLOSE 1
+#define POST 2
+#define WAIT 3
+#define SET 4
+
+//scheduler
+#define READ 3
+#define WRITE 4
+#define SEM 5
+#define STDIN 6
+
+//threads
+#define RUNNING 0
+#define BLOCKED 1
+#define READY 2
+#define NEW 3
+#define DEAD 4
 
 void * memset(void * destination, int32_t character, uint64_t length);
 void * memcpy(void * destination, const void * source, uint64_t length);
