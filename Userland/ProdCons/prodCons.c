@@ -27,7 +27,7 @@ int producer(int messageID){
 		message_write(messageID, "capo");
 		printf("Produce: capo\n");
 	}*/
-	int timeout = 10000000;
+	int timeout = 10000000000000;
   	while(1){
     	if(timeout == 0){
       		message_write(messageID, "capo");
@@ -46,7 +46,7 @@ int consumer(int messageID){
 		message_read(messageID, buffer);
 		printf("Consume: %s\n", buffer);
 	}*/
-	int timeout = 10000000;
+	int timeout = 10000000000000;
   	while(1){
     	if(timeout == 0){
       		char* buffer = malloc(100);

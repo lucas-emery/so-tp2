@@ -18,9 +18,8 @@ static const char * modules[][2] = {
   "sampleCodeModule","A sampleCodeModule.\nParams: None",
   "sem","Performs a sem_post on the 'topkek' semaphore.\nParams: None",
   "time","Prints the actual time.\nParams: None",
-  "prodcons","Prints solution to producer-consumer problem.\nParams: None"
-  0
-};
+  "prodcons","Prints solution to producer-consumer problem.\nParams: None",
+  0};
 
 int main(int argc, char *argv[]) {
   if(argc < 2) {
