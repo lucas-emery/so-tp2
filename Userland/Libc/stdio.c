@@ -7,11 +7,11 @@
 #define BUFFER_SIZE 25*80+1000
 
 void write(int fd, char* buffer, int size) {
-	int80(1,fd,buffer,size);
+	int80(1,(uint64_t) fd,(uint64_t) buffer,(uint64_t) size);
 }
 
 void read(int fd, char* buffer, int size) {
-	int80(0,fd,buffer,size);
+	int80(0, (uint64_t) fd, (uint64_t) buffer, (uint64_t) size);
 }
 
 void putchar(char c) {
@@ -26,7 +26,7 @@ char getchar() {
 	return ch;
 }
 
-int printf(const char* format, ...) {
+int printf(char* format, ...) {
 	va_list args;
 	va_start(args, format);
 	int num, length;
@@ -68,17 +68,16 @@ int printf(const char* format, ...) {
 	return 0;
 }
 
-int scanf(const char* format, ...) {
+int scanf(char* format, ...) {
 	va_list args;
 	va_start(args, format);
 	int read = 0;
 	int index = 0;
-	int length;
 	char ch;
 	char buffer[BUFFER_SIZE];
   char* character;
 
-  length = readLine(buffer,BUFFER_SIZE);
+  readLine(buffer,BUFFER_SIZE);
 
 	while((ch = *(format++)) != '\0') {
 		if(ch == '%') {
@@ -108,9 +107,9 @@ int scanf(const char* format, ...) {
 	return read;
 }
 
-int sscanf(const char* format, const char* str, ...) {
+int sscanf(char* format, char* str, ...) {
 	va_list args;
-	va_start( args, format );
+	va_start(args, format);
 	int read = 0;
 	int index;
 	char ch;

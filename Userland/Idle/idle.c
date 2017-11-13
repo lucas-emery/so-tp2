@@ -1,10 +1,9 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <process.h>
+
+#define TOPKEK 1337
 
 int main(int argc, char *argv[]) {
-	char* buffer = malloc(100);
-	ps(buffer);
-	printf("%s\n", buffer);
+	while(TOPKEK);
 	return 0;
 }

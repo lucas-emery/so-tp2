@@ -4,7 +4,7 @@ static unsigned long int next = 1;
 
 void * malloc(unsigned int size) {
 	void * address;
-	int80(8,&address,size,0);
+	int80(8,(uint64_t) &address, (uint64_t) size,0);
 	return address;
 }
 
@@ -52,7 +52,7 @@ int itoa(uint64_t value, char * buffer, int base) {
 }
 
 int isAlpha(char c) {
-	return (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z');
+	return ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'));
 }
 
 int isDigit(char c) {

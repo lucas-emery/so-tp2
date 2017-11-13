@@ -34,32 +34,11 @@ void screenTickHandler() {
 }
 
 void timerTickHandler(uint64_t rsp) {
-	// print("rsp");
-	// printHex(rsp);
-	//uint64_t * reg = rsp;
-	// while(reg <= CONTEXT_SWITCH_STACKBASE) {
-	// 	newLine();
-	// 	printHex(*reg);
-	// 	reg++;
-	// }
-	// while(1);
 	kernelMode();
-	//printHex(rsp);
-	//print("\n");
-	//printHex(*((uint64_t *)(rsp + (8*15))));
-	//print("\n");
-	//screenTickHandler();
+
 	schedule();
-	userMode(); //Puedo llegar a querer salir en kernel mode?
-	// reg = rsp;
-	// if(pid == 1) {
-	// 	while(reg <= CONTEXT_SWITCH_STACKBASE) {
-	// 		newLine();
-	// 		printHex(*reg);
-	// 		reg++;
-	// 	}
-	// 	while(1);
-	// }
+
+	userMode();
 }
 
 void irqDispatcher(int irq) {
@@ -104,7 +83,7 @@ void debug(){
 
 void setupIDT() {
 	//iSetHandler(0x0D, 0, (uint64_t) &debug);
-	//iSetHandler(0x0E, 0, (uint64_t) &PFHandler);
+	iSetHandler(0x0E, 0, (uint64_t) &PFHandler);
 	iSetHandler(0x20, 2, (uint64_t) &TTHandler);
 	iSetHandler(0x21, 2, (uint64_t) &irq1Handler);
 	iSetHandler(0x2C, 2, (uint64_t) &irq12Handler);

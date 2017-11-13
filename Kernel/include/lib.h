@@ -19,6 +19,7 @@ char* strcat(char *dest, const char *src);
 char* strcpy(char* dest, char* src);
 size_t strlen(const char *str);
 
+void intTT();
 void dispatch(uint64_t,uint64_t);
 char *cpuVendor(char *result);
 void writePort(uint8_t port, uint8_t value);

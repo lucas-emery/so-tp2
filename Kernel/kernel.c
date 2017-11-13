@@ -17,7 +17,7 @@ int main(){
 	initScheduler();
 	initSharedMemory();
 	enableMemoryProtection();
-	ncClear();
+	//ncClear();
 	setFocusedPID(createProcess(0,0,0));
   sti();
   while(1);

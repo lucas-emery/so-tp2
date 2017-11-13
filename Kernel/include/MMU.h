@@ -16,10 +16,6 @@ typedef struct {
 	void * interruptContext;
 } context_t;
 
-void changePDEPresent(int entry, int present);
-void setKernelPresent(int present);
-void copyAndExecuteModule(int moduleIndex, int argc, char *argv[]);
-void copyAndExecuteDefaultModule();
 void changePDE(int entry, uint64_t physAddr, int present);
 void changePDEPresent(int entry, int present);
 void * initializeKernelBinary();
@@ -34,8 +30,5 @@ void userMode();
 void setContext(context_t * newContext);
 void initSharedMemory();
 void enableMemoryProtection();
-
-extern uint64_t cleanReturnAddress();
-extern void injectReturnAddress(uint64_t returnAddress);
 
 #endif

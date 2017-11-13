@@ -1,11 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <semaphore.h>
-
-int semId;
 
 int main(int argc, char *argv[]) {
-  semId = sem_open("topkek");
-  sem_post(semId);
+  int * kernel = 0x0;
+  printf("%x\n", *kernel);
   return 0;
 }

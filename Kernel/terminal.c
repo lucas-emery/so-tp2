@@ -421,6 +421,7 @@ void writeBuffer(char ch) {
 			writeIndex = startIndex = endIndex;
 			if(echo)
 				printc(ch);
+			unblock(0,STDIN);
 			break;
 		default:
 			if(size < BUFFER_SIZE-1) {					//Dejar un espacio para \n

@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <process.h>
 
+
 int main(int argc, char *argv[]) {
-	char* buffer = malloc(100);
-	ps(buffer);
-	printf("%s\n", buffer);
+  int x;
+  parseInt(argv[1], &x);
+	kill(x);
 	return 0;
 }

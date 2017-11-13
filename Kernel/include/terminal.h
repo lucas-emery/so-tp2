@@ -2,6 +2,7 @@
 #define TERMINAL_H
 
 #include <stdint.h>
+#include <scheduler.h>
 
 #define WIDTH 80
 #define HEIGHT 25

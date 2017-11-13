@@ -4,6 +4,10 @@ int sysRead(uint64_t fileDescriptor, uint64_t buffer, uint64_t size) {
 	int index = 0;
 	char c;
 	if(fileDescriptor == 0) {
+		if((c = readBuffer()) == NULL)
+			block(0, STDIN);
+		*((char*)buffer++)= c;
+		index++;
 		while(index++ < size)
 			*((char*)buffer++)= readBuffer();
 	}
@@ -57,13 +61,18 @@ int sysExec(uint64_t filename, uint64_t argc, uint64_t argv) {
 	int i = 0;
 	while(moduleNames[i] != 0){
 		if(strcmp(filename, moduleNames[i]) == 0) {
-			if(argc > 0 && ((char**)argv)[argc-1][0] == '&') {
-				int pid = createProcess(i, argc-1, argv);
+			if(argc == 0) {
+				return createProcess(i, argc, argv);
+			}
+			else if(strcmp(((char**)argv)[argc-1], "&") == 0) {
+				return createProcess(i, argc-1, argv);
+			}
+			else {
+				int pid = createProcess(i, argc, argv);
 				setFocusedPID(pid);
 				exitCurrentProcess(0);
 				return pid;
 			}
-			return createProcess(i, argc, argv);
 		}
 		i++;
 	}
@@ -81,6 +90,7 @@ int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
 	//Change to userMode
 	//TO DO
 	//Return to kernelMode
+	return 0;
 }
 
 int sysOpenSem(uint64_t name, uint64_t value, uint64_t id){
@@ -104,11 +114,13 @@ int sysPthread(uint64_t startRoutine, uint64_t arg, uint64_t rcx){
 }
 
 int sysKillProcess(uint64_t pid, uint64_t rdx, uint64_t rcx){
-	removePCB(pid);
+	exitProcess(pid, 1);
+	return 0;
 }
 
 int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
 	processesInfo(buffer);
+	return 0;
 }
 
 int sysSetSem(uint64_t id, uint64_t value, uint64_t rcx){
@@ -121,6 +133,7 @@ int sysInitMsg(uint64_t name, uint64_t messageSize, uint64_t rcx){
 
 int sysYieldProcess(uint64_t rsi, uint64_t rdx, uint64_t rcx){
 	//block();
+	return 0;
 }
 
 int sysOpenMsg(uint64_t name, uint64_t rdx, uint64_t rcx){

@@ -2,16 +2,25 @@ include Makefile.inc
 
 SAMPLE_DATA=0001-sampleDataModule.bin
 
-all: libc sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls philosophers multi sem echo
+all: libc accessKernel sampleCodeModule sampleDataModule shell hello help time date clear roflcopter ps ls philosophers multi sem echo idle kill
 
 libc:
 	cd Libc; make
 
+accessKernel:
+	cd AccessKernel; make
+
 sampleCodeModule:
 	cd SampleCodeModule; make
 
+kill:
+	cd Kill; make
+
 sem:
 	cd Sem; make
+
+idle:
+	cd Idle; make
 
 sampleDataModule:
 	printf "This is sample data." >> $(SAMPLE_DATA) && dd if=/dev/zero bs=1 count=1 >> $(SAMPLE_DATA)
@@ -55,6 +64,7 @@ clear:
 clean:
 	cd SampleCodeModule; make clean
 	cd Shell; make clean
+	cd AccessKernel; make clean
 	cd Libc; make clean
 	rm -rf *.bin
 

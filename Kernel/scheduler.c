@@ -1,15 +1,18 @@
 #include <scheduler.h>
 #include <stdint.h>
-
-
+#define IDLE 0
 
 static queueADT RRqueue, stdinQueue;
 static queueADT * semQueues, * rMsgQueues, * wMsgQueues;
-static qnode * current = NULL;
+static qnode * idle, * current = NULL;
+extern int moduleCount;
+
 
 uint8_t initScheduler(){
   RRqueue = initQueue();
   stdinQueue = initQueue();
+  createProcess(moduleCount - 1, 0, 0);
+  idle = current;
   return (RRqueue == NULL) + (stdinQueue == NULL);
 }
 
@@ -37,12 +40,16 @@ int getCurrentProcess(){
 }
 
 void schedule(){
-  if(current != NULL && current->thread->state != BLOCKED && current->thread->state != DEAD){
+  if(current != NULL && current->thread->state != BLOCKED && current->thread->state != DEAD && current->thread->tid != IDLE){
      current->thread->state = READY;
      enqueue(RRqueue, current);
   }
 
   current = dequeue(RRqueue);
+  //printHex(current);
+  if(current == NULL){
+    current = idle;
+  }
 
   if(current->thread->state == DEAD){
     schedule();
@@ -53,7 +60,7 @@ void schedule(){
   current->thread->state = RUNNING;
 }
 
-static uint8_t open(int i, queueADT ** array){
+uint8_t open(int i, queueADT ** array){
   *array = (queueADT *) realloc(*array, (i+1)*sizeof(queueCDT));
   if(*array == NULL)
     return FAIL;
