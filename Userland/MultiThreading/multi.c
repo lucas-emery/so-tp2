@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
   sem_set(semId,0);
   pthread_create((function) doIt,(void *) 1);
   sem_wait(semId);
-  pthread_create((function) doIt,(void *) 1);
+  pthread_create((function) doIt,(void *) 2);
   while(1);
   return 0;
 }
