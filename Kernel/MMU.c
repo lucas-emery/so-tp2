@@ -79,7 +79,7 @@ void changePDE(int entry, uint64_t physAddr, int present){
 	}
 
 	if(present)
-		*((uint64_t*)PD) = (uint64_t)physAddr | 0x8F; //TODO: Don´t override
+		*((uint64_t*)PD) = (uint64_t)physAddr | 0x8F;
 	else
 		*((uint64_t*)PD) = ((uint64_t)physAddr | 0x8F) & ~(uint64_t)0x1;
 }
@@ -176,9 +176,9 @@ void setupGDT(){
 
 void setupTSS() {
 	uint32_t * TSS = TSS_ADDR;
-	TSS[1] = KERNEL_STACK_BOTTOM;				//Bits 31-0
-	TSS[2] = KERNEL_STACK_BOTTOM >> 32;	//Bits 63-32
-	TSS[9] = SYSCALL_STACK_BOTTOM;								//IST for SysCalls
+	TSS[1] = KERNEL_STACK_BOTTOM;					//Bits 31-0
+	TSS[2] = KERNEL_STACK_BOTTOM >> 32;		//Bits 63-32
+	TSS[9] = SYSCALL_STACK_BOTTOM;				//IST for SysCalls
 	TSS[10] = SYSCALL_STACK_BOTTOM >> 32;
 	TSS[11] = KERNEL_STACK_BOTTOM;
 	TSS[12] = KERNEL_STACK_BOTTOM >> 32;

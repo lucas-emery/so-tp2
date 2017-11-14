@@ -46,7 +46,7 @@ int removePCB(int id){
 			pcbADT pcb = pcbTable[i];
 			for(int j = 0; j < pcb->threadCount; j++)
 				pcb->threads[j]->state = DEAD;
-			freeProcessContext(pcb->threads[0]->context); //TODO: Existe este thread siempre?? Creo que si, gracias stu <3
+			freeProcessContext(pcb->threads[0]->context);
 			free(pcbTable[i]);
 			for(int j = i; j < tableSize-1; j++)
 				pcbTable[j] = pcbTable[j+1];
@@ -86,7 +86,7 @@ void threadsInfo(char* buffer){
 	*buffer = NULL;
 	for (int i = 0; i < tableSize; i++){
 		for (int j = 0; j < pcbTable[i]->threadCount; j++){
-			strcat(buffer, makeStringThread(pcbTable[i]->threads[j], pcbTable[i]->name, maxNameLength));	
+			strcat(buffer, makeStringThread(pcbTable[i]->threads[j], pcbTable[i]->name, maxNameLength));
 		}
 	}
 }
