@@ -25,9 +25,9 @@ static int philosopherCount;
 
 State state[MAX];
 
-int mutex;
-int semaphores[MAX];
-int philosopherId[MAX];
+static int mutex;
+static int semaphores[MAX];
+static int philosopherId[MAX];
 
 //GUI
 void render();
@@ -39,17 +39,20 @@ State philoState[MAX];
 int forkState[MAX];
 
 void * philosopher(void * id) {
+	printf("ndfjad\n");
 	int timeout = 10000000;
 	while(1) {
 		
 		//Think
 		if(timeout == 0){
+			printf("tik\n");
       		takeForks(*(int*)id);
       		timeout=10000000;
     	}
 
 		//Eat
     	if(timeout == 5000000){
+    		printf("eat\n");
       		putForks(*(int*)id);
     	}
     	timeout--;
@@ -59,7 +62,7 @@ void * philosopher(void * id) {
 
 void takeForks(int id) {
 	sem_wait(mutex);				//Crit zone
-
+	printf('take');
 	//Set state
 	state[id] = Hungry;
 	setPhiloState(id, Hungry);
@@ -72,7 +75,7 @@ void takeForks(int id) {
 
 void putForks(int id) {
 	sem_wait(mutex);				//Crit zone
-
+	printf("put");
 	//Set state
 	state[id] = Thinking;
 	//Think and release forks
@@ -107,27 +110,29 @@ int main(int argc, char ** argv) {
 	//Setup
 	philosopherCount = 4;
 	mutex = sem_set("philosophersMutex",0);
+	char letra = 'A';
 
 	for (int i = 0; i < philosopherCount; i++) {
-		char* semaphoreName = "philosopher";
-		char* number = malloc(10);
-		itoa(i,number,10);
-		semaphoreName = strcat(semaphoreName, number);
-		semaphores[i] = sem_set(semaphoreName, -1);//Philosophers start not having ownership of the forks
-		free(number);
+		char* semaphoreName = malloc(30);
+		strcat(semaphoreName,"philosopher");
+		printf("%s\n", semaphoreName);
+		strcat(semaphoreName, &letra);
+		letra++;
+		printf("%s\n", semaphoreName);
+		semaphores[i] = sem_open(semaphoreName);//Philosophers start not having ownership of the forks
 	}
 
 	for (int i = 0; i < philosopherCount; i++) {
+		putchar('b');
 		philosopherId[i] = i;
+		//printf("bdhfsbadg\n");
 		state[i] = Thinking;
-		printf("hola\n");
 		pthread_create((function)philosopher, (void*)philosopherId[i]);
 	}
 
 	printf("running\n");
-	getchar();
+	//getchar();
 	//pthread_exit();
-	while(1);
 	return 0;
 }
 
