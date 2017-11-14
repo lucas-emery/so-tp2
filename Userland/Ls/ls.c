@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-static const char* ls = "hello roflmao date time philosophers prodcons";
+static const char* ls = "hello roflmao date time philosophers prodcons accessKernel echo kill multi sem";
 
 
 int main(int argc, char *argv[]) {
