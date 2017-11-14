@@ -3,8 +3,9 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include <strings.h>
+#include <process.h>
 
-#define PHILOSOPHER_COUNT 2
+#define MAX 20
 
 typedef enum {
 	Hungry = 0,
@@ -20,12 +21,13 @@ void putForks(int id);
 void test(int i);
 int randRange(int min, int max);
 
-State state[PHILOSOPHER_COUNT];
+static int philosopherCount;
+
+State state[MAX];
 
 int mutex;
-int semaphores[PHILOSOPHER_COUNT];
-//int philosopherThread[PHILOSOPHER_COUNT];
-int philosopherId[PHILOSOPHER_COUNT];
+int semaphores[MAX];
+int philosopherId[MAX];
 
 //GUI
 void render();
@@ -33,23 +35,26 @@ void setPhiloState(int philo, State state);
 void setForkState(int fork, int owner);
 
 char * stateStrings[3] = { "Hungry", "Thinking", "Eating" };
-State philoState[PHILOSOPHER_COUNT];
-int forkState[PHILOSOPHER_COUNT];
+State philoState[MAX];
+int forkState[MAX];
 
 void * philosopher(void * id) {
+	int timeout = 10000000;
 	while(1) {
+		
 		//Think
-		//sleep(10);
-		//sleep(randRange(5, 10));
-
-		takeForks(*(int*)id);
+		if(timeout == 0){
+      		takeForks(*(int*)id);
+      		timeout=10000000;
+    	}
 
 		//Eat
-		//sleep(10);
-		//sleep(randRange(5, 10));
-
-		putForks(*(int*)id);
+    	if(timeout == 5000000){
+      		putForks(*(int*)id);
+    	}
+    	timeout--;
 	}
+	pthread_exit();
 }
 
 void takeForks(int id) {
@@ -100,38 +105,38 @@ void test(int id) {
 
 int main(int argc, char ** argv) {
 	//Setup
-	return 0; /*
-	mutex = sem_open("philosophers_mutex");
-	sem_set(mutex,0);
-	char* semaphoreName = "philosopher";
+	philosopherCount = 4;
+	mutex = sem_set("philosophersMutex",0);
 
-	for (int i = 0; i < PHILOSOPHER_COUNT; i++) {
+	for (int i = 0; i < philosopherCount; i++) {
+		char* semaphoreName = "philosopher";
 		char* number = malloc(10);
 		itoa(i,number,10);
 		semaphoreName = strcat(semaphoreName, number);
-		sem_open(semaphoreName, -1);//Philosophers start not having ownership of the forks
-		semaphoreName = "philosopher";
+		semaphores[i] = sem_set(semaphoreName, -1);//Philosophers start not having ownership of the forks
 		free(number);
 	}
 
-	for (int i = 0; i < PHILOSOPHER_COUNT; i++) {
+	for (int i = 0; i < philosopherCount; i++) {
 		philosopherId[i] = i;
 		state[i] = Thinking;
-		//pthread_create(philosopherThread[i], philosopher, philosopherId[i]);
+		printf("hola\n");
+		pthread_create((function)philosopher, (void*)philosopherId[i]);
 	}
 
 	printf("running\n");
 	getchar();
-
-	//pthread_exit(NULL);*/
+	//pthread_exit();
+	while(1);
+	return 0;
 }
 
 int left(int i) {
-	return (i + PHILOSOPHER_COUNT - 1) % PHILOSOPHER_COUNT;
+	return (i + philosopherCount - 1) % philosopherCount;
 }
 
 int right(int i) {
-	return (i + 1) % PHILOSOPHER_COUNT;
+	return (i + 1) % philosopherCount;
 }
 
 int randRange(int min, int max) {
@@ -140,7 +145,7 @@ int randRange(int min, int max) {
 
 //GUI
 void render() {
-	for(int i = 0; i < PHILOSOPHER_COUNT; i++) {
+	for(int i = 0; i < philosopherCount; i++) {
 		printf("Philosopher %d: %s\n", i, stateStrings[philoState[i]]);
 		printf("Fork - ");
 
