@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-MODULE=0002-sampleCodeModule.bin
+MODULE=0002-ts.bin
 SOURCES=$(wildcard [^_]*.c)
 LIBC=$(wildcard ../Libc/*.o)
 

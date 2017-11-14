@@ -132,6 +132,11 @@ int sysListProcesses(uint64_t buffer, uint64_t rdx, uint64_t rcx){
 	return SUCCESS;
 }
 
+int sysListThreads(uint64_t buffer, uint64_t rdx, uint64_t rcx){
+	threadsInfo(buffer);
+	return SUCCESS;
+}
+
 int sysKeyBlock(uint64_t key, uint64_t rdx, uint64_t rcx){
 	initKey(key);
 	block(key, KEY);
@@ -217,4 +222,5 @@ void sysCallsSetup(){
 	sysCalls[25] = &sysExitThread;
 	sysCalls[26] = &sysGetPid;
 	sysCalls[27] = &sysGetVar;
+	sysCalls[28] = &sysListThreads;
 }

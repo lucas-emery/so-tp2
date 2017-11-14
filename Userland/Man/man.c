@@ -15,7 +15,7 @@ static const char * modules[][2] = {
   "philosophers","Prints solution to philosophers problem.\nParams: None",
   "ps","Prints information about the system processes.\nParams: None",
   "roflmao","Easter Egg.\nParams: None",
-  "sampleCodeModule","A sampleCodeModule.\nParams: None",
+  "ts","Prints information about the system threads.\nParams: None",
   "sem","Performs a sem_post on the 'topkek' semaphore.\nParams: None",
   "time","Prints the actual time.\nParams: None",
   "prodcons","Prints solution to producer-consumer problem.\nParams: create producer letter, create consumer letter, remove producer letter, remove consumer letter",

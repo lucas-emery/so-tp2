@@ -27,7 +27,7 @@ extern void loadGDTR(uint32_t address, uint16_t limit);
 extern void loadTR(uint16_t tr);
 
 
-char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao","ps", "ls", "philosophers","multi","sem","echo","kill","accessKernel","man", "prodcons", 0};
+char* moduleNames[] = {"shell", "sampleDataModule", "ts", "hello", "help", "date", "time", "clear", "roflmao","ps", "ls", "philosophers","multi","sem","echo","kill","accessKernel","man", "prodcons", 0};
 void ** moduleAddresses = AVOID_BSS;
 uint32_t moduleCount = AVOID_BSS;
 

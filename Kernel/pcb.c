@@ -18,7 +18,7 @@ static int maxNameLength = 0;
 *Creates the string having the info of the process in parameter
 *Returns the string created
 */
-static char* makeString(pcbADT process);
+static char* makeStringProcess(pcbADT process);
 
 void setupPCB(){
 	pcbTable = malloc(sizeof(pcbADT));
@@ -78,11 +78,20 @@ int getState(int id){
 void processesInfo(char* buffer){
 	*buffer = NULL;
 	for (int i = 0; i < tableSize; i++){
-		strcat(buffer, makeString(pcbTable[i]));
+		strcat(buffer, makeStringProcess(pcbTable[i]));
 	}
 }
 
-static char* makeString(pcbADT process){
+void threadsInfo(char* buffer){
+	*buffer = NULL;
+	for (int i = 0; i < tableSize; i++){
+		for (int j = 0; j < pcbTable[i]->threadCount; j++){
+			strcat(buffer, makeStringThread(pcbTable[i]->threads[j], pcbTable[i]->name, maxNameLength));	
+		}
+	}
+}
+
+static char* makeStringProcess(pcbADT process){
 	char* aux = malloc(100);
 	char* str1 = malloc(10);
 	char* str2 = malloc(10);

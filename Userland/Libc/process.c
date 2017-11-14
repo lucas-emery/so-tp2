@@ -40,6 +40,10 @@ void ps(char* buffer){
 	int80(12, (uint64_t) buffer,0,0);
 }
 
+void ts(char* buffer){
+	int80(28, (uint64_t) buffer,0,0);
+}
+
 void keyBlock(char key){
 	int80(13, (uint64_t) key,0,0);
 }

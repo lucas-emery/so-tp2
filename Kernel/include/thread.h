@@ -22,5 +22,6 @@ typedef struct tcbCDT{
 tcbADT createFirstTCB(int privilege,int pid, int moduleIndex, int argc, char *argv[]);
 tcbADT createTCB(int privilege, void * start_routine, void * arg);
 int createThread(void *(*startRoutine)(void*), void * arg);
+char* makeStringThread(tcbADT thread, char* name, int maxNameLength);
 
 #endif

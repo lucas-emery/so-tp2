@@ -6,9 +6,9 @@ static const char * man =
 "time: Prints out the current time\n\
 date: Prints out the current date\n\
 ps: Prints out processes information\n\
+ts: Prints out threads information\n\
 clear: Wipes out the screen\n\
 hello: Prints arguments\n\
-sampleCodeModule: A sample module\n\
 philosophers: Solution to philosophers problem\n\
 prodcons: Solution to producer-consumer problem";
 
