@@ -39,20 +39,18 @@ State philoState[MAX];
 int forkState[MAX];
 
 void philosopher(int id) {
-	int timeout = 10000000;
+	int timeout = 1000000000;
 	while(1) {
 		
 		//Think
-		if(timeout == 5000000){
-			printf("tik\n");
+		if(timeout == 500000000){
       		takeForks(id);
-      		timeout=10000000;
     	}
 
 		//Eat
     	if(timeout == 0){
-    		printf("eat\n");
       		putForks(id);
+      		timeout = 1000000000;
     	}
     	timeout--;
 	}
@@ -61,7 +59,6 @@ void philosopher(int id) {
 
 void takeForks(int id) {
 	sem_wait(mutex);				//Crit zone
-	printf('take');
 	//Set state
 	state[id] = Hungry;
 	setPhiloState(id, Hungry);
@@ -74,7 +71,6 @@ void takeForks(int id) {
 
 void putForks(int id) {
 	sem_wait(mutex);				//Crit zone
-	printf("put");
 	//Set state
 	state[id] = Thinking;
 	//Think and release forks
@@ -128,8 +124,6 @@ int main(int argc, char ** argv) {
 	}
 
 	printf("running\n");
-	//getchar();
-	//pthread_exit();
 	while(1);
 	return 0;
 }
@@ -149,7 +143,7 @@ int randRange(int min, int max) {
 //GUI
 void render() {
 	for(int i = 0; i < philosopherCount; i++) {
-		printf("Philosopher %d: %s\n", i, stateStrings[philoState[i]]);
+		printf("Philosopher %d: %s ", i, stateStrings[philoState[i]]);
 		printf("Fork - ");
 
 		if (forkState[i] == -1)
