@@ -110,22 +110,20 @@ int main(int argc, char ** argv) {
 	//Setup
 	philosopherCount = 4;
 	mutex = sem_set("philosophersMutex",0);
-	char letra = 'A';
+	char letra[2] = {'A',0};
 
 	for (int i = 0; i < philosopherCount; i++) {
 		char* semaphoreName = malloc(30);
 		strcat(semaphoreName,"philosopher");
-		printf("%s\n", semaphoreName);
-		strcat(semaphoreName, &letra);
-		letra++;
+		strcat(semaphoreName, letra);
+		(letra[0])++;
 		printf("%s\n", semaphoreName);
 		semaphores[i] = sem_open(semaphoreName);//Philosophers start not having ownership of the forks
 	}
 
 	for (int i = 0; i < philosopherCount; i++) {
-		putchar('b');
 		philosopherId[i] = i;
-		//printf("bdhfsbadg\n");
+		printf("%d\n", philosopherId[i]);
 		state[i] = Thinking;
 		pthread_create((function)philosopher, (void*)philosopherId[i]);
 	}
