@@ -15,7 +15,7 @@ typedef enum {
 
 int left(int i);
 int right(int i);
-void * philosopher(void * id);
+void philosopher(int id);
 void takeForks(int id);
 void putForks(int id);
 void test(int i);
@@ -38,20 +38,19 @@ char * stateStrings[3] = { "Hungry", "Thinking", "Eating" };
 State philoState[MAX];
 int forkState[MAX];
 
-void * philosopher(void * id) {
-	printf("ndfjad\n");
+void philosopher(int id) {
 	int timeout = 10000000;
 	while(1) {
 		
 		//Think
-		if(timeout == 0){
+		if(timeout == 5000000){
 			printf("tik\n");
       		takeForks(*(int*)id);
       		timeout=10000000;
     	}
 
 		//Eat
-    	if(timeout == 5000000){
+    	if(timeout == 0){
     		printf("eat\n");
       		putForks(*(int*)id);
     	}
@@ -109,7 +108,7 @@ void test(int id) {
 int main(int argc, char ** argv) {
 	//Setup
 	philosopherCount = 4;
-	mutex = sem_set("philosophersMutex",0);
+	mutex = sem_open("philosophersMutex");
 	char letra[2] = {'A',0};
 
 	for (int i = 0; i < philosopherCount; i++) {
@@ -117,7 +116,6 @@ int main(int argc, char ** argv) {
 		strcat(semaphoreName,"philosopher");
 		strcat(semaphoreName, letra);
 		(letra[0])++;
-		printf("%s\n", semaphoreName);
 		semaphores[i] = sem_open(semaphoreName);//Philosophers start not having ownership of the forks
 	}
 
@@ -125,12 +123,13 @@ int main(int argc, char ** argv) {
 		philosopherId[i] = i;
 		printf("%d\n", philosopherId[i]);
 		state[i] = Thinking;
-		pthread_create((function)philosopher, (void*)philosopherId[i]);
+		pthread_create((function)philosopher, i);
 	}
 
 	printf("running\n");
 	//getchar();
 	//pthread_exit();
+	while(1);
 	return 0;
 }
 
