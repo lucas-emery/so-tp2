@@ -83,6 +83,7 @@ void deletePhilosopher(){
 			(philosophers[philosopherCount-1])->finishThread = TRUE;
 			sem_close(semaphores[philosopherCount-1]);
 			philosopherCount--;
+			id--;
 		}
 	}
 	pthread_exit();
