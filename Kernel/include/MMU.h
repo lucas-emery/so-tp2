@@ -31,7 +31,6 @@ typedef struct {
 	page_t stackPage;
 	page_t kernelPage;
 	uint64_t heapBase;
-	uint64_t heapSize;
 	void * interruptContext;
 } context_t;
 

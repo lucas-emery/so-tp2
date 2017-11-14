@@ -50,10 +50,9 @@ static context_t * processContext = AVOID_BSS;
 static context_t * sharedContext = AVOID_BSS;
 
 
-context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, uint64_t heapSize) { //TODO: Support many heap pages
+context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress) {
 	if(heapPageAddress == NULL) {
 		heapPageAddress = getFreePage();
-		heapSize = EMPTY;
 	}
 
 	uint64_t stackPageAddress = getFreePage();
@@ -69,7 +68,6 @@ context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress, ui
 	newContext->kernelPage.index = KERNEL_STACK/PAGESIZE;
 	newContext->kernelPage.address = kernelPageAddress;
 	newContext->heapBase = USER_HEAP;
-	newContext->heapSize = heapSize;
 
 	return newContext;
 }
@@ -106,6 +104,11 @@ void changeHeap(context_t * newContext) {
 	flushPaging();
 }
 
+void initHeap() {
+	uint64_t * heapSize = (uint64_t*)context->heapBase;
+	*heapSize = sizeof(uint64_t);
+}
+
 void restoreProcessHeap() {
 	if(processContext != NULL) {
 		loadPage(processContext->heapPage);
@@ -135,11 +138,12 @@ uint64_t copyModule(int moduleIndex) {
 
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
 	uint64_t dataPageAddress = copyModule(moduleIndex);
-	context_t * newContext = createContext(dataPageAddress, NULL, NULL);
+	context_t * newContext = createContext(dataPageAddress, NULL);
 
 	sharedMode();
 	argv = moveArgsToActiveHeap(argc, argv);
 	changeHeap(newContext);
+	initHeap();
 	argv = moveArgsToActiveHeap(argc, argv);
 	restoreProcessHeap();
 	kernelMode();
@@ -149,7 +153,7 @@ context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
 }
 
 context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg) {
-	context_t * newContext = createContext(siblingContext->dataPage.address, siblingContext->heapPage.address, siblingContext->heapSize);
+	context_t * newContext = createContext(siblingContext->dataPage.address, siblingContext->heapPage.address);
 	buildThreadStack((uint64_t)arg, NULL, (uint64_t)start_routine, newContext);
 	return newContext;
 }
@@ -203,13 +207,14 @@ void loadContext() {
 }
 
 void * malloc(uint64_t request) {
-	uint64_t futureSize = context->heapSize + request;
+	uint64_t * heapSize = (uint64_t*)context->heapBase;
+	uint64_t futureSize = *heapSize + request;
 	if (futureSize > PAGESIZE) {
 		return NULL;
 	}
 
-	uint64_t blockAddress = context->heapBase + context->heapSize;
-	context->heapSize = futureSize;
+	uint64_t blockAddress = context->heapBase + *heapSize;
+	*heapSize = futureSize;
 
 	return blockAddress;
 }
@@ -295,9 +300,8 @@ void clearBSS(void * bssAddress, uint64_t bssSize)
 	memset(bssAddress, 0, bssSize);
 }
 
-void initializeKernelContext(uint64_t heapSize) {
+void initializeKernelContext() {
 	kernelContext = (context_t *) malloc(sizeof(context_t));
-	kernelContext->heapSize = heapSize + sizeof(context_t);
 	kernelContext->heapBase = KERNEL_HEAP;
 
 	changePDE(CONTEXT_SWITCH_STACK/PAGESIZE, getFreePage(), PRESENT);
@@ -307,28 +311,32 @@ void initializeKernelContext(uint64_t heapSize) {
 
 void initSharedMemory() {
 	sharedContext = (context_t *) malloc(sizeof(context_t));
-	sharedContext->heapSize = EMPTY;
 	sharedContext->heapBase = SHARED_MEMORY;
 
 	changePDE(SHARED_MEMORY/PAGESIZE, getFreePage(), PRESENT);
 	flushPaging();
+
+	context_t * oldContext = context;
+	context = sharedContext;
+	initHeap();
+	context = oldContext;
 }
 
 void * initializeKernelBinary()
 {
 	ncPrint("Initializing Kernel...\n");
 
-	context_t tempContext;
+	context_t tempContext; //We need a working heap to load the modules and create kernelContext
 	tempContext.heapBase = KERNEL_HEAP;
-	tempContext.heapSize = EMPTY;
-	context = &tempContext; //So we have a working heap
+	context = &tempContext;
+	initHeap();
 
 	initPageAllocator();
 
 	moduleAddresses = loadModules(&endOfKernelBinary);
 	clearBSS(&bss, &endOfKernel - &bss);
 
-	initializeKernelContext(tempContext.heapSize);
+	initializeKernelContext();
 	processContext = NULL;
 
 	return CONTEXT_SWITCH_STACKBASE;
