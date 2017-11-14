@@ -39,6 +39,7 @@ uint8_t initScheduler(){
   stdinQueue = initQueue();
   createProcess(moduleCount - 1, 0, 0);
   idle = current;
+  idle->thread->state = BLOCKED;
   return (RRqueue == NULL) + (stdinQueue == NULL);
 }
 
@@ -48,16 +49,17 @@ uint8_t addThread(tcbADT t){
   t->state = NEW;
   qnode * new = (qnode*) malloc(sizeof(qnode));
   new->thread = t;
+
   if(current == NULL){
     current = new;
     return SUCCESS;
   }
+
   return enqueue(RRqueue,new);
 }
 
 void killThread(){
   current->thread->state = DEAD;
-  sti();
   intTT();
 }
 
@@ -76,9 +78,8 @@ void schedule(){
 
   current = dequeue(RRqueue);
 
-  if(current == NULL){
+  if(current == NULL)
     current = idle;
-  }
 
   if(current->thread->state == DEAD){
     freeThreadContext(current->thread->context);
@@ -87,7 +88,9 @@ void schedule(){
   }
 
   setContext(current->thread->context);
-  current->thread->state = RUNNING;
+
+  if(current->thread->tid != IDLE)
+    current->thread->state = RUNNING;
 }
 
 uint8_t open(int i, queueADT * array){
