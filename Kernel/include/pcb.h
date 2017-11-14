@@ -4,6 +4,7 @@
 #include <lib.h>
 #include <MMU.h>
 #include <thread.h>
+#include <context.h>
 
 typedef struct pcbCDT* pcbADT;
 

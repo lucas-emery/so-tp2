@@ -1,10 +1,12 @@
 #include <stdint.h>
 #include <moduleLoader.h>
 #include <lib.h>
-#include <terminal.h>
 #include <naiveConsole.h>
 #include <terminal.h>
 #include <MMU.h>
+#include <heap.h>
+#include <pageAllocator.h>
+#include <process.h>
 
 #define GDT_ADDR 0x1000
 #define TSS_ADDR 0x50000 //Free space based on Pure64 Manual
@@ -13,10 +15,6 @@
 #define USER_CS 0x18
 #define TSS_SEL 0x28
 #define PD_ADDR 0x10000
-#define NULL 0
-#define CS_STACK_SIZE (21 * 8)
-#define SUPERVISOR 0
-#define USER 1
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -25,213 +23,17 @@ extern uint8_t bss;
 extern uint8_t endOfKernelBinary;
 extern uint8_t endOfKernel;
 extern void hang();
-extern uint64_t getStackPtr();
-extern void setStackPtr(uint64_t rsp);
-extern void * buildStack(uint64_t argc, uint64_t argv, uint64_t rip, uint64_t rsp);
-extern uint64_t swapStack(uint64_t newStackPtr, int pageIndex, uint64_t pageAddress);
 extern void loadGDTR(uint32_t address, uint16_t limit);
 extern void loadTR(uint16_t tr);
-extern void flushPaging();
 
-typedef int (*EntryPoint)(int argc, char *argv[]);
 
 char* moduleNames[] = {"shell", "sampleDataModule", "sampleCodeModule", "hello", "help", "date", "time", "clear", "roflmao","ps", "ls", "philosophers","multi","sem","echo","kill","accessKernel","man", "prodcons", 0};
 void ** moduleAddresses = AVOID_BSS;
 uint32_t moduleCount = AVOID_BSS;
 
-static context_t * context = AVOID_BSS;
-static context_t * kernelContext = AVOID_BSS;
-static context_t * processContext = AVOID_BSS;
-static context_t * sharedContext = AVOID_BSS;
-
-
-context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress) {
-	if(heapPageAddress == NULL) {
-		heapPageAddress = getFreePage();
-	}
-
-	uint64_t stackPageAddress = getFreePage();
-	uint64_t kernelPageAddress = getFreePage();
-
-	context_t * newContext = malloc(sizeof(context_t));
-	newContext->dataPage.index = EXEC_MEM_ADDR/PAGESIZE;
-	newContext->dataPage.address = dataPageAddress;
-	newContext->heapPage.index = USER_HEAP/PAGESIZE;
-	newContext->heapPage.address = heapPageAddress;
-	newContext->stackPage.index = STACKBASE/PAGESIZE;
-	newContext->stackPage.address = stackPageAddress;
-	newContext->kernelPage.index = SYSCALL_STACK/PAGESIZE;
-	newContext->kernelPage.address = kernelPageAddress;
-	newContext->heapBase = USER_HEAP;
-
-	return newContext;
-}
-
-void buildThreadStack(uint64_t rdi, uint64_t rsi, uint64_t rip, context_t * threadContext) {
-	void * rsp = buildStack(rdi, rsi, rip, STACKBASE);
-
-	threadContext->interruptContext = malloc(CS_STACK_SIZE);
-	memcpy(threadContext->interruptContext, rsp, CS_STACK_SIZE);
-	setStackPtr(rsp - CS_STACK_SIZE); //Clean stack
-}
-
-char** moveArgsToActiveHeap(int argc, char * argv[]) {
-	char ** new = argv;
-  if(argc > 0) {
-    new = malloc(argc * sizeof(char **));
-    if(new == 0)
-      return argv;
-
-    for(int i = 0; i < argc; i++) {
-      size_t len = strlen(argv[i]) + 1;
-      new[i] = malloc(len * sizeof(char));
-      if(new[i] == 0)
-        return argv;
-      memcpy(new[i], argv[i], len * sizeof(char));
-    }
-  }
-  return new;
-}
-
-void changeHeap(context_t * newContext) {
-	context = newContext;
-	loadPage(newContext->heapPage);
-	flushPaging();
-}
-
-void initHeap() {
-	uint64_t * heapSize = (uint64_t*)context->heapBase;
-	*heapSize = sizeof(uint64_t);
-}
-
-void restoreProcessHeap() {
-	if(processContext != NULL) {
-		loadPage(processContext->heapPage);
-		flushPaging();
-	}
-}
-
-void changeDataPage(uint64_t address) {
-	changePDE(EXEC_MEM_ADDR / PAGESIZE, address, PRESENT);
-	flushPaging();
-}
-
-void restoreProcessData() {
-	if(processContext != NULL) {
-		loadPage(processContext->dataPage);
-		flushPaging();
-	}
-}
-
-uint64_t copyModule(int moduleIndex) {
-	uint64_t dataPageAddress = getFreePage();
-	changeDataPage(dataPageAddress);
-	memcpy((void *)EXEC_MEM_ADDR, moduleAddresses[moduleIndex], PAGESIZE);
-	restoreProcessData();
-	return dataPageAddress;
-}
-
-context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
-	uint64_t dataPageAddress = copyModule(moduleIndex);
-	context_t * newContext = createContext(dataPageAddress, NULL);
-
-	sharedMode();
-	argv = moveArgsToActiveHeap(argc, argv);
-	changeHeap(newContext);
-	initHeap();
-	argv = moveArgsToActiveHeap(argc, argv);
-	restoreProcessHeap();
-	kernelMode();
-
-	buildThreadStack((uint64_t)argc, (uint64_t)argv, EXEC_MEM_ADDR, newContext);
-	return newContext;
-}
-
-context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg) {
-	context_t * newContext = createContext(siblingContext->dataPage.address, siblingContext->heapPage.address);
-	buildThreadStack((uint64_t)arg, NULL, (uint64_t)start_routine, newContext);
-	return newContext;
-}
-
-void freeProcessContext(context_t * context) {
-	freePage(context->dataPage.address);
-	freePage(context->heapPage.address);
-}
-
-void freeThreadContext(context_t * context) {
-	freePage(context->stackPage.address);
-	freePage(context->kernelPage.address);
-}
 
 void loadPage(page_t page) {
 	changePDE(page.index, page.address, PRESENT);
-}
-
-void kernelMode() {
-	context = kernelContext; //Just affects the heap
-}
-
-void userMode() {
-	context = processContext; //Just affects the heap
-}
-
-void sharedMode() {
-	context = sharedContext; //Just affects the heap
-}
-
-void setContext(context_t * newContext) {
-	if(processContext != NULL)
-		saveContext();
-
-	processContext = newContext;
-
-	loadContext();
-	flushPaging();
-}
-
-void saveContext() {
-	memcpy(processContext->interruptContext, KERNEL_STACK_BOTTOM - CS_STACK_SIZE, CS_STACK_SIZE);
-}
-
-void loadContext() {
-	loadPage(processContext->dataPage);
-	loadPage(processContext->heapPage);
-	loadPage(processContext->stackPage);
-	loadPage(processContext->kernelPage);
-	memcpy(KERNEL_STACK_BOTTOM - CS_STACK_SIZE, processContext->interruptContext, CS_STACK_SIZE);
-}
-
-void * malloc(uint64_t request) {
-	uint64_t * heapSize = (uint64_t*)context->heapBase;
-	uint64_t futureSize = *heapSize + request;
-	if (futureSize > PAGESIZE) {
-		return NULL;
-	}
-
-	uint64_t blockAddress = context->heapBase + *heapSize;
-	*heapSize = futureSize;
-
-	return blockAddress;
-}
-
-void * calloc(uint64_t request){
-	void * blockAddress = malloc(request);
-
-	uint8_t * aux = (uint8_t *) blockAddress;
-	for(int i = 0; i < request ; i++){
-		aux[i] = 0;
-	}
-	return blockAddress;
-}
-
-void * realloc(void * ptr, uint64_t size) {
-	void *  newptr = malloc(size);
-	memcpy(newptr, ptr, size);
-	return newptr;
-}
-
-void free(void * ptr) {
-
 }
 
 void changePDEPresent(int entry, int present){
@@ -295,44 +97,24 @@ void clearBSS(void * bssAddress, uint64_t bssSize)
 	memset(bssAddress, 0, bssSize);
 }
 
-void initializeKernelContext() {
-	kernelContext = (context_t *) malloc(sizeof(context_t));
-	kernelContext->heapBase = KERNEL_HEAP;
-
+void initStack() {
 	changePDE(KERNEL_STACK/PAGESIZE, getFreePage(), PRESENT);
 	flushPaging();
-	context = kernelContext;
-}
-
-void initSharedMemory() {
-	sharedContext = (context_t *) malloc(sizeof(context_t));
-	sharedContext->heapBase = SHARED_MEMORY;
-
-	changePDE(SHARED_MEMORY/PAGESIZE, getFreePage(), PRESENT);
-	flushPaging();
-
-	context_t * oldContext = context;
-	context = sharedContext;
-	initHeap();
-	context = oldContext;
 }
 
 void * initializeKernelBinary()
 {
 	ncPrint("Initializing Kernel...\n");
 
-	context_t tempContext; //We need a working heap to load the modules and create kernelContext
-	tempContext.heapBase = KERNEL_HEAP;
-	context = &tempContext;
-	initHeap();
+	initKernelContext();
 
 	initPageAllocator();
 
-	moduleAddresses = loadModules(&endOfKernelBinary);
+	loadModules(&endOfKernelBinary);
+
 	clearBSS(&bss, &endOfKernel - &bss);
 
-	initializeKernelContext();
-	processContext = NULL;
+	initStack();
 
 	return KERNEL_STACKBASE;
 }

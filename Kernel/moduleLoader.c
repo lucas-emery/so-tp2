@@ -4,10 +4,12 @@
 #include <naiveConsole.h>
 #include <MMU.h>
 #include <terminal.h>
+#include <pageAllocator.h>
 
 static void loadModule(uint8_t ** module, void * targetModuleAddress);
 static uint32_t readUint32(uint8_t ** address);
 
+extern void ** moduleAddresses;
 extern uint32_t moduleCount;
 
 void ** loadModules(void * payloadStart){
@@ -15,7 +17,7 @@ void ** loadModules(void * payloadStart){
 	uint64_t moduleAddress = ROM;
 	uint8_t * currentModule = (uint8_t*)payloadStart;
 	moduleCount = readUint32(&currentModule);
-	void ** moduleAddresses = malloc(moduleCount * sizeof(void *));
+	moduleAddresses = malloc(moduleCount * sizeof(void *));
 
 	for (i = 0; i < moduleCount; i++) {
 		changePDE(moduleAddress / PAGESIZE, getFreePage(), PRESENT);

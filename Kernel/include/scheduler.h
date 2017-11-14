@@ -31,7 +31,7 @@ typedef queueCDT * queueADT;
  */
 
 
-
+uint8_t initKey(int key);
 /*
  * 	Initializes $RRqueue.
  *	Return: #SUCCESS on success, otherwise #FAIL.

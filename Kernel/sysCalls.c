@@ -1,4 +1,5 @@
 #include <sysCalls.h>
+#include <scheduler.h>
 
 static sys sysCalls[SYSCALLS];
 

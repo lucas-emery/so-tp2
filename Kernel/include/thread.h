@@ -6,6 +6,7 @@ typedef struct tcbCDT* tcbADT;
 #include <lib.h>
 #include <MMU.h>
 #include <pcb.h>
+#include <context.h>
 
 typedef struct tcbCDT{
 	int tid;

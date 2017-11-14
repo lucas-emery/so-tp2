@@ -1,6 +1,9 @@
 #ifndef MMU_H
 #define MMU_H
 
+#include <context.h>
+#include <heap.h>
+
 #define PAGESIZE 0x200000
 #define KERNEL 0x0
 #define KERNEL_HEAP 0x200000
@@ -19,37 +22,22 @@
 #define AVOID_BSS 1
 #define PRESENT 1
 #define NOT_PRESENT 0
-
-typedef struct {
-	int index;
-	uint64_t address;
-} page_t;
-
-typedef struct {
-	page_t dataPage;
-	page_t heapPage;
-	page_t stackPage;
-	page_t kernelPage;
-	uint64_t heapBase;
-	void * interruptContext;
-} context_t;
+#define SUPERVISOR 0
+#define USER 1
+#define CONT_SW_STACK_SIZE (21 * 8)
 
 void changePDE(int entry, uint64_t physAddr, int present);
 void changePDEPresent(int entry, int present);
 void * initializeKernelBinary();
-void * malloc(uint64_t size);
-void free(void * ptr);
-void * realloc(void * ptr, uint64_t size);
-context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]);
-context_t * createThreadContext(context_t * siblingContext, void * start_routine, void * arg);
-void freeProcessContext(context_t * context);
-void freeThreadContext(context_t * context);
-void kernelMode();
-void userMode();
-void setContext(context_t * newContext);
-void initSharedMemory();
 void enableMemoryProtection();
 void setupTSS();
 void setupGDT();
+void loadPage(page_t page);
+
+extern uint64_t getStackPtr();
+extern void setStackPtr(uint64_t rsp);
+extern void * buildStack(uint64_t argc, uint64_t argv, uint64_t rip, uint64_t rsp);
+extern uint64_t swapStack(uint64_t newStackPtr, int pageIndex, uint64_t pageAddress);
+extern void flushPaging();
 
 #endif

@@ -1,4 +1,5 @@
 #include <scheduler.h>
+#include <process.h>
 
 static queueADT RRqueue, stdinQueue, semQueues[MAX_QUEUES], rMsgQueues[MAX_QUEUES], wMsgQueues[MAX_QUEUES], keyQueues[KEYS];
 static qnode * idle, * current = NULL;
