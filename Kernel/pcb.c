@@ -76,6 +76,7 @@ int getState(int id){
 }
 
 void processesInfo(char* buffer){
+	*buffer = NULL;
 	for (int i = 0; i < tableSize; i++){
 		strcat(buffer, makeString(pcbTable[i]));
 	}
