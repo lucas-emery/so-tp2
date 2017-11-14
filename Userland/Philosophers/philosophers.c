@@ -7,6 +7,15 @@
 
 #define MAX 20
 
+typedef struct arguments{
+	int id;
+	char finishThread;
+}arguments;
+
+typedef struct arguments* argumentsPointer;
+
+argumentsPointer philosophers[MAX];
+
 typedef enum {
 	Hungry = 0,
 	Thinking = 1,
@@ -15,17 +24,20 @@ typedef enum {
 
 int left(int i);
 int right(int i);
-void philosopher(int id);
+void philosopher(argumentsPointer arg);
 void takeForks(int id);
 void putForks(int id);
 void test(int i);
 int randRange(int min, int max);
+void createPhilosopher();
+void deletePhilosopher();
 
 static int philosopherCount;
 
 State state[MAX];
 
 static int mutex;
+static int id;
 static int semaphores[MAX];
 static int philosopherId[MAX];
 
@@ -38,19 +50,54 @@ char * stateStrings[3] = { "Hungry", "Thinking", "Eating" };
 State philoState[MAX];
 int forkState[MAX];
 
-void philosopher(int id) {
-	int timeout = 1000000000;
-	while(1) {
+static char* createSemaphoreName(int id){
+	char* semaphoreName = malloc(30);
+	char letra[2] = {'A', 0};
+	(letra[0])+= id;
+	strcat(semaphoreName,"philosopher");
+	strcat(semaphoreName, letra);
+	return semaphoreName;
+}
+
+void createPhilosopher(){
+	while(1){
+		keyBlock('p');		
+		semaphores[philosopherCount] = sem_open(createSemaphoreName(id));
+		philosopherId[philosopherCount] = id;
+		state[philosopherCount] = Thinking;
+		argumentsPointer arg = malloc(sizeof(arguments));
+		arg->id = id;
+		arg->finishThread = FALSE;
+		philosophers[philosopherCount] = arg;
+		id++;
+		philosopherCount++;
+		pthread_create((function)philosopher, arg);
+	}
+}
+
+void deletePhilosopher(){
+	while(1){
+		keyBlock('r');
+		if(philosopherCount != 1){
+			(philosophers[philosopherCount-1])->finishThread = TRUE;
+			philosopherCount--;
+		}
+	}
+}
+
+void philosopher(argumentsPointer arg) {
+	int timeout = 100000000;
+	while(!arg->finishThread) {
 		
 		//Think
-		if(timeout == 500000000){
-      		takeForks(id);
+		if(timeout == 50000000){
+      		takeForks(arg->id);
     	}
 
 		//Eat
     	if(timeout == 0){
-      		putForks(id);
-      		timeout = 1000000000;
+      		putForks(arg->id);
+      		timeout = 100000000;
     	}
     	timeout--;
 	}
@@ -103,27 +150,12 @@ void test(int id) {
 
 int main(int argc, char ** argv) {
 	//Setup
-	philosopherCount = 4;
+	philosopherCount = 0;
+	id = 0;
 	mutex = sem_open("philosophersMutex");
 	sem_set(mutex, 1);
-	char letra[2] = {'A',0};
-
-	for (int i = 0; i < philosopherCount; i++) {
-		char* semaphoreName = malloc(30);
-		strcat(semaphoreName,"philosopher");
-		strcat(semaphoreName, letra);
-		(letra[0])++;
-		semaphores[i] = sem_open(semaphoreName);//Philosophers start not having ownership of the forks
-	}
-
-	for (int i = 0; i < philosopherCount; i++) {
-		philosopherId[i] = i;
-		printf("%d\n", philosopherId[i]);
-		state[i] = Thinking;
-		pthread_create((function)philosopher, i);
-	}
-
-	printf("running\n");
+	pthread_create((function)createPhilosopher, (void*)0);
+	pthread_create((function)deletePhilosopher, (void*)0);
 	while(1);
 	return 0;
 }
@@ -143,7 +175,7 @@ int randRange(int min, int max) {
 //GUI
 void render() {
 	for(int i = 0; i < philosopherCount; i++) {
-		printf("Philosopher %d: %s ", i, stateStrings[philoState[i]]);
+		printf("Philosopher %d: %s \n", i, stateStrings[philoState[i]]);
 		printf("Fork - ");
 
 		if (forkState[i] == -1)
