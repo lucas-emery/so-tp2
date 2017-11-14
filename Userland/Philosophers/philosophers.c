@@ -45,14 +45,14 @@ void philosopher(int id) {
 		//Think
 		if(timeout == 5000000){
 			printf("tik\n");
-      		takeForks(*(int*)id);
+      		takeForks(id);
       		timeout=10000000;
     	}
 
 		//Eat
     	if(timeout == 0){
     		printf("eat\n");
-      		putForks(*(int*)id);
+      		putForks(id);
     	}
     	timeout--;
 	}
@@ -109,6 +109,7 @@ int main(int argc, char ** argv) {
 	//Setup
 	philosopherCount = 4;
 	mutex = sem_open("philosophersMutex");
+	sem_set(mutex, 1);
 	char letra[2] = {'A',0};
 
 	for (int i = 0; i < philosopherCount; i++) {
