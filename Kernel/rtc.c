@@ -7,7 +7,6 @@ static uint8_t daysPerMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 
 uint8_t getTime(uint8_t value) {
   int seconds, minutes, hours, day, month, year;
-
   writePort(0x70, SECONDS);
   seconds = readPort(0x71);
   writePort(0x70, MINUTES);
@@ -20,9 +19,7 @@ uint8_t getTime(uint8_t value) {
   month = readPort(0x71);
   writePort(0x70, YEAR);
   year = readPort(0x71);
-
   recalculate(&hours, &day, &month, &year);
-
   switch(value) {
     case SECONDS: return seconds;
     case MINUTES: return minutes;
@@ -36,7 +33,6 @@ uint8_t getTime(uint8_t value) {
 
 void recalculate(int * hours, int * day, int * month, int * year) {
   *(hours) += timeZone;
-
   if(*hours < 0) {
     *(hours) += 24;
     *(day) -= 1;

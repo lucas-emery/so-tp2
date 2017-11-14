@@ -46,7 +46,6 @@ void mouseWrite(uint8_t write) {
 
 void initializeMouse() {
 	uint8_t status_byte;
-
 	mouseWait(1);
 	writePort(0x64,0xA8);
 	mouseWait(1);
@@ -66,23 +65,17 @@ void initializeMouse() {
 void mouseWait(uint8_t type)
 {
   unsigned int timeOut=100000;
-  if(type==0)
-  {
-    while(timeOut--) //Data
-    {
-      if((readPort(0x64) & 1)==1)
-      {
+  if(type==0){
+    while(timeOut--){
+      if((readPort(0x64) & 1)==1){
         return;
       }
     }
     return;
   }
-  else
-  {
-    while(timeOut--) //Signal
-    {
-      if((readPort(0x64) & 2)==0)
-      {
+  else{
+    while(timeOut--){
+      if((readPort(0x64) & 2)==0){
         return;
       }
     }
@@ -94,14 +87,11 @@ void mouseHandler() {
 	uint8_t hasMoved = FALSE;
 	if(readPort(0x64) & 0x20)
 		info[byte++] = mouseRead();
-
 	if(byte == 3) {
 		byte = 0;
-
 		if(info[0] & 0x80 || info[0] & 0x40) {
 			return;
 		}
-
 		if((info[0] & 0x1) && !left)  {
 			selected.start.x = cursor.x;
 			selected.start.y = cursor.y;
@@ -115,7 +105,6 @@ void mouseHandler() {
       		copySelection();
 			left = FALSE;
 		}
-
 		if((info[0] & 0x2) && !right)  {
 			for(int i = 0; i<clipboardIndex; i++)
 				writeBuffer(clipboard[i]);
@@ -124,12 +113,9 @@ void mouseHandler() {
 		}
 		if(!(info[0] & 0x2) && right)
 			right = FALSE;
-
 		if (info[1] != 0 || info[2] != 0) {
-
 			counterX += info[1];
 			counterY += info[2];
-
 			if(counterX >= DELAY || counterX <= -DELAY) {
 				counterX/=DELAY;
 				if(cursor.x + counterX <= WIDTH-1 && cursor.x + counterX >= 0) {
@@ -138,7 +124,6 @@ void mouseHandler() {
 				}
 				counterX = 0;
 			}
-
 			if(counterY >= DELAY || counterY <= -DELAY) {
 				counterY/=DELAY;
 	            if(cursor.y - counterY<= HEIGHT-1 && cursor.y - counterY>= 0) {
@@ -161,7 +146,6 @@ void mouseHandler() {
 void copySelection() {
 	selection copy;
     int x, y;
-
     if(selected.start.x > selected.end.x) {
         copy.start.x = selected.end.x;
         copy.end.x = selected.start.x;
@@ -170,7 +154,6 @@ void copySelection() {
         copy.start.x = selected.start.x;
         copy.end.x = selected.end.x;
     }
-
     if(selected.start.y > selected.end.y) {
         copy.start.y = selected.end.y;
         copy.end.y = selected.start.y;
@@ -179,10 +162,8 @@ void copySelection() {
         copy.start.y = selected.start.y;
         copy.end.y = selected.end.y;
     }
-
     x = copy.start.x;
     y = copy.start.y;
-
     while(y <= copy.end.y) {
         while(x <= copy.end.x) {
             clipboard[clipboardIndex++] = getCharAt(x, y);

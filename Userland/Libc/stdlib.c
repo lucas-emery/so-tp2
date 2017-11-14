@@ -4,50 +4,44 @@ static unsigned long int next = 1;
 
 void * malloc(unsigned int size) {
 	void * address;
-	int80(8,(uint64_t) &address, (uint64_t) size,0);
+	int80(8,(uint64_t) &address, (uint64_t) size, 0);
 	return address;
+}
+
+void * realloc(void * ptr, unsigned int size){
+	int80(29, (uint64_t) &ptr, (uint64_t) size, 0);
+	return ptr;
 }
 
 void free(void *ptr) {
 
 }
 
-//Adapted from naiveterminal.c
 int itoa(uint64_t value, char * buffer, int base) {
 	char *p = buffer;
 	char *p1, *p2;
 	int digits = 0;
-
 	if(value < 0 && base == 10) {
 		value = -value;
 		*p++ = '-';
 		digits++;
 	}
-
-	//Calculate characters for each digit
-	do
-	{
+	do{
 		int remainder = value % base;
 		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
 		digits++;
 	}
 	while (value /= base);
-
-	// Terminate string in buffer.
 	*p = 0;
-
-	//Reverse string in buffer.
 	p1 = *buffer == '-' ? buffer + 1: buffer;
 	p2 = p - 1;
-	while (p1 < p2)
-	{
+	while (p1 < p2){
 		char tmp = *p1;
 		*p1 = *p2;
 		*p2 = tmp;
 		p1++;
 		p2--;
 	}
-
 	return digits;
 }
 

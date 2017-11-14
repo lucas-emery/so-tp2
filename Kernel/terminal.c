@@ -124,7 +124,6 @@ void setStyle(char style) {
 void incrementCursor() {
 	if(cursorX == WIDTH-1) {
 		cursorX = 0;
-
 		if(cursorY == HEIGHT-1)
 			shiftScreen();
 		else
@@ -132,7 +131,6 @@ void incrementCursor() {
 	}
 	else
 		cursorX++;
-
 	updateCursor(cursorX, cursorY);
 }
 
@@ -148,16 +146,12 @@ void newLine() {
 		}
 		else
 			cursorX++;
-
 	}
-
 	cursorX = 0;
-
 	if(cursorY == HEIGHT-1)
 		shiftScreen();
 	else
 		cursorY++;
-
 	updateCursor(cursorX, cursorY);
 	updateScreen();
 	toggleCursors();
@@ -193,7 +187,6 @@ void backspace() {
 		}
 		if(offset == 0)
 			offset = 1;
-
 		do {
 			prevX = x - offset;
 			prevY = y;
@@ -201,19 +194,15 @@ void backspace() {
 				prevX += WIDTH;
 				prevY--;
 			}
-
 			videoBuffer[prevY][prevX] = videoBuffer[y][x];
 			videoBuffer[y][x].ch = 0;
-
 			if(x == WIDTH-1) {
 				x = 0;
 				y++;
 			}
 			else
 				x++;
-
 		} while(y < HEIGHT && videoBuffer[prevY][prevX].ch != 0);
-
 		updateCursor(cursorX, cursorY);
 		updateScreen();
 		toggleCursors();
@@ -321,7 +310,6 @@ void toggleCursors() {
 		videoBuffer[cursorY][cursorX].style = 0x77 ^ videoBuffer[cursorY][cursorX].style;
 		writeStyle(cursorX, cursorY, videoBuffer[cursorY][cursorX].style);
 	}
-
 	int xOff = toX - fromX;
 	int yOff = toY - fromY;
 	int xStep = (xOff > 0)? 1 : -1;

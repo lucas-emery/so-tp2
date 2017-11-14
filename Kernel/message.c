@@ -12,7 +12,6 @@ static int id = 0;
 static int messagesCount = 0;
 static messageADT* messages;
 static messageOperation messageOperations[MESSAGE_OPERATIONS];
-static int lock = 0;
 
 
 void msgString(char* buffer){

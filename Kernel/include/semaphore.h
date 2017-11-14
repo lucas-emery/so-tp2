@@ -11,8 +11,6 @@ typedef struct semCDT* semADT;
 
 typedef int (*semOperation)(char*, int, int);
 
-extern int testAndSet(uint64_t lock);
-
 void semString(char* buffer);
 int setValue(char* arg1, int id, int value);
 int semOpen(char* name, int arg2, int arg3);

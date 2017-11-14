@@ -15,10 +15,8 @@ context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress) {
 	if(heapPageAddress == NULL) {
 		heapPageAddress = getFreePage();
 	}
-
 	uint64_t stackPageAddress = getFreePage();
 	uint64_t kernelPageAddress = getFreePage();
-
 	context_t * newContext = malloc(sizeof(context_t));
 	newContext->dataPage.index = EXEC_MEM_ADDR/PAGESIZE;
 	newContext->dataPage.address = dataPageAddress;
@@ -29,13 +27,11 @@ context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress) {
 	newContext->kernelPage.index = SYSCALL_STACK/PAGESIZE;
 	newContext->kernelPage.address = kernelPageAddress;
 	newContext->heapBase = USER_HEAP;
-
 	return newContext;
 }
 
 void buildThreadStack(uint64_t rdi, uint64_t rsi, uint64_t rip, context_t * threadContext) {
 	void * rsp = buildStack(rdi, rsi, rip, STACKBASE);
-
 	threadContext->interruptContext = malloc(CONT_SW_STACK_SIZE);
 	memcpy(threadContext->interruptContext, rsp, CONT_SW_STACK_SIZE);
 	setStackPtr(rsp - CONT_SW_STACK_SIZE); //Clean stack
@@ -47,7 +43,6 @@ char** moveArgsToActiveHeap(int argc, char * argv[]) {
     new = malloc(argc * sizeof(char **));
     if(new == 0)
       return argv;
-
     for(int i = 0; i < argc; i++) {
       size_t len = strlen(argv[i]) + 1;
       new[i] = malloc(len * sizeof(char));
@@ -95,7 +90,6 @@ uint64_t copyModule(int moduleIndex) {
 context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
 	uint64_t dataPageAddress = copyModule(moduleIndex);
 	context_t * newContext = createContext(dataPageAddress, NULL);
-
 	sharedMode();
 	argv = moveArgsToActiveHeap(argc, argv);
 	changeHeap(newContext);
@@ -103,7 +97,6 @@ context_t * createFirstThreadContext(int moduleIndex, int argc, char *argv[]) {
 	argv = moveArgsToActiveHeap(argc, argv);
 	restoreProcessHeap();
 	kernelMode();
-
 	buildThreadStack((uint64_t)argc, (uint64_t)argv, EXEC_MEM_ADDR, newContext);
 	return newContext;
 }
@@ -151,9 +144,7 @@ void loadContext() {
 void setContext(context_t * newContext) {
 	if(processContext != NULL)
 		saveContext();
-
 	processContext = newContext;
-
 	loadContext();
 	flushPaging();
 }
@@ -162,12 +153,9 @@ void initKernelContext() {
 	context_t tempContext; //We need a working heap to create kernelContext
 	tempContext.heapBase = KERNEL_HEAP;
 	context = &tempContext;
-
 	initHeap();
-
 	kernelContext = (context_t *) malloc(sizeof(context_t));
 	kernelContext->heapBase = KERNEL_HEAP;
-
 	context = kernelContext;
 	processContext = NULL;
 }
@@ -175,10 +163,8 @@ void initKernelContext() {
 void initSharedMemory() {
 	sharedContext = (context_t *) malloc(sizeof(context_t));
 	sharedContext->heapBase = SHARED_MEMORY;
-
 	changePDE(SHARED_MEMORY/PAGESIZE, getFreePage(), PRESENT);
 	flushPaging();
-
 	context_t * oldContext = context;
 	context = sharedContext;
 	initHeap();

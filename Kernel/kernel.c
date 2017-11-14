@@ -18,6 +18,6 @@ int main(){
 	initScheduler();
 	enableMemoryProtection();
 	setFocusedPID(createProcess(0,0,0));
-  sti();
-  while(1);
+  	sti();
+  	while(1);
 }

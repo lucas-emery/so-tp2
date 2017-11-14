@@ -13,8 +13,6 @@
 typedef struct messageCDT* messageADT;
 typedef int (*messageOperation)(char*, int);
 
-extern int testAndSet(uint64_t lock);
-
 void msgString(char* buffer);
 int createMessage(char* name, int messageSize);
 int openMessage(char* name, int arg2);

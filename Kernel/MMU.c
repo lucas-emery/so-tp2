@@ -38,13 +38,11 @@ void loadPage(page_t page) {
 
 void changePDEPresent(int entry, int present){
 	uint64_t PD = PD_ADDR;
-
 	while(entry){
 		PD += 8;
 		--entry;
 	}
 	uint64_t PDE = *((uint64_t*)PD);
-
 	if(present)
 		*((uint64_t*)PD) =  PDE | 0x1;
 	else
@@ -53,13 +51,11 @@ void changePDEPresent(int entry, int present){
 
 void changePDEPrivilege(int entry, int privilege) {
 	uint64_t PD = PD_ADDR;
-
 	while(entry){
 		PD += 8;
 		--entry;
 	}
 	uint64_t PDE = *((uint64_t*)PD);
-
 	if(privilege == SUPERVISOR)
 		*((uint64_t*)PD) =  PDE & ~(uint64_t)0x4;
 	else
@@ -70,14 +66,11 @@ void changePDEPrivilege(int entry, int privilege) {
 void changePDE(int entry, uint64_t physAddr, int present){
 	if(physAddr & 0x001FFFFF != 0)
 		return;
-
 	uint64_t PD = PD_ADDR;
-
 	while(entry){
 		PD += 8;
 		--entry;
 	}
-
 	if(present)
 		*((uint64_t*)PD) = (uint64_t)physAddr | 0x8F;
 	else
@@ -92,30 +85,22 @@ void pageFaultHandler(){
 	while(1);
 }
 
-void clearBSS(void * bssAddress, uint64_t bssSize)
-{
+void clearBSS(void * bssAddress, uint64_t bssSize){
 	memset(bssAddress, 0, bssSize);
 }
 
-void initStack() {
+void initStack(){
 	changePDE(KERNEL_STACK/PAGESIZE, getFreePage(), PRESENT);
 	flushPaging();
 }
 
-void * initializeKernelBinary()
-{
+void * initializeKernelBinary(){
 	ncPrint("Initializing Kernel...\n");
-
 	initKernelContext();
-
 	initPageAllocator();
-
 	loadModules(&endOfKernelBinary);
-
 	clearBSS(&bss, &endOfKernel - &bss);
-
 	initStack();
-
 	return KERNEL_STACKBASE;
 }
 
@@ -124,7 +109,6 @@ void enableMemoryProtection() {
 	changePDEPrivilege(KERNEL_HEAP/PAGESIZE, SUPERVISOR);
 	changePDEPrivilege(SYSCALL_STACK/PAGESIZE, SUPERVISOR);
 	changePDEPrivilege(KERNEL_STACK/PAGESIZE, SUPERVISOR);
-
 	int i = 0;
 	while(i < moduleCount) {
 		changePDEPrivilege((uint64_t)moduleAddresses[i]/PAGESIZE, SUPERVISOR);
@@ -134,28 +118,22 @@ void enableMemoryProtection() {
 
 uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag){
     uint64_t descriptor;
-
     // Create the high 32 bit segment
     descriptor  =  limit       & 0x000F0000;         // set limit bits 19:16
     descriptor |= (flag <<  8) & 0x00F0FF00;         // set type, p, dpl, s, g, d/b, l and avl fields
     descriptor |= (base >> 16) & 0x000000FF;         // set base bits 23:16
     descriptor |=  base        & 0xFF000000;         // set base bits 31:24
-
     // Shift by 32 to allow for low part of segment
     descriptor <<= 32;
-
     // Create the low 32 bit segment
     descriptor |= base  << 16;                       // set base bits 15:0
     descriptor |= limit  & 0x0000FFFF;               // set limit bits 15:0
-
     return descriptor;
 }
 
 uint64_t create_upper_system_descriptor(uint64_t base){
 	uint64_t descriptor;
-
 	descriptor = (base >> 32);         // set base bits 63:32
-
 	return descriptor;
 }
 
@@ -165,12 +143,10 @@ uint64_t create_lower_system_descriptor(uint64_t base, uint32_t limit, uint16_t 
 
 void setupGDT(){
 	uint64_t * GDT = GDT_ADDR;
-
 	GDT[3] = create_descriptor(0x0,0xFFFFFFFF,0x20F8);
 	GDT[4] = create_descriptor(0x0,0xFFFFFFFF,0x20F2);
 	GDT[5] = create_lower_system_descriptor(TSS_ADDR, TSS_LIMIT, 0x2089);
 	GDT[6] = create_upper_system_descriptor(TSS_ADDR);
-
 	loadGDTR(GDT_ADDR, 7 * sizeof(uint64_t));
 }
 
@@ -182,6 +158,5 @@ void setupTSS() {
 	TSS[10] = SYSCALL_STACK_BOTTOM >> 32;
 	TSS[11] = KERNEL_STACK_BOTTOM;
 	TSS[12] = KERNEL_STACK_BOTTOM >> 32;
-
 	loadTR(TSS_SEL);
 }

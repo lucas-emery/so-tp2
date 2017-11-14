@@ -158,6 +158,7 @@ int main(int argc, char ** argv) {
 	id = 0;
 	mutex = sem_open("philosophersMutex");
 	sem_set(mutex, 1);
+	printf("Press 'p' to add a philosopher and 'r' to remove one\n");
 	pthread_create((function)createPhilosopher, (void*)0);
 	pthread_create((function)deletePhilosopher, (void*)0);
 	while(1);

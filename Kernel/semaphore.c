@@ -10,7 +10,6 @@ static semADT* semaphores;
 static int semCount = 0;
 static int id = 0;
 static semOperation semOperations[SEM_OPERATIONS];
-static int lock = 0;
 
 void semString(char * buffer){
 	strcat(buffer, "Semaphores: ");
@@ -94,9 +93,7 @@ int semWait(char* arg1, int id, int arg3){
 int executeSemaphore(int operation, char* arg1, int arg2, int arg3){
 	if(operation < 0 || operation > SEM_OPERATIONS)
 		return -1;
-	int ret;
-	ret = (semOperations[operation])(arg1, arg2, arg3);
-	return ret;
+	return (semOperations[operation])(arg1, arg2, arg3);
 }
 
 void setupSemaphores(){

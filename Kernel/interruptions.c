@@ -31,9 +31,7 @@ void screenTickHandler() {
 
 void timerTickHandler(uint64_t rsp) {
 	kernelMode();
-
 	schedule();
-
 	userMode();
 }
 
@@ -58,13 +56,10 @@ void iSetHandler(int index, uint8_t ist, uint64_t handler) {
 	IDT[index].offset_l = (uint16_t) handler & 0xFFFF;
 	IDT[index].offset_m = (uint16_t) (handler >> 16) & 0xFFFF;
 	IDT[index].offset_h = (uint32_t) (handler >> 32) & 0xFFFFFFFF;
-
 	IDT[index].selector = 0x08;
 	IDT[index].attrs = 0xEE;
 	IDT[index].ist = ist;
-
 	IDT[index].zero_h = 0;
-
 }
 
 void debug(){

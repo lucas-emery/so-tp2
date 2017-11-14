@@ -12,7 +12,7 @@ static const char * modules[][2] = {
   "kill","Kills the specified process.\nParams: [PID]",
   "ls","Prints available modules.\nParams: None",
   "man","Provides information about a module.\nParams: [Module]",
-  "philosophers","Prints solution to philosophers problem.\nParams: None",
+  "philosophers","Prints solution to philosophers problem. Press 'p' to add a philosopher and 'r' to remove one.\nParams: None",
   "ps","Prints information about the system processes.\nParams: None",
   "roflmao","Easter Egg.\nParams: None",
   "ts","Prints information about the system threads.\nParams: None",

@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
 	createConsumerLetter = *argv[2];
 	removeProducerLetter = *argv[3];
 	removeConsumerLetter = *argv[4];
+	printf("Press '%c' to add a producer\n", createProducerLetter);
 	pthread_create((function)createProducer, (void*) messageID);
 	pthread_create((function)removeProducer, (void*)0);
 	pthread_create((function)createConsumer, (void*) messageID);
@@ -79,7 +80,7 @@ void createConsumer(int messageID){
 void removeProducer(){
 	while(1){
 		keyBlock(removeProducerLetter);
-		if(producerCount != 1){
+		if(producerCount != 0){
 			(producers[producerCount-1])->finishThread = TRUE;
 			producerCount--;
 		}
@@ -90,7 +91,7 @@ void removeProducer(){
 void removeConsumer(){
 	while(1){
 		keyBlock(removeConsumerLetter);
-		if(consumerCount != 1){
+		if(consumerCount != 0){
 			(consumers[consumerCount-1])->finishThread = TRUE;
 			consumerCount--;
 		}
@@ -102,8 +103,8 @@ void producer(argumentsPointer arg){
 	int timeout = 10000000;
   	while(!arg->finishThread){
     	if(timeout == 0){
-      		message_write(arg->messageID, "capo ");
-			printf("Produce: capo\n");
+      		message_write(arg->messageID, "hola ");
+			printf("Produce: hola\n");
       		timeout=10000000;
     	}
     	timeout--;

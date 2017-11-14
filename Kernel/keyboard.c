@@ -26,11 +26,9 @@ void parseScanCode(uint8_t scanCode) {
 			case CTRL_RELEASE:
 				parseSpecialKey(scanCode);
 				break;
-
 			case SPECIAL_KEY:
 				specialKey = TRUE;
 				break;
-
 			default:
 				if(scanCode < 0x80) {
 					char ch = scanCodes[shiftMayus][scanCode];
@@ -50,7 +48,6 @@ void parseScanCode(uint8_t scanCode) {
 
 void parseSpecialKey(uint8_t scanCode) {
 	specialKey = FALSE;
-
 	switch(scanCode) {
 		case LEFT_SHIFT_PRESS:
 			leftShift = TRUE;
@@ -60,39 +57,31 @@ void parseSpecialKey(uint8_t scanCode) {
 			rightShift = TRUE;
 			shiftMayus = shiftMayus | SHIFT;
 			break;
-
 		case LEFT_SHIFT_RELEASE:
 			leftShift = FALSE;
 			if(!(leftShift || rightShift))
 				shiftMayus =  shiftMayus & NOT_SHIFT;
 			break;
-
 		case RIGHT_SHIFT_RELEASE:
 			rightShift = FALSE;
 			if(!(leftShift || rightShift))
 				shiftMayus =  shiftMayus & NOT_SHIFT;
 			break;
-
 		case CAPSLOCK_PRESS:
 			shiftMayus = shiftMayus ^ MAYUS;
 			break;
-
 		case CURSOR_LEFT:
 			keyboardLeft();
 			break;
-
 		case CURSOR_RIGHT:
 			keyboardRight();
 			break;
-
 		case CTRL_PRESS:
 			ctrl = TRUE;
 			break;
-
 		case CTRL_RELEASE:
 			ctrl = FALSE;
 			break;
-
 		default:
 			break;
 	}

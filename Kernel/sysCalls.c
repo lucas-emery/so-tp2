@@ -88,7 +88,14 @@ int sysMalloc(uint64_t address, uint64_t size, uint64_t rcx) {
 	userMode();
 	*((uint64_t *)address) = malloc(size);
 	kernelMode();
-	return 0;
+	return SUCCESS;
+}
+
+int sysRealloc(uint64_t address, uint64_t size, uint64_t rcx){
+	userMode();
+	*((uint64_t *)address) = realloc(address, size);
+	kernelMode();
+	return SUCCESS;
 }
 
 int sysFree(uint64_t address, uint64_t rdx, uint64_t rcx){
@@ -223,4 +230,5 @@ void sysCallsSetup(){
 	sysCalls[26] = &sysGetPid;
 	sysCalls[27] = &sysGetVar;
 	sysCalls[28] = &sysListThreads;
+	sysCalls[29] = &sysRealloc;
 }

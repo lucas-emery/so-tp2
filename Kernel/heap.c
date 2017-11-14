@@ -16,10 +16,8 @@ void * malloc(uint64_t request) {
 	if (futureSize > PAGESIZE) {
 		return NULL;
 	}
-
 	uint64_t blockAddress = context->heapBase + *heapSize;
 	*heapSize = futureSize;
-
 	return blockAddress;
 }
 

@@ -75,18 +75,15 @@ void schedule(){
   else if(current != NULL && current->thread->state == DEAD) {
     freeThreadContext(current->thread->context);
   }
-
   current = dequeue(RRqueue);
-
-  if(current == NULL)
+  if(current == NULL){
     current = idle;
-
+  }
   if(current->thread->state == DEAD){
     freeThreadContext(current->thread->context);
     schedule();
     return;
   }
-
   setContext(current->thread->context);
 
   if(current->thread->tid != IDLE)
@@ -96,7 +93,6 @@ void schedule(){
 uint8_t open(int i, queueADT * array){
   if(/*i >= MAX_QUEUES || */array[i] != NULL)
     return FAIL;
-
   array[i] = initQueue();
   if(array[i] == NULL)
     return FAIL;

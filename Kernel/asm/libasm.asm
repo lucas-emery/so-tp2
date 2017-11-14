@@ -3,7 +3,6 @@ GLOBAL readPort
 GLOBAL writePort
 GLOBAL hang
 GLOBAL dispatch
-GLOBAL testAndSet
 
 %include "./asm/macros.m"
 
@@ -75,16 +74,3 @@ hang:
 	cli
 	hlt	; halt machine should kernel return
 	jmp hang
-
-testAndSet:
-	mov rdx, 0x1
-	.spin:
-		mov eax, [rdi]
-		test eax, eax
-		jnz .spin
-
-		lock cmpxchg [rdi], rdx 
-
-		test eax, eax
-		jnz .spin
-		ret
