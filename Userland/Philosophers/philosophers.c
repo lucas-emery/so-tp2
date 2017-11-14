@@ -5,7 +5,7 @@
 #include <strings.h>
 #include <process.h>
 
-#define MAX 20
+#define MAX 50
 
 typedef struct arguments{
 	int id;
@@ -73,16 +73,19 @@ void createPhilosopher(){
 		philosopherCount++;
 		pthread_create((function)philosopher, arg);
 	}
+	pthread_exit();
 }
 
 void deletePhilosopher(){
 	while(1){
 		keyBlock('r');
-		if(philosopherCount != 1){
+		if(philosopherCount > 1){
 			(philosophers[philosopherCount-1])->finishThread = TRUE;
+			sem_close(semaphores[philosopherCount-1]);
 			philosopherCount--;
 		}
 	}
+	pthread_exit();
 }
 
 void philosopher(argumentsPointer arg) {
@@ -181,7 +184,7 @@ void render() {
 		if (forkState[i] == -1)
 			printf("Free\n");
 		else
-			printf("Owner %d\n", forkState[forkState[i]]);
+			printf("Owner %d\n", forkState[i]);
 	}
 
 	putchar('\n');
