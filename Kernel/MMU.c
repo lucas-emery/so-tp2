@@ -11,13 +11,8 @@
 #define TSS_LIMIT 0x1000
 #define KERNEL_CS 0x8
 #define USER_CS 0x18
-#define TR 0x28
+#define TSS_SEL 0x28
 #define PD_ADDR 0x10000
-#define INITIAL_PC 3
-#define HEAP_PAGE_IDX 0
-#define STACK_PAGE_IDX 1
-#define DATA_PAGE_IDX 2
-#define EMPTY 0
 #define NULL 0
 #define CS_STACK_SIZE (21 * 8)
 #define SUPERVISOR 0
@@ -65,7 +60,7 @@ context_t * createContext(uint64_t dataPageAddress, uint64_t heapPageAddress) {
 	newContext->heapPage.address = heapPageAddress;
 	newContext->stackPage.index = STACKBASE/PAGESIZE;
 	newContext->stackPage.address = stackPageAddress;
-	newContext->kernelPage.index = KERNEL_STACK/PAGESIZE;
+	newContext->kernelPage.index = SYSCALL_STACK/PAGESIZE;
 	newContext->kernelPage.address = kernelPageAddress;
 	newContext->heapBase = USER_HEAP;
 
@@ -195,7 +190,7 @@ void setContext(context_t * newContext) {
 }
 
 void saveContext() {
-	memcpy(processContext->interruptContext, CS_STACK_BOTTOM - CS_STACK_SIZE, CS_STACK_SIZE);
+	memcpy(processContext->interruptContext, KERNEL_STACK_BOTTOM - CS_STACK_SIZE, CS_STACK_SIZE);
 }
 
 void loadContext() {
@@ -203,7 +198,7 @@ void loadContext() {
 	loadPage(processContext->heapPage);
 	loadPage(processContext->stackPage);
 	loadPage(processContext->kernelPage);
-	memcpy(CS_STACK_BOTTOM - CS_STACK_SIZE, processContext->interruptContext, CS_STACK_SIZE);
+	memcpy(KERNEL_STACK_BOTTOM - CS_STACK_SIZE, processContext->interruptContext, CS_STACK_SIZE);
 }
 
 void * malloc(uint64_t request) {
@@ -304,7 +299,7 @@ void initializeKernelContext() {
 	kernelContext = (context_t *) malloc(sizeof(context_t));
 	kernelContext->heapBase = KERNEL_HEAP;
 
-	changePDE(CONTEXT_SWITCH_STACK/PAGESIZE, getFreePage(), PRESENT);
+	changePDE(KERNEL_STACK/PAGESIZE, getFreePage(), PRESENT);
 	flushPaging();
 	context = kernelContext;
 }
@@ -339,14 +334,14 @@ void * initializeKernelBinary()
 	initializeKernelContext();
 	processContext = NULL;
 
-	return CONTEXT_SWITCH_STACKBASE;
+	return KERNEL_STACKBASE;
 }
 
 void enableMemoryProtection() {
 	changePDEPrivilege(KERNEL/PAGESIZE, SUPERVISOR);
 	changePDEPrivilege(KERNEL_HEAP/PAGESIZE, SUPERVISOR);
+	changePDEPrivilege(SYSCALL_STACK/PAGESIZE, SUPERVISOR);
 	changePDEPrivilege(KERNEL_STACK/PAGESIZE, SUPERVISOR);
-	changePDEPrivilege(CONTEXT_SWITCH_STACK/PAGESIZE, SUPERVISOR);
 
 	int i = 0;
 	while(i < moduleCount) {
@@ -399,12 +394,12 @@ void setupGDT(){
 
 void setupTSS() {
 	uint32_t * TSS = TSS_ADDR;
-	TSS[1] = CS_STACK_BOTTOM;				//Bits 31-0
-	TSS[2] = CS_STACK_BOTTOM >> 32;	//Bits 63-32
-	TSS[9] = KERNEL_STACK_BOTTOM;								//IST for SysCalls
-	TSS[10] = KERNEL_STACK_BOTTOM >> 32;
-	TSS[11] = CS_STACK_BOTTOM;
-	TSS[12] = CS_STACK_BOTTOM >> 32;
+	TSS[1] = KERNEL_STACK_BOTTOM;				//Bits 31-0
+	TSS[2] = KERNEL_STACK_BOTTOM >> 32;	//Bits 63-32
+	TSS[9] = SYSCALL_STACK_BOTTOM;								//IST for SysCalls
+	TSS[10] = SYSCALL_STACK_BOTTOM >> 32;
+	TSS[11] = KERNEL_STACK_BOTTOM;
+	TSS[12] = KERNEL_STACK_BOTTOM >> 32;
 
-	loadTR(TR);
+	loadTR(TSS_SEL);
 }

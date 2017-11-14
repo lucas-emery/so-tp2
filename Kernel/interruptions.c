@@ -1,10 +1,6 @@
 //interruptions.c
 #include <interruptions.h>
 
-#define AVOID_BSS 1
-#define	CONTEXT_SWITCH_STACK 0x600000
-#define PAGESIZE 0x200000
-#define	CONTEXT_SWITCH_STACKBASE (CONTEXT_SWITCH_STACK + PAGESIZE - sizeof(uint64_t))
 
 extern uint64_t getStackPtr();
 
@@ -73,7 +69,7 @@ void iSetHandler(int index, uint8_t ist, uint64_t handler) {
 
 void debug(){
 	uint64_t * reg = getStackPtr();
-	while(reg <= CONTEXT_SWITCH_STACKBASE) {
+	while(reg <= KERNEL_STACKBASE) {
 		newLine();
 		printHex(*reg);
 		reg++;
