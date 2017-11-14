@@ -33,7 +33,7 @@ void removeConsumer();
 
 int main(int argc, char *argv[]) {
 	if(argc <= 4){
-		printf("Missing arguments\n");
+		printf("Missing arguments. Check 'man prodcons' for further explanation.\n");
 		return 1;
 	}
 	uint64_t messageID = (uint64_t) message_init("Diego", 5);
