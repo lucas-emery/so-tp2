@@ -107,22 +107,7 @@ static char* makeStringProcess(pcbADT process){
 	strcat(aux, " PRIVILEGE: ");
 	uintToBase(process->privilege,str3,10);
 	strcat(aux, str3);
-	strcat(aux, " STATE: ");
-	switch(process->state){
-		case RUNNING:
-			strcpy(str2, "running\n");
-		break;
-		case BLOCKED:
-			strcpy(str2, "blocked\n");
-		break;
-		case READY:
-			strcpy(str2, "ready\n");
-		break;
-		case NEW:
-			strcpy(str2, "new\n");
-		break;
-	}
-	strcat(aux, str2);
+	strcat(aux, "\n");
 	return aux;
 }
 
