@@ -16,9 +16,10 @@ static const char * modules[][2] = {
   "ps","Prints information about the system processes.\nParams: None",
   "roflmao","Easter Egg.\nParams: None",
   "ts","Prints information about the system threads.\nParams: None",
+  "multi","Creates one thread that prints 1, waits for sem to post 'topkek' and creates a thread that prints 2. The threads print when 'a' key is pressed.\nParams: None",
   "sem","Performs a sem_post on the 'topkek' semaphore.\nParams: None",
   "time","Prints the actual time.\nParams: None",
-  "prodcons","Prints solution to producer-consumer problem.\nParams: create producer letter, create consumer letter, remove producer letter, remove consumer letter",
+  "prodcons","Prints solution to producer-consumer problem.\nParams: (only letters allowed) create producer letter, create consumer letter, remove producer letter, remove consumer letter",
   0};
 
 int main(int argc, char *argv[]) {

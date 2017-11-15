@@ -14,6 +14,7 @@ hello: Prints arguments\n\
 accessKernel: Attempts to read data from the kernel.\n\
 echo: Prints system variables.\n\
 kill: Kills the specified process.\n\
+multi: Demonstration of multithreading and semaphore. (used with sem)\n\
 sem: Performs a sem_post on the 'topkek' semaphore.\n\
 philosophers: Solution to philosophers problem\n\
 prodcons: Solution to producer-consumer problem";
